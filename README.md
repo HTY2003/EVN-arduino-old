@@ -3,7 +3,7 @@ Software Repository for EVN Alpha
 
 ## Table of contents
 - [App Pre-Requisites](#app-pre-requisites)
-- [Library Installation](#test-upload)
+- [Test Upload](#test-upload)
 - [Library Installation](#library-installation)
 - [Usage in Arduino IDE](#usage-in-arduino-ide)
 
