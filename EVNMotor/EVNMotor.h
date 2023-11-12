@@ -8,6 +8,9 @@
 
 // caa 051123
 
+#define DIRECT 0
+#define REVERSE 1
+
 #define OUTPUTPWMFREQ 20000
 #define PWM_MAX_VAL 255
 #define HW_TIMER_INTERVAL_MS 1
@@ -145,11 +148,12 @@ public:
 
 private:
 	bool _encoded;
-	uint8_t _motora, _motorb, _enca, _encb, _maxrpm, _motortype;
+	uint8_t _motora, _motorb, _enca, _encb, _motortype, _maxrpm;
 	uint32_t lastcommand_ms;
 
 public:
 	encoder_state_t encoder;
+	uint8_t maxrpm;
 
 private:
 	speed_pid_t speed_pid;
@@ -548,23 +552,23 @@ private:
 	static void pidtimer3() { pid_update(speedArgs[3], posArgs[3], timeArgs[3], encoderArgs[6]); }
 };
 
-// class EVNDrivebase
-// {
-// public:
-// 	EVNDrivebase(EVNMotor *motora, EVNMotor *motorb);
-// 	void init();
-// 	void steer(double speed, double turning_rate);
-// 	void steerTime(double speed, double turning_rate, uint32_t time_ms);
-// 	void steerDistance(double speed, double turning_rate, uint32_t distance_mm);
-// 	uint32_t timeSinceLastCommand();
-// 	bool commandFinished();
-// 	void brake();
-// 	void coast();
-// 	void hold();
+class EVNDrivebase
+{
+public:
+	EVNDrivebase(EVNMotor *motora, EVNMotor *motorb, uint8_t motora_dir = DIRECT, uint8_t motorb_dir = DIRECT);
+	void steer(double speed, double turn_rate);
+	// void steerTime(double speed, double turn_rate, uint32_t time_ms);
+	// void steerDistance(double speed, double turning_rate, uint32_t distance_mm);
+	//  uint32_t timeSinceLastCommand();
+	//  bool commandFinished();
+	void brake();
+	void coast();
+	void hold();
 
-// private:
-// 	EVNMotor *_motors[2];
-// 	double speed, turning_rate;
-// }
+private:
+	EVNMotor *_motora, *_motorb;
+	bool _motora_inv, _motorb_inv;
+	double _maxrpm;
+};
 
 #endif

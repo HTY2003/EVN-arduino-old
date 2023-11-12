@@ -97,3 +97,8 @@ uint8_t EVNSensorHelper::getPort(uint8_t bus)
 
 	return (bus == 0) ? _wire0SensorPort : _wire1SensorPort;
 }
+
+double EVNSensorHelper::calibrate(double reading, double low, double high)
+{
+	return (reading - low) / (high - low);
+}

@@ -23,6 +23,7 @@ public:
 	void init();
 	void selectPort(uint8_t bus, uint8_t port);
 	uint8_t getPort(uint8_t bus);
+	double calibrate(double reading, double low, double high);
 	void printPortScanner();
 
 private:

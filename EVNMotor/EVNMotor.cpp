@@ -79,6 +79,7 @@ EVNMotor::EVNMotor(uint8_t port, uint8_t motortype, EVNButton *button)
 		pos_pid.d = (double)POS_PID_KD_CUSTOM;
 		break;
 	}
+	maxrpm = _maxrpm;
 }
 
 void EVNMotor::init()
@@ -271,4 +272,56 @@ bool EVNMotor::commandFinished()
 uint64_t EVNMotor::timeSinceLastCommand()
 {
 	return millis() - lastcommand_ms;
+}
+
+EVNDrivebase::EVNDrivebase(EVNMotor *motora, EVNMotor *motorb, uint8_t motora_inv, uint8_t motorb_inv)
+{
+	_motora = motora;
+	_motorb = motorb;
+	_maxrpm = min(motora->maxrpm, motorb->maxrpm);
+	_motora_inv = motora_inv;
+	_motorb_inv = motorb_inv;
+}
+
+void EVNDrivebase::steer(double speed, double turn_rate)
+{
+	double leftspeed, rightspeed;
+	double speedc = constrain(speed, -_maxrpm, _maxrpm);
+	double turn_ratec = constrain(turn_rate, -1, 1);
+	if (turn_ratec >= 0)
+	{
+		leftspeed = speedc;
+		rightspeed = speedc - 2 * turn_ratec * speedc;
+	}
+	else
+	{
+		rightspeed = speedc;
+		leftspeed = speedc + 2 * turn_ratec * speedc;
+	}
+
+	if (_motora_inv == REVERSE)
+		leftspeed *= -1;
+	if (_motorb_inv == REVERSE)
+		rightspeed *= -1;
+
+	_motora->runSpeed(leftspeed);
+	_motorb->runSpeed(rightspeed);
+}
+
+void EVNDrivebase::brake()
+{
+	_motora->brake();
+	_motorb->brake();
+}
+
+void EVNDrivebase::coast()
+{
+	_motora->coast();
+	_motorb->coast();
+}
+
+void EVNDrivebase::hold()
+{
+	_motora->hold();
+	_motorb->hold();
 }
