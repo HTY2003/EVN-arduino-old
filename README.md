@@ -2,8 +2,9 @@
 Software Repository for EVN Alpha
 
 ## Table of contents
-
-- [Installation](#installation)
+- [App Pre-Requisites](#app-pre-requisites)
+- [Library Installation](#test-upload)
+- [Library Installation](#library-installation)
 - [Usage in Arduino IDE](#usage-in-arduino-ide)
 
 ## App Pre-Requisites
@@ -49,6 +50,7 @@ Additionally for EVNMotor, install the RPI_PICO_TimerInterrupt Ver 1.3.1 library
 
 ## Usage in Arduino IDE
 To include all libraries, include them at the start of the library:
+
 ```
 #include "RPi_Pico_ISR_Timer.h" //this is a helper library for the EVNMotor library
 #include <EVNMotor.h>
@@ -57,6 +59,7 @@ To include all libraries, include them at the start of the library:
 ```
 
 Create instances before void setup():
+
 ```
 EVNButton butt;
 EVNMotor motora(1, EV3_LARGE, &butt); //(port number from 1-4, motor type, pointer to button object)
