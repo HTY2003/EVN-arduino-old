@@ -42,8 +42,9 @@
 #define NXT_LARGE 0
 #define EV3_MED 1
 #define CUSTOM 2
-#define EV3_LARGE_MOTOR_MAX_RPM 155
-#define EV3_MED_MOTOR_MAX_RPM 230
+
+#define EV3_LARGE_MAX_RPM 155
+#define EV3_MED_MAX_RPM 230
 #define CUSTOM_MAX_RPM 155
 
 #define STOP_ACTION_BRAKE 0
@@ -396,7 +397,7 @@ public:
 				posArg->preverror = posArg->error;
 				posArg->error = (posArg->targetpos - ((double)encoderArg->position) / 2) / 360;
 				posArg->summederror += posArg->error * posArg->i;
-				posArg->summederror = constrain(posArg->summederror, -10000, 10000);
+				// posArg->summederror = constrain(posArg->summederror, -10000, 10000);
 
 				posArg->output =
 					(posArg->p * posArg->error) +						// P: increase output value proportionally to error

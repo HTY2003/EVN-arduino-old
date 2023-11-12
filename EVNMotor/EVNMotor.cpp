@@ -52,7 +52,7 @@ EVNMotor::EVNMotor(uint8_t port, uint8_t motortype, EVNButton *button)
 	switch (motortype)
 	{
 	case EV3_LARGE:
-		_maxrpm = EV3_LARGE_MOTOR_MAX_RPM;
+		_maxrpm = EV3_LARGE_MAX_RPM;
 		speed_pid.p = (double)SPEED_PID_KP_LARGE;
 		speed_pid.i = (double)SPEED_PID_KI_LARGE;
 		speed_pid.d = (double)SPEED_PID_KD_LARGE;
@@ -61,7 +61,7 @@ EVNMotor::EVNMotor(uint8_t port, uint8_t motortype, EVNButton *button)
 		pos_pid.d = (double)POS_PID_KD_LARGE;
 		break;
 	case EV3_MED:
-		_maxrpm = EV3_MED_MOTOR_MAX_RPM;
+		_maxrpm = EV3_MED_MAX_RPM;
 		speed_pid.p = (double)SPEED_PID_KP_MED;
 		speed_pid.i = (double)SPEED_PID_KI_MED;
 		speed_pid.d = (double)SPEED_PID_KD_MED;
@@ -183,6 +183,7 @@ void EVNMotor::runSpeed(double rpm)
 	pos_pid.running = false;
 	time_pid.running = false;
 	pos_pid.hold = false;
+
 	speed_pid.targetrpm = rpmc;
 }
 
@@ -199,6 +200,7 @@ void EVNMotor::runDegrees(double degrees, uint8_t stop_action, bool wait)
 	pos_pid.running = true;
 	time_pid.running = false;
 	speed_pid.running = false;
+	pos_pid.hold = false;
 
 	if (wait)
 	{
@@ -221,6 +223,7 @@ void EVNMotor::runTime(double rpm, uint32_t time_ms, uint8_t stop_action, bool w
 	time_pid.running = true;
 	pos_pid.running = false;
 	speed_pid.running = false;
+	pos_pid.hold = false;
 
 	lastcommand_ms = millis();
 
