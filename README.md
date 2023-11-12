@@ -1,4 +1,4 @@
-### EVN Alpha
+# EVN Alpha
 Software Repository for EVN Alpha
 
 ## Table of contents
@@ -6,8 +6,22 @@ Software Repository for EVN Alpha
 - [Installation](#installation)
 - [Usage in Arduino IDE](#usage-in-arduino-ide)
 
+## App Pre-Requisites
+The following apps should be installed
+* Arduino IDE 1.8.x (latest version)
 
-## Installation
+Add the Raspberry Pi Pico to your Arduino Installation by adding Earle F Philhower's Arduino-Pico core using the Boards Manager (Tools - Board - Boards Manager - search "Raspberry Pi Pico/RP2040" and install latest version).
+
+To upload, select Raspberry Pi Pico as your board (Tools - Board - Raspberry Pi RP2040 Boards - Raspberry Pi Pico).
+
+Plug in the USB cable to the EVN Alpha. 
+
+When the EVN Alpha is on (red light), it will appear as an option in the Ports menu (Tools - Port). Select this COM Port to upload to it.
+
+## Test Upload
+To test EVN Alpha, you can use the Blink example in Arduino (File - Examples - 01.Basics - Blink).
+
+## Library Installation
 
 Transfer each folder to the libraries folder in File Explorer. On Windows, this should be in Documents/Arduino/libraries. Follow the folder structure shown below:
 
@@ -30,7 +44,7 @@ Documents/
 Ensure that in each EVN folder, there is only one .h and .cpp file.
 Ensure that there are no 2 folders with the same name in the libraries folder.
 
-Additionally, install the RPI_PICO_TimerInterrupt Ver 1.3.1 library by Khoi Hoang in Arduino's Library Manager (Sketch - Include Library - Manage Libraries...).
+Additionally for EVNMotor, install the RPI_PICO_TimerInterrupt Ver 1.3.1 library by Khoi Hoang in Arduino's Library Manager (Sketch - Include Library - Manage Libraries...).
 
 
 ## Usage in Arduino IDE
