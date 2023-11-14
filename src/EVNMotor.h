@@ -5,8 +5,7 @@
 #include <EVNButton.h>
 #include "RPi_Pico_TimerInterrupt.h"
 #include "RPi_Pico_ISR_Timer.hpp"
-
-// caa 051123
+#include "PIDController.h"
 
 #define DIRECT 0
 #define REVERSE 1
@@ -17,36 +16,45 @@
 #define PID_TIMER_INTERVAL_MS 2
 #define NO_OF_PULSES_TIMED 2
 
-#define SPEED_PID_KP_LARGE 5
-#define SPEED_PID_KI_LARGE 0.125
-#define SPEED_PID_KD_LARGE 0
+#define SPEED_PID_KP_EV3_LARGE 5
+#define SPEED_PID_KI_EV3_LARGE 0.125
+#define SPEED_PID_KD_EV3_LARGE 0
 
-#define SPEED_PID_KP_MED 4.5
-#define SPEED_PID_KI_MED 0.125
-#define SPEED_PID_KD_MED 0
+#define SPEED_PID_KP_NXT_LARGE 5
+#define SPEED_PID_KI_NXT_LARGE 0.125
+#define SPEED_PID_KD_NXT_LARGE 0
+
+#define SPEED_PID_KP_EV3_MED 4.5
+#define SPEED_PID_KI_EV3_MED 0.125
+#define SPEED_PID_KD_EV3_MED 0
 
 #define SPEED_PID_KP_CUSTOM 5
 #define SPEED_PID_KI_CUSTOM 0.125
 #define SPEED_PID_KD_CUSTOM 0
 
-#define POS_PID_KP_LARGE 400
-#define POS_PID_KI_LARGE 0
-#define POS_PID_KD_LARGE 600
+#define POS_PID_KP_EV3_LARGE 400
+#define POS_PID_KI_EV3_LARGE 0
+#define POS_PID_KD_EV3_LARGE 600
 
-#define POS_PID_KP_MED 300
-#define POS_PID_KI_MED 0
-#define POS_PID_KD_MED 600
+#define POS_PID_KP_NXT_LARGE 400
+#define POS_PID_KI_NXT_LARGE 0
+#define POS_PID_KD_NXT_LARGE 600
+
+#define POS_PID_KP_EV3_MED 300
+#define POS_PID_KI_EV3_MED 0
+#define POS_PID_KD_EV3_MED 600
 
 #define POS_PID_KP_CUSTOM 400
 #define POS_PID_KI_CUSTOM 0
 #define POS_PID_KD_CUSTOM 600
 
 #define EV3_LARGE 0
-#define NXT_LARGE 0
-#define EV3_MED 1
-#define CUSTOM 2
+#define NXT_LARGE 1
+#define EV3_MED 2
+#define CUSTOM 3
 
 #define EV3_LARGE_MAX_RPM 155
+#define NXT_LARGE_MAX_RPM 155
 #define EV3_MED_MAX_RPM 230
 #define CUSTOM_MAX_RPM 155
 
@@ -77,7 +85,7 @@ typedef struct
 	volatile uint8_t enca;
 	volatile uint8_t encb;
 	volatile uint8_t state;
-	volatile long position; // if any ISR writes a value to it, use volatile
+	volatile double position; // if any ISR writes a value to it, use volatile
 	volatile uint64_t pulsetimes[NO_OF_PULSES_TIMED];
 	volatile uint8_t lastpulseindex;
 	volatile uint64_t lastpulsetime;
@@ -89,31 +97,28 @@ typedef struct
 
 typedef struct
 {
-	volatile double p, i, d;
 	volatile bool running;
 	volatile double maxrpm;
 	uint8_t motora;
 	uint8_t motorb;
 	volatile double targetrpm;
-	volatile double preverror;
 	volatile double error;
-	volatile double summederror;
 	volatile double output;
-	EVNButton *button;
+	EVNButton* button;
+	PIDController* pid;
+
 } speed_pid_t;
 
 typedef struct
 {
-	volatile double p, i, d;
 	volatile uint32_t counter;
 	volatile bool running;
 	volatile bool hold;
 	volatile uint8_t stop_action;
 	volatile double targetpos;
-	volatile double preverror;
 	volatile double error;
-	volatile double summederror;
 	volatile double output;
+	PIDController* pid;
 } position_pid_t;
 
 typedef struct
@@ -127,9 +132,9 @@ typedef struct
 class EVNMotor
 {
 public:
-	EVNMotor(uint8_t port, uint8_t motortype = EV3_LARGE, EVNButton *button = NULL);
+	EVNMotor(uint8_t port, uint8_t motortype = EV3_LARGE, EVNButton* button = NULL);
 	void init();
-	void writePWM(uint8_t speed); // Directly write speed (-1 to 1) as PWM value to motor
+	void writePWM(double speed); // Directly write speed (-1 to 1) as PWM value to motor
 	double getPos();			  // Return absolute position in degrees
 	void resetPos();			  // Set current position as 0 deg
 	double getRPM();			  // Return velocity in RPM rotations per minute
@@ -155,20 +160,20 @@ public:
 	encoder_state_t encoder;
 	uint8_t maxrpm;
 
-private:
+	// private:
 	speed_pid_t speed_pid;
 	position_pid_t pos_pid;
 	time_pid_t time_pid;
 
 public:
-	static encoder_state_t *encoderArgs[8]; // static list of pointers to each instances' structs
-	static speed_pid_t *speedArgs[4];
-	static position_pid_t *posArgs[4];
-	static time_pid_t *timeArgs[4];
+	static encoder_state_t* encoderArgs[8]; // static list of pointers to each instances' structs
+	static speed_pid_t* speedArgs[4];
+	static position_pid_t* posArgs[4];
+	static time_pid_t* timeArgs[4];
 	static RPI_PICO_Timer timer;		// static timer shared by all instances
 	static RPI_PICO_ISR_Timer ISRtimer; // means that no other class can use the ISRtimer (I think)
 
-	static void rpm_update(encoder_state_t *arg)
+	static void rpm_update(encoder_state_t* arg)
 	{
 		uint8_t new_p0 = digitalRead(arg->enca);
 
@@ -196,7 +201,7 @@ public:
 		}
 	}
 
-	static void update(encoder_state_t *arg)
+	static void update(encoder_state_t* arg)
 	{
 		uint8_t new_p0 = digitalRead(arg->enca);
 		uint8_t new_p1 = digitalRead(arg->encb);
@@ -235,99 +240,94 @@ public:
 		}
 	}
 
-	static bool pid_update(speed_pid_t *speedArg, position_pid_t *posArg, time_pid_t *timeArg, encoder_state_t *encoderArg)
+	static void writePWM_static(uint8_t motora, uint8_t motorb, double speed)
+	{
+		double speedc = constrain(speed, -1, 1);
+		if (speedc >= 0)
+		{
+			if (speedc == 0)
+				digitalWrite(motora, LOW);
+			else
+				analogWrite(motora, speedc * PWM_MAX_VAL);
+			digitalWrite(motorb, LOW);
+		}
+		else
+		{
+			analogWrite(motorb, -speedc * PWM_MAX_VAL);
+			digitalWrite(motora, LOW);
+		}
+	}
+
+	static void stopAction_static(uint8_t motora, uint8_t motorb, position_pid_t* posArg, encoder_state_t* encoderArg)
+	{
+		switch (posArg->stop_action)
+		{
+		case STOP_ACTION_BRAKE:
+			digitalWrite(motora, LOW);
+			digitalWrite(motorb, LOW);
+			break;
+		case STOP_ACTION_COAST:
+			digitalWrite(motora, HIGH);
+			digitalWrite(motorb, HIGH);
+			break;
+		case STOP_ACTION_HOLD:
+			digitalWrite(motora, HIGH);
+			digitalWrite(motorb, HIGH);
+			posArg->hold = true;
+			posArg->targetpos = (double)encoderArg->position / 2;
+			break;
+		}
+	}
+
+	static double getRPM_static(encoder_state_t* encoderArg)
+	{
+		uint64_t currenttime = micros();
+		uint64_t lastpulsetiming = (encoderArg->dataReady) ? (currenttime - encoderArg->pulsetimes[encoderArg->lastpulseindex]) : (currenttime - encoderArg->lastpulsetime);
+		if (lastpulsetiming > encoderArg->avgpulsetiming)
+		{
+			double avgpulsetiming = (double)lastpulsetiming;
+			double rpm = (1000000 / (avgpulsetiming * 3)) * encoderArg->dir;
+			return rpm;
+		}
+		else
+		{
+			return encoderArg->rpm;
+		}
+	}
+
+	static bool pid_update(speed_pid_t* speedArg, position_pid_t* posArg, time_pid_t* timeArg, encoder_state_t* encoderArg)
 	{
 		if (speedArg->button->read())
 		{
-			uint64_t currenttime = micros();
-			uint64_t lastpulsetiming = (encoderArg->dataReady) ? (currenttime - encoderArg->pulsetimes[encoderArg->lastpulseindex]) : (currenttime - encoderArg->lastpulsetime);
-			if (lastpulsetiming > encoderArg->avgpulsetiming)
-			{
-				encoderArg->avgpulsetiming = (double)lastpulsetiming;
-				encoderArg->rpm = (1000000 / (encoderArg->avgpulsetiming * 3)) * encoderArg->dir;
-			}
+			double rpm = getRPM_static(encoderArg);
 
-			if (timeArg->running)
+			if (speedArg->running || timeArg->running)
 			{
-				if ((millis() - timeArg->starttime) >= timeArg->time_ms)
+				if (timeArg->running && ((millis() - timeArg->starttime) >= timeArg->time_ms))
 				{
-					if (posArg->stop_action == STOP_ACTION_BRAKE)
-					{
-						digitalWrite(speedArg->motora, LOW);
-						digitalWrite(speedArg->motorb, LOW);
-					}
-					else if (posArg->stop_action == STOP_ACTION_COAST)
-					{
-						digitalWrite(speedArg->motora, HIGH);
-						digitalWrite(speedArg->motorb, HIGH);
-					}
-					else
-					{
-						digitalWrite(speedArg->motora, HIGH);
-						digitalWrite(speedArg->motorb, HIGH);
-						posArg->hold = true;
-						posArg->targetpos = (double)encoderArg->position / 2;
-					}
+					stopAction_static(speedArg->motora, speedArg->motorb, posArg, encoderArg);
 					timeArg->running = false;
 					return true;
 				}
 
-				speedArg->targetrpm = timeArg->targetrpm;
-				speedArg->preverror = speedArg->error;
-				speedArg->error = (speedArg->targetrpm - encoderArg->rpm) / speedArg->maxrpm;
-				speedArg->summederror += speedArg->error * speedArg->i;
-				if (speedArg->summederror > 1)
-					speedArg->summederror = 1;
-				if (speedArg->summederror < -1)
-					speedArg->summederror = -1;
-				speedArg->output =
-					(speedArg->p * speedArg->error) +						  // P: increase output value proportionally to error
-					(speedArg->d * (speedArg->error - speedArg->preverror)) + // D: "counter-force" to P (proportional to rate of decrease in error i.e. when the rate of error slows down, counter-force caused by D is lower)
-					speedArg->summederror;									  // I: increase/decrease output based on all errors summed together (eliminates steady state error)
+				if (timeArg->running) speedArg->targetrpm = timeArg->targetrpm;
 
-				if ((speedArg->output >= 0) || (speedArg->targetrpm == 0))
-				{
-					if ((speedArg->output == 0) || (speedArg->targetrpm == 0))
-					{
-						digitalWrite(speedArg->motora, LOW);
-					}
-					else
-					{
-						analogWrite(speedArg->motora, speedArg->output * PWM_MAX_VAL);
-					}
-					digitalWrite(speedArg->motorb, LOW);
-				}
+				speedArg->error = (speedArg->targetrpm - rpm) / speedArg->maxrpm;
+				speedArg->output = speedArg->pid->compute(speedArg->error);
+
+				if (speedArg->targetrpm == 0)
+					writePWM_static(speedArg->motora, speedArg->motorb, 0);
 				else
-				{
-					analogWrite(speedArg->motorb, -speedArg->output * PWM_MAX_VAL);
-					digitalWrite(speedArg->motora, LOW);
-				}
+					writePWM_static(speedArg->motora, speedArg->motorb, speedArg->output);
 			}
-			else if (posArg->running)
+			else if (posArg->running || posArg->hold)
 			{
-				if (fabs(posArg->targetpos - ((double)encoderArg->position) / 2) < 1)
+				if (posArg->running && (fabs(posArg->targetpos - ((double)encoderArg->position) / 2) < 1))
 				{
 					posArg->counter += 1;
-
 					if (posArg->counter > 10)
 					{
-						if (posArg->stop_action == STOP_ACTION_BRAKE)
-						{
-							digitalWrite(speedArg->motora, LOW);
-							digitalWrite(speedArg->motorb, LOW);
-						}
-						else if (posArg->stop_action == STOP_ACTION_COAST)
-						{
-							digitalWrite(speedArg->motora, HIGH);
-							digitalWrite(speedArg->motorb, HIGH);
-						}
-						else
-						{
-							digitalWrite(speedArg->motora, HIGH);
-							digitalWrite(speedArg->motorb, HIGH);
-							posArg->hold = true;
-							posArg->targetpos = (double)encoderArg->position / 2;
-						}
+						stopAction_static(speedArg->motora, speedArg->motorb, posArg, encoderArg);
 						posArg->running = false;
 						return true;
 					}
@@ -337,100 +337,15 @@ public:
 					posArg->counter = 0;
 				}
 
-				posArg->preverror = posArg->error;
 				posArg->error = (posArg->targetpos - ((double)encoderArg->position) / 2) / 360;
-				posArg->summederror += posArg->error * posArg->i;
-				// posArg->summederror = constrain(posArg->summederror, -1000, 1000);
-
-				posArg->output =
-					(posArg->p * posArg->error) +						// P: increase output value proportionally to error
-					(posArg->d * (posArg->error - posArg->preverror)) + // D: "counter-force" to P (proportional to rate of decrease in error i.e. when the rate of error slows down, counter-force caused by D is lower)
-					posArg->summederror;								// I: increase/decrease output based on all errors summed together (eliminates steady state error)
-
-				if (posArg->output >= 0)
-				{
-					if (posArg->output == 0)
-					{
-						digitalWrite(speedArg->motora, LOW);
-					}
-					else
-					{
-						analogWrite(speedArg->motora, posArg->output * PWM_MAX_VAL);
-					}
-					digitalWrite(speedArg->motorb, LOW);
-				}
-				else
-				{
-					analogWrite(speedArg->motorb, -posArg->output * PWM_MAX_VAL);
-					digitalWrite(speedArg->motora, LOW);
-				}
-			}
-
-			else if (speedArg->running)
-			{
-				speedArg->preverror = speedArg->error;
-				speedArg->error = (speedArg->targetrpm - encoderArg->rpm) / speedArg->maxrpm;
-				speedArg->summederror += speedArg->error * speedArg->i;
-				speedArg->summederror = constrain(speedArg->summederror, -1, 1);
-
-				speedArg->output =
-					(speedArg->p * speedArg->error) +						  // P: increase output value proportionally to error
-					(speedArg->d * (speedArg->error - speedArg->preverror)) + // D: "counter-force" to P (proportional to rate of decrease in error i.e. when the rate of error slows down, counter-force caused by D is lower)
-					speedArg->summederror;									  // I: increase/decrease output based on all errors summed together (eliminates steady state error)
-
-				if ((speedArg->output >= 0) || (speedArg->targetrpm = 0))
-				{
-					if ((speedArg->output == 0) || (speedArg->targetrpm = 0))
-					{
-						digitalWrite(speedArg->motora, LOW);
-					}
-					else
-					{
-						analogWrite(speedArg->motora, speedArg->output * PWM_MAX_VAL);
-					}
-					digitalWrite(speedArg->motorb, LOW);
-				}
-				else
-				{
-					analogWrite(speedArg->motorb, -speedArg->output * PWM_MAX_VAL);
-					digitalWrite(speedArg->motora, LOW);
-				}
-			}
-			else if (posArg->hold)
-			{
-				posArg->preverror = posArg->error;
-				posArg->error = (posArg->targetpos - ((double)encoderArg->position) / 2) / 360;
-				posArg->summederror += posArg->error * posArg->i;
-				// posArg->summederror = constrain(posArg->summederror, -10000, 10000);
-
-				posArg->output =
-					(posArg->p * posArg->error) +						// P: increase output value proportionally to error
-					(posArg->d * (posArg->error - posArg->preverror)) + // D: "counter-force" to P (proportional to rate of decrease in error i.e. when the rate of error slows down, counter-force caused by D is lower)
-					posArg->summederror;								// I: increase/decrease output based on all errors summed together (eliminates steady state error)
-
-				if (posArg->output >= 0)
-				{
-					if (posArg->output == 0)
-					{
-						digitalWrite(speedArg->motora, LOW);
-					}
-					else
-					{
-						analogWrite(speedArg->motora, posArg->output * PWM_MAX_VAL);
-					}
-					digitalWrite(speedArg->motorb, LOW);
-				}
-				else
-				{
-					analogWrite(speedArg->motorb, -posArg->output * PWM_MAX_VAL);
-					digitalWrite(speedArg->motora, LOW);
-				}
+				posArg->output = posArg->pid->compute(posArg->error);
+				writePWM_static(speedArg->motora, speedArg->motorb, posArg->output);
 			}
 		}
 		else
 		{
-			digitalWrite(speedArg->motora, LOW);
-			digitalWrite(speedArg->motorb, LOW);
+			posArg->stop_action = 0;
+			stopAction_static(speedArg->motora, speedArg->motorb, posArg, encoderArg);
 			speedArg->running = false;
 			posArg->running = false;
 			timeArg->running = false;
@@ -441,7 +356,7 @@ public:
 
 private:
 	static void
-	attach_enc_interrupt(uint8_t pin, encoder_state_t *enc)
+		attach_enc_interrupt(uint8_t pin, encoder_state_t* enc)
 	{
 		switch (pin)
 		{
@@ -480,7 +395,7 @@ private:
 		}
 	}
 
-	static void attach_pid_interrupt(uint8_t pin, speed_pid_t *state1, position_pid_t *state2, time_pid_t *state3)
+	static void attach_pid_interrupt(uint8_t pin, speed_pid_t* state1, position_pid_t* state2, time_pid_t* state3)
 	{
 		switch (pin)
 		{
@@ -515,7 +430,7 @@ private:
 		}
 	}
 
-	static bool isrtimer(struct repeating_timer *t)
+	static bool isrtimer(struct repeating_timer* t)
 	{
 		ISRtimer.run();
 		return true;
@@ -555,8 +470,11 @@ private:
 class EVNDrivebase
 {
 public:
-	EVNDrivebase(EVNMotor *motora, EVNMotor *motorb, uint8_t motora_dir = DIRECT, uint8_t motorb_dir = DIRECT);
+	EVNDrivebase(uint32_t wheel_dia, uint32_t wheel_dist, EVNMotor* _motor_left, EVNMotor* _motor_right, uint8_t motor_left_inv = DIRECT, uint8_t motor_right_inv = DIRECT);
 	void steer(double speed, double turn_rate);
+
+	// TODO
+	// void steer_better(double speed, double turn_rate);
 	// void steerTime(double speed, double turn_rate, uint32_t time_ms);
 	// void steerDistance(double speed, double turning_rate, uint32_t distance_mm);
 	//  uint32_t timeSinceLastCommand();
@@ -566,8 +484,10 @@ public:
 	void hold();
 
 private:
-	EVNMotor *_motora, *_motorb;
-	bool _motora_inv, _motorb_inv;
+	EVNMotor* _motor_left, * _motor_right;
+	PIDController avg_pid, diff_pid, avg_follow_pid, diff_follow_pid;
+	bool _motor_left_inv, _motor_right_inv;
+	uint32_t _wheel_dist, _wheel_dia;
 	double _maxrpm;
 };
 

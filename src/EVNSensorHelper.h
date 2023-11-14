@@ -4,8 +4,6 @@
 #include <Arduino.h>
 #include <Wire.h>
 
-// caa 051123
-
 #define TCAADDR 0x70
 #define WIRE0_SDA 4
 #define WIRE0_SCL 5

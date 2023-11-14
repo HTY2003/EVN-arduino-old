@@ -1,15 +1,15 @@
-#ifndef EVNPIDController_h
-#define EVNPIDController_h
+#ifndef PIDController_h
+#define PIDController_h
 
 #include <Arduino.h>
 
 #define DIRECT 0
 #define REVERSE 1
 
-class EVNPIDController
+class PIDController
 {
 public:
-	EVNPIDController(double kp, double ki, double kd, uint8_t dir);
+	PIDController(double kp, double ki, double kd, uint8_t dir);
 	double compute(double error);
 
 private:

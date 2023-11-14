@@ -1,7 +1,7 @@
-#include <EVNPIDController.h>
+#include <PIDController.h>
 #include <Arduino.h>
 
-EVNPIDController::EVNPIDController(double kp, double ki, double kd, uint8_t dir)
+PIDController::PIDController(double kp, double ki, double kd, uint8_t dir)
 {
 	_kp = kp;
 	_ki = ki;
@@ -9,7 +9,7 @@ EVNPIDController::EVNPIDController(double kp, double ki, double kd, uint8_t dir)
 	_dir = dir;
 }
 
-double EVNPIDController::compute(double error)
+double PIDController::compute(double error)
 {
 	double errorc = constrain(error, -1, 1);
 	_preverror = _error;
@@ -21,5 +21,6 @@ double EVNPIDController::compute(double error)
 	{
 		_output *= -1;
 	}
+	_output = constrain(_output, -1, 1);
 	return _output;
 }

@@ -1,9 +1,7 @@
 #include <EVNButton.h>
 #include <Arduino.h>
 
-// caa 051123
-
-button_state_t *EVNButton::buttonArg;
+button_state_t* EVNButton::buttonArg;
 
 EVNButton::EVNButton()
 {
@@ -12,8 +10,8 @@ EVNButton::EVNButton()
 
 void EVNButton::init()
 {
-	pinMode(BUTTONPIN, INPUT_PULLUP);
 	attach_button_interrupt(&button);
+	pinMode(BUTTONPIN, INPUT_PULLUP);
 }
 
 bool EVNButton::read()

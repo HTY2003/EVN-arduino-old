@@ -5,8 +5,6 @@
 #define BUTTONPIN 24
 #define DEBOUNCE_TIMING_MS 300
 
-// caa 051123
-
 typedef struct
 {
 	volatile bool state;
@@ -22,10 +20,10 @@ public:
 	bool read();
 
 	button_state_t button;
-	static button_state_t *buttonArg; // static list of pointers to each instances' structs
+	static button_state_t* buttonArg; // static list of pointers to each instances' structs
 
 private:
-	static void attach_button_interrupt(button_state_t *arg)
+	static void attach_button_interrupt(button_state_t* arg)
 	{
 		buttonArg = arg;
 		attachInterrupt(BUTTONPIN, isr, FALLING);

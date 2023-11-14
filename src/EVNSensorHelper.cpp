@@ -2,8 +2,6 @@
 #include <Arduino.h>
 #include <Wire.h>
 
-// caa 051123
-
 EVNSensorHelper::EVNSensorHelper()
 {
 }
