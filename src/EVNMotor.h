@@ -2,7 +2,7 @@
 #define EVNMotor_h
 
 #include <Arduino.h>
-#include <EVNButton.h>
+#include "EVNButton.h"
 #include "RPi_Pico_TimerInterrupt.h"
 #include "RPi_Pico_ISR_Timer.hpp"
 #include "PIDController.h"
@@ -102,10 +102,10 @@ typedef struct
 	uint8_t motora;
 	uint8_t motorb;
 	volatile double targetrpm;
-	volatile double error;
+	volatile double error, preverror, summederror;
 	volatile double output;
 	EVNButton* button;
-	PIDController* pid;
+	volatile double kp, ki, kd;
 
 } speed_pid_t;
 
@@ -116,9 +116,9 @@ typedef struct
 	volatile bool hold;
 	volatile uint8_t stop_action;
 	volatile double targetpos;
-	volatile double error;
+	volatile double error, preverror, summederror;
 	volatile double output;
-	PIDController* pid;
+	volatile double kp, ki, kd;
 } position_pid_t;
 
 typedef struct
@@ -313,7 +313,11 @@ public:
 				if (timeArg->running) speedArg->targetrpm = timeArg->targetrpm;
 
 				speedArg->error = (speedArg->targetrpm - rpm) / speedArg->maxrpm;
-				speedArg->output = speedArg->pid->compute(speedArg->error);
+				speedArg->preverror = speedArg->error;
+				speedArg->error = constrain(speedArg->error, -1, 1);
+				speedArg->summederror += speedArg->error;
+				speedArg->output = speedArg->kp * speedArg->error + speedArg->kd * (speedArg->error - speedArg->preverror) + speedArg->ki * speedArg->summederror;
+				speedArg->output = constrain(speedArg->output, -1, 1);
 
 				if (speedArg->targetrpm == 0)
 					writePWM_static(speedArg->motora, speedArg->motorb, 0);
@@ -338,7 +342,11 @@ public:
 				}
 
 				posArg->error = (posArg->targetpos - ((double)encoderArg->position) / 2) / 360;
-				posArg->output = posArg->pid->compute(posArg->error);
+				posArg->preverror = posArg->error;
+				posArg->error = constrain(posArg->error, -1, 1);
+				posArg->summederror += posArg->error;
+				posArg->output = posArg->kp * posArg->error + posArg->kd * (posArg->error - posArg->preverror) + posArg->ki * posArg->summederror;
+				posArg->output = constrain(speedArg->output, -1, 1);
 				writePWM_static(speedArg->motora, speedArg->motorb, posArg->output);
 			}
 		}

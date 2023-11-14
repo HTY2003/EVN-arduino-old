@@ -1,6 +1,8 @@
-#include <EVNMotor.h>
-#include <EVNButton.h>
+#include "EVNMotor.h"
+#include "EVNButton.h"
 #include <Arduino.h>
+#include "PIDController.h"
+
 
 encoder_state_t* EVNMotor::encoderArgs[];
 speed_pid_t* EVNMotor::speedArgs[];
@@ -24,7 +26,6 @@ EVNMotor::EVNMotor(uint8_t port, uint8_t motortype, EVNButton* button)
 		_enca = OUTPUT1ENCA;
 		_encb = OUTPUT1ENCB;
 		break;
-
 	case 2:
 		_motora = OUTPUT2MOTORA;
 		_motorb = OUTPUT2MOTORB;
@@ -51,23 +52,39 @@ EVNMotor::EVNMotor(uint8_t port, uint8_t motortype, EVNButton* button)
 	{
 	case EV3_LARGE:
 		_maxrpm = EV3_LARGE_MAX_RPM;
-		speed_pid.pid = new PIDController(SPEED_PID_KP_EV3_LARGE, SPEED_PID_KI_EV3_LARGE, SPEED_PID_KD_EV3_LARGE, DIRECT);
-		pos_pid.pid = new PIDController(POS_PID_KP_EV3_LARGE, POS_PID_KI_EV3_LARGE, POS_PID_KD_EV3_LARGE, DIRECT);
+		speed_pid.kp = SPEED_PID_KP_EV3_LARGE;
+		speed_pid.ki = SPEED_PID_KI_EV3_LARGE;
+		speed_pid.kd = SPEED_PID_KD_EV3_LARGE;
+		pos_pid.kp = POS_PID_KP_EV3_LARGE;
+		pos_pid.ki = POS_PID_KI_EV3_LARGE;
+		pos_pid.kd = POS_PID_KD_EV3_LARGE;
 		break;
 	case NXT_LARGE:
 		_maxrpm = NXT_LARGE_MAX_RPM;
-		speed_pid.pid = new PIDController(SPEED_PID_KP_NXT_LARGE, SPEED_PID_KI_NXT_LARGE, SPEED_PID_KD_NXT_LARGE, DIRECT);
-		pos_pid.pid = new PIDController(POS_PID_KP_NXT_LARGE, POS_PID_KI_NXT_LARGE, POS_PID_KD_NXT_LARGE, DIRECT);
+		speed_pid.kp = SPEED_PID_KP_NXT_LARGE;
+		speed_pid.ki = SPEED_PID_KI_NXT_LARGE;
+		speed_pid.kd = SPEED_PID_KD_NXT_LARGE;
+		pos_pid.kp = POS_PID_KP_NXT_LARGE;
+		pos_pid.ki = POS_PID_KI_NXT_LARGE;
+		pos_pid.kd = POS_PID_KD_NXT_LARGE;
 		break;
 	case EV3_MED:
 		_maxrpm = EV3_MED_MAX_RPM;
-		speed_pid.pid = new PIDController(SPEED_PID_KP_EV3_MED, SPEED_PID_KI_EV3_MED, SPEED_PID_KD_EV3_MED, DIRECT);
-		pos_pid.pid = new PIDController(POS_PID_KP_EV3_MED, POS_PID_KI_EV3_MED, POS_PID_KD_EV3_MED, DIRECT);
+		speed_pid.kp = SPEED_PID_KP_EV3_MED;
+		speed_pid.ki = SPEED_PID_KI_EV3_MED;
+		speed_pid.kd = SPEED_PID_KD_EV3_MED;
+		pos_pid.kp = POS_PID_KP_EV3_MED;
+		pos_pid.ki = POS_PID_KI_EV3_MED;
+		pos_pid.kd = POS_PID_KD_EV3_MED;
 		break;
 	case CUSTOM:
 		_maxrpm = CUSTOM_MAX_RPM;
-		speed_pid.pid = new PIDController(SPEED_PID_KP_CUSTOM, SPEED_PID_KI_CUSTOM, SPEED_PID_KD_CUSTOM, DIRECT);
-		pos_pid.pid = new PIDController(POS_PID_KP_CUSTOM, POS_PID_KI_CUSTOM, POS_PID_KD_CUSTOM, DIRECT);
+		speed_pid.kp = SPEED_PID_KP_CUSTOM;
+		speed_pid.ki = SPEED_PID_KI_CUSTOM;
+		speed_pid.kd = SPEED_PID_KD_CUSTOM;
+		pos_pid.kp = POS_PID_KP_CUSTOM;
+		pos_pid.ki = POS_PID_KI_CUSTOM;
+		pos_pid.kd = POS_PID_KD_CUSTOM;
 		break;
 	}
 	maxrpm = _maxrpm;
