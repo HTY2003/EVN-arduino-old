@@ -1,4 +1,5 @@
-# EVN Alpha
+# EVN
+Ver 0.1.0
 Software Repository for EVN Alpha
 
 ## Table of contents
