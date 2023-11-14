@@ -2,89 +2,77 @@
 Software Repository for EVN Alpha
 
 ## Table of contents
-- [App Pre-Requisites](#app-pre-requisites)
+- [App Installation](#app-installation)
 - [Test Upload](#test-upload)
 - [Library Installation](#library-installation)
 - [Usage in Arduino IDE](#usage-in-arduino-ide)
 
-## App Pre-Requisites
+## App Installation
 The following apps should be installed
-* Arduino IDE 1.8.x (latest version)
+* [Arduino IDE 1.8.19] (https://www.arduino.cc/en/software)
 
-Add the Raspberry Pi Pico to your Arduino Installation by adding Earle F Philhower's Arduino-Pico core using the Boards Manager (Tools - Board - Boards Manager - search "Raspberry Pi Pico/RP2040" and install latest version).
+After installing Arduino IDE, install Earle F Philhower's Arduino-Pico core using the Boards Manager (Tools - Board - Boards Manager - search "Raspberry Pi Pico/RP2040" - Install "Raspberry Pi Pico/RP2040 by Earle F Philhower III").
 
-To upload, select Raspberry Pi Pico as your board (Tools - Board - Raspberry Pi RP2040 Boards - Raspberry Pi Pico).
+To upload, select Board: Raspberry Pi Pico (Tools - Board - Raspberry Pi RP2040 Boards - Click Raspberry Pi Pico).
 
 Plug in the USB cable to the EVN Alpha. 
 
-When the EVN Alpha is on (red light), it will appear as an option in the Ports menu (Tools - Port). Select this COM Port to upload to it.
+When the EVN Alpha is on (red light), it will appear as an option in the Ports menu (e.g. Tools - Port - COM7 (Raspberry Pi Pico)). Select this COM Port to upload to EVN Alpha.
 
 ## Test Upload
-To test EVN Alpha, you can use the Blink example in Arduino (File - Examples - 01.Basics - Blink).
+To test EVN Alpha, use the Blink example in Arduino (File - Examples - 01.Basics - Blink).
 
 ## Library Installation
+Download this repository as a .zip file.
 
-Transfer each folder to the libraries folder in File Explorer. On Windows, this should be in Documents/Arduino/libraries. Follow the folder structure shown below:
-
-```
-Documents/
-└── Arduino/
-    └── libraries/
-        ├── EVNMotor/
-        │   ├── EVNMotor.h
-        │   └── EVNMotor.cpp
-        ├── EVNSensorHelper/
-        │   ├── EVNSensorHelper.h
-        │   └── EVNSensorHelper.cpp
-        ├── EVNButton/
-        │   └── EVNButton.h
-        │   └── EVNButton.cpp
-        └── EVNPIDController/
-            └── EVNPIDController.h
-            └── EVNPIDController.cpp
-
-```
-
-Ensure that in each EVN folder, there is only one .h and .cpp file.
-Ensure that there are no 2 folders with the same name in the libraries folder.
-
-Additionally for EVNMotor, install the RPI_PICO_TimerInterrupt Ver 1.3.1 library by Khoi Hoang in Arduino's Library Manager (Sketch - Include Library - Manage Libraries...).
+Install in Arduino IDE as follows:
+Sketch - Include Library - Add .ZIP Library - Browse to downloaded .zip file and select.
 
 
 ## Usage in Arduino IDE
 To include all libraries, include them at the start of the library:
 
 ```
-#include "RPi_Pico_ISR_Timer.h" //this is a helper library for the EVNMotor library
-#include <EVNMotor.h>
-#include <EVNButton.h>
-#include <EVNSensorHelper.h>
+#include <EVN.h>
 ```
 
 Create instances before void setup():
 
 ```
-EVNButton butt;
-EVNMotor motora(1, EV3_LARGE, &butt); //(port number from 1-4, motor type, pointer to button object)
-EVNMotor motorb(2, EV3_MED, &butt); 
 EVNSensorHelper helper;
+EVNButton button;
+EVNDisplay display(0); //i2c bus
+
+EVNMotor motora(1, EV3_LARGE, &button);
+EVNMotor motorb(2, EV3_LARGE, &button);
+EVNMotor motorc(3, EV3_MED, &button); 
+EVNDrivebase(60, 175, &motora, &motorb, DIRECT, DIRECT);
+
+PIDController(1,0,0, DIRECT);
+
 ```
 
 
-And initalize them in void setup() and void setup1():
+And initalize the hardware components in void setup() and void setup1():
 ```
 void setup()
 {
-    butt.init();
+    button.init();
     helper.init();
+
+    helper.selectPort(0, 0) //i2c bus 0, port 0
+    display
+    display.init();
 }
 
 void setup1()
 {
-    motora.init(); //initializing motors on second core improves performance, if the 2nd core is not in use
+    //initializing motors on second core improves performance, if the 2nd core is not in use
+    motora.init(); 
     motorb.init();
+    motorc.init();
 }
 
 ```
 
-Detailed functions of each class will be outlined in the individual folder READMEs.
+Detailed functions of each class will be outlined soon.
