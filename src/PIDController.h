@@ -11,6 +11,7 @@ class PIDController
 public:
 	PIDController(double kp, double ki, double kd, uint8_t dir);
 	double compute(double error);
+	void reset();
 
 private:
 	double _kp, _ki, _kd, _dir;

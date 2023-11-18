@@ -19,8 +19,15 @@ double PIDController::compute(double error)
 	_output = _kp * _error + _kd * (_error - _preverror) + _ki * _summederror;
 	if (_dir == REVERSE)
 	{
-		_output *= -1;
+		_output = -_output;
 	}
 	_output = constrain(_output, -1, 1);
 	return _output;
+}
+
+void PIDController::reset()
+{
+	_error = 0;
+	_preverror = 0;
+	_summederror = 0;
 }
