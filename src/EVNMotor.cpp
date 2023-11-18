@@ -1,22 +1,14 @@
 #include "EVNMotor.h"
-#include "EVNButton.h"
 #include <Arduino.h>
-#include "PIDController.h"
-
 
 encoder_state_t* EVNMotor::encoderArgs[];
 speed_pid_t* EVNMotor::speedArgs[];
 position_pid_t* EVNMotor::posArgs[];
 time_pid_t* EVNMotor::timeArgs[];
-RPI_PICO_Timer EVNMotor::timer(3);
-RPI_PICO_ISR_Timer EVNMotor::ISRtimer;
 
 EVNMotor::EVNMotor(uint8_t port, uint8_t motortype, EVNButton* button)
 {
-	if (button)
-	{
-		speed_pid.button = button;
-	}
+	if (button)	speed_pid.button = button;
 
 	switch (port)
 	{
@@ -52,42 +44,39 @@ EVNMotor::EVNMotor(uint8_t port, uint8_t motortype, EVNButton* button)
 	{
 	case EV3_LARGE:
 		_maxrpm = EV3_LARGE_MAX_RPM;
-		speed_pid.kp = SPEED_PID_KP_EV3_LARGE;
-		speed_pid.ki = SPEED_PID_KI_EV3_LARGE;
-		speed_pid.kd = SPEED_PID_KD_EV3_LARGE;
-		pos_pid.kp = POS_PID_KP_EV3_LARGE;
-		pos_pid.ki = POS_PID_KI_EV3_LARGE;
-		pos_pid.kd = POS_PID_KD_EV3_LARGE;
+		speed_pid.pid = new PIDController(SPEED_PID_KP_EV3_LARGE, SPEED_PID_KI_EV3_LARGE, SPEED_PID_KD_EV3_LARGE, DIRECT);
+		pos_pid.pid = new PIDController(POS_PID_KP_EV3_LARGE, POS_PID_KI_EV3_LARGE, POS_PID_KD_EV3_LARGE, DIRECT);
 		break;
 	case NXT_LARGE:
 		_maxrpm = NXT_LARGE_MAX_RPM;
-		speed_pid.kp = SPEED_PID_KP_NXT_LARGE;
-		speed_pid.ki = SPEED_PID_KI_NXT_LARGE;
-		speed_pid.kd = SPEED_PID_KD_NXT_LARGE;
-		pos_pid.kp = POS_PID_KP_NXT_LARGE;
-		pos_pid.ki = POS_PID_KI_NXT_LARGE;
-		pos_pid.kd = POS_PID_KD_NXT_LARGE;
+		speed_pid.pid = new PIDController(SPEED_PID_KP_NXT_LARGE, SPEED_PID_KI_NXT_LARGE, SPEED_PID_KD_NXT_LARGE, DIRECT);
+		pos_pid.pid = new PIDController(POS_PID_KP_NXT_LARGE, POS_PID_KI_NXT_LARGE, POS_PID_KD_NXT_LARGE, DIRECT);
 		break;
 	case EV3_MED:
 		_maxrpm = EV3_MED_MAX_RPM;
-		speed_pid.kp = SPEED_PID_KP_EV3_MED;
-		speed_pid.ki = SPEED_PID_KI_EV3_MED;
-		speed_pid.kd = SPEED_PID_KD_EV3_MED;
-		pos_pid.kp = POS_PID_KP_EV3_MED;
-		pos_pid.ki = POS_PID_KI_EV3_MED;
-		pos_pid.kd = POS_PID_KD_EV3_MED;
+		speed_pid.pid = new PIDController(SPEED_PID_KP_EV3_MED, SPEED_PID_KI_EV3_MED, SPEED_PID_KD_EV3_MED, DIRECT);
+		pos_pid.pid = new PIDController(POS_PID_KP_EV3_MED, POS_PID_KI_EV3_MED, POS_PID_KD_EV3_MED, DIRECT);
 		break;
 	case CUSTOM:
 		_maxrpm = CUSTOM_MAX_RPM;
-		speed_pid.kp = SPEED_PID_KP_CUSTOM;
-		speed_pid.ki = SPEED_PID_KI_CUSTOM;
-		speed_pid.kd = SPEED_PID_KD_CUSTOM;
-		pos_pid.kp = POS_PID_KP_CUSTOM;
-		pos_pid.ki = POS_PID_KI_CUSTOM;
-		pos_pid.kd = POS_PID_KD_CUSTOM;
+		speed_pid.pid = new PIDController(SPEED_PID_KP_CUSTOM, SPEED_PID_KI_CUSTOM, SPEED_PID_KD_CUSTOM, DIRECT);
+		pos_pid.pid = new PIDController(POS_PID_KP_CUSTOM, POS_PID_KI_CUSTOM, POS_PID_KD_CUSTOM, DIRECT);
+
 		break;
 	}
+
+	encoder.enca = _enca;
+	encoder.encb = _encb;
+	speed_pid.motora = _motora;
+	speed_pid.motorb = _motorb;
+
 	maxrpm = _maxrpm;
+	speed_pid.maxrpm = (double)_maxrpm;
+	speed_pid.running = false;
+	pos_pid.hold = false;
+	pos_pid.running = false;
+	speed_pid.running = false;
+	time_pid.running = false;
 }
 
 void EVNMotor::init()
@@ -95,29 +84,10 @@ void EVNMotor::init()
 	analogWriteFreq(OUTPUTPWMFREQ);
 	pinMode(_motora, OUTPUT_8MA);
 	pinMode(_motorb, OUTPUT_8MA);
-
-	encoder.enca = _enca;
-	encoder.encb = _encb;
-
-	attach_enc_interrupt(_enca, &encoder);
-	attach_enc_interrupt(_encb, &encoder);
-
 	pinMode(_enca, INPUT);
 	pinMode(_encb, INPUT);
-
-	time_pid.running = false;
-
-	speed_pid.motora = _motora;
-	speed_pid.motorb = _motorb;
-	speed_pid.maxrpm = (double)_maxrpm;
-	speed_pid.running = false;
-	speed_pid.error = 0;
-
-	pos_pid.error = 0;
-	pos_pid.hold = false;
-	pos_pid.running = false;
-
-	timer.attachInterruptInterval(HW_TIMER_INTERVAL_MS * 1000, isrtimer);
+	attach_enc_interrupt(_enca, &encoder);
+	attach_enc_interrupt(_encb, &encoder);
 	attach_pid_interrupt(_enca, &speed_pid, &pos_pid, &time_pid);
 }
 
@@ -132,7 +102,7 @@ void EVNMotor::writePWM(double speed)
 
 double EVNMotor::getPos()
 {
-	return ((double)encoder.position / 2);
+	return (double)encoder.position / 2;
 }
 
 void EVNMotor::resetPos()
@@ -254,7 +224,7 @@ uint64_t EVNMotor::timeSinceLastCommand()
 	return millis() - lastcommand_ms;
 }
 
-EVNDrivebase::EVNDrivebase(uint32_t wheel_dia, uint32_t wheel_dist, EVNMotor* motor_left, EVNMotor* motor_right, uint8_t motor_left_inv, uint8_t motor_right_inv) : avg_pid(1, 0, 0, DIRECT), diff_pid(1, 0, 0, DIRECT), avg_follow_pid(1, 0, 0, DIRECT), diff_follow_pid(1, 0, 0, DIRECT)
+EVNDrivebase::EVNDrivebase(uint32_t wheel_dia, uint32_t wheel_dist, EVNMotor* motor_left, EVNMotor* motor_right, uint8_t motor_left_inv, uint8_t motor_right_inv)
 {
 	_motor_left = motor_left;
 	_motor_right = motor_right;
@@ -281,10 +251,8 @@ void EVNDrivebase::steer(double speed, double turn_rate)
 		leftspeed = speedc + 2 * turn_ratec * speedc;
 	}
 
-	if (_motor_left_inv == REVERSE)
-		leftspeed *= -1;
-	if (_motor_right_inv == REVERSE)
-		rightspeed *= -1;
+	if (_motor_left_inv == REVERSE) leftspeed *= -1;
+	if (_motor_right_inv == REVERSE) rightspeed *= -1;
 
 	_motor_left->runSpeed(leftspeed);
 	_motor_right->runSpeed(rightspeed);

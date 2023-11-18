@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 #include "EVNButton.h"
+#include "EVNISRTimer.h"
 #include "RPi_Pico_TimerInterrupt.h"
 #include "RPi_Pico_ISR_Timer.hpp"
 #include "PIDController.h"
@@ -52,12 +53,10 @@
 #define NXT_LARGE 1
 #define EV3_MED 2
 #define CUSTOM 3
-
 #define EV3_LARGE_MAX_RPM 155
 #define NXT_LARGE_MAX_RPM 155
 #define EV3_MED_MAX_RPM 230
 #define CUSTOM_MAX_RPM 155
-
 #define STOP_ACTION_BRAKE 0
 #define STOP_ACTION_COAST 1
 #define STOP_ACTION_HOLD 2
@@ -70,7 +69,6 @@
 #define OUTPUT3MOTORB 22
 #define OUTPUT4MOTORA 21
 #define OUTPUT4MOTORB 20
-
 #define OUTPUT1ENCA 18
 #define OUTPUT1ENCB 19
 #define OUTPUT2ENCA 17
@@ -102,10 +100,10 @@ typedef struct
 	uint8_t motora;
 	uint8_t motorb;
 	volatile double targetrpm;
-	volatile double error, preverror, summederror;
+	volatile double error;
 	volatile double output;
+	PIDController* pid;
 	EVNButton* button;
-	volatile double kp, ki, kd;
 
 } speed_pid_t;
 
@@ -116,9 +114,9 @@ typedef struct
 	volatile bool hold;
 	volatile uint8_t stop_action;
 	volatile double targetpos;
-	volatile double error, preverror, summederror;
+	volatile double error;
 	volatile double output;
-	volatile double kp, ki, kd;
+	PIDController* pid;
 } position_pid_t;
 
 typedef struct
@@ -170,8 +168,6 @@ public:
 	static speed_pid_t* speedArgs[4];
 	static position_pid_t* posArgs[4];
 	static time_pid_t* timeArgs[4];
-	static RPI_PICO_Timer timer;		// static timer shared by all instances
-	static RPI_PICO_ISR_Timer ISRtimer; // means that no other class can use the ISRtimer (I think)
 
 	static void rpm_update(encoder_state_t* arg)
 	{
@@ -297,7 +293,12 @@ public:
 
 	static bool pid_update(speed_pid_t* speedArg, position_pid_t* posArg, time_pid_t* timeArg, encoder_state_t* encoderArg)
 	{
-		if (speedArg->button->read())
+		bool buttonread;
+
+		if (speedArg->button == NULL) buttonread = true;
+		else buttonread = speedArg->button->read();
+
+		if (buttonread)
 		{
 			double rpm = getRPM_static(encoderArg);
 
@@ -307,22 +308,17 @@ public:
 				{
 					stopAction_static(speedArg->motora, speedArg->motorb, posArg, encoderArg);
 					timeArg->running = false;
+					speedArg->pid->reset();
 					return true;
 				}
 
 				if (timeArg->running) speedArg->targetrpm = timeArg->targetrpm;
 
 				speedArg->error = (speedArg->targetrpm - rpm) / speedArg->maxrpm;
-				speedArg->preverror = speedArg->error;
-				speedArg->error = constrain(speedArg->error, -1, 1);
-				speedArg->summederror += speedArg->error;
-				speedArg->output = speedArg->kp * speedArg->error + speedArg->kd * (speedArg->error - speedArg->preverror) + speedArg->ki * speedArg->summederror;
-				speedArg->output = constrain(speedArg->output, -1, 1);
+				speedArg->output = speedArg->pid->compute(speedArg->error);
 
-				if (speedArg->targetrpm == 0)
-					writePWM_static(speedArg->motora, speedArg->motorb, 0);
-				else
-					writePWM_static(speedArg->motora, speedArg->motorb, speedArg->output);
+				if (speedArg->targetrpm == 0) writePWM_static(speedArg->motora, speedArg->motorb, 0);
+				else writePWM_static(speedArg->motora, speedArg->motorb, speedArg->output);
 			}
 			else if (posArg->running || posArg->hold)
 			{
@@ -333,6 +329,7 @@ public:
 					{
 						stopAction_static(speedArg->motora, speedArg->motorb, posArg, encoderArg);
 						posArg->running = false;
+						posArg->pid->reset();
 						return true;
 					}
 				}
@@ -342,11 +339,7 @@ public:
 				}
 
 				posArg->error = (posArg->targetpos - ((double)encoderArg->position) / 2) / 360;
-				posArg->preverror = posArg->error;
-				posArg->error = constrain(posArg->error, -1, 1);
-				posArg->summederror += posArg->error;
-				posArg->output = posArg->kp * posArg->error + posArg->kd * (posArg->error - posArg->preverror) + posArg->ki * posArg->summederror;
-				posArg->output = constrain(speedArg->output, -1, 1);
+				posArg->output = posArg->pid->compute(posArg->error);
 				writePWM_static(speedArg->motora, speedArg->motorb, posArg->output);
 			}
 		}
@@ -358,6 +351,8 @@ public:
 			posArg->running = false;
 			timeArg->running = false;
 			posArg->hold = false;
+			speedArg->pid->reset();
+			posArg->pid->reset();
 		}
 		return true;
 	}
@@ -412,36 +407,31 @@ private:
 			speedArgs[0] = state1;
 			posArgs[0] = state2;
 			timeArgs[0] = state3;
-			ISRtimer.setInterval(PID_TIMER_INTERVAL_MS, pidtimer0);
+			EVNISRTimer::sharedISRTimer().setInterval(PID_TIMER_INTERVAL_MS, pidtimer0);
+
 			break;
 		case OUTPUT2ENCA:
 		case OUTPUT2ENCB:
 			speedArgs[1] = state1;
 			posArgs[1] = state2;
 			timeArgs[1] = state3;
-			ISRtimer.setInterval(PID_TIMER_INTERVAL_MS, pidtimer1);
+			EVNISRTimer::sharedISRTimer().setInterval(PID_TIMER_INTERVAL_MS, pidtimer1);
 			break;
 		case OUTPUT3ENCA:
 		case OUTPUT3ENCB:
 			speedArgs[2] = state1;
 			posArgs[2] = state2;
 			timeArgs[2] = state3;
-			ISRtimer.setInterval(PID_TIMER_INTERVAL_MS, pidtimer2);
+			EVNISRTimer::sharedISRTimer().setInterval(PID_TIMER_INTERVAL_MS, pidtimer2);
 			break;
 		case OUTPUT4ENCA:
 		case OUTPUT4ENCB:
 			speedArgs[3] = state1;
 			posArgs[3] = state2;
 			timeArgs[3] = state3;
-			ISRtimer.setInterval(PID_TIMER_INTERVAL_MS, pidtimer3);
+			EVNISRTimer::sharedISRTimer().setInterval(PID_TIMER_INTERVAL_MS, pidtimer3);
 			break;
 		}
-	}
-
-	static bool isrtimer(struct repeating_timer* t)
-	{
-		ISRtimer.run();
-		return true;
 	}
 
 	static void isr0()
@@ -493,7 +483,6 @@ public:
 
 private:
 	EVNMotor* _motor_left, * _motor_right;
-	PIDController avg_pid, diff_pid, avg_follow_pid, diff_follow_pid;
 	bool _motor_left_inv, _motor_right_inv;
 	uint32_t _wheel_dist, _wheel_dia;
 	double _maxrpm;
