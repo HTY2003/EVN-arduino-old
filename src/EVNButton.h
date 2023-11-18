@@ -3,19 +3,21 @@
 
 #include <Arduino.h>
 #define BUTTONPIN 24
+#define LEDPIN 25
 #define DEBOUNCE_TIMING_MS 300
 
 typedef struct
 {
 	volatile bool state;
-	volatile bool link_led;
+	volatile bool linkLED;
+	volatile bool toggle;
 	volatile unsigned long last_pressed;
 } button_state_t;
 
 class EVNButton
 {
 public:
-	EVNButton();
+	EVNButton(bool toggle = true, bool linkLED = false);
 	void init();
 	bool read();
 
@@ -33,8 +35,17 @@ private:
 		if ((millis() - buttonArg->last_pressed) > DEBOUNCE_TIMING_MS)
 		{
 			buttonArg->state = !buttonArg->state;
+			if (buttonArg->linkLED)
+			{
+				digitalWrite(LEDPIN, HIGH);
+			}
+			else
+			{
+				digitalWrite(LEDPIN, LOW);
+			}
 			buttonArg->last_pressed = millis();
 		}
+
 	}
 };
 
