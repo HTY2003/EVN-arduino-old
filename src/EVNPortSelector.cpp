@@ -1,12 +1,12 @@
-#include <EVNSensorHelper.h>
+#include <EVNPortSelector.h>
 #include <Arduino.h>
 #include <Wire.h>
 
-EVNSensorHelper::EVNSensorHelper()
+EVNPortSelector::EVNPortSelector()
 {
 }
 
-void EVNSensorHelper::init()
+void EVNPortSelector::init()
 {
 	Wire.setSDA(WIRE0_SDA);
 	Wire.setSCL(WIRE0_SCL);
@@ -23,7 +23,7 @@ void EVNSensorHelper::init()
 	Serial.begin();
 }
 
-void EVNSensorHelper::printPortScanner()
+void EVNPortSelector::printPorts()
 {
 	for (uint8_t t = 0; t < 8; t++)
 	{
@@ -49,8 +49,9 @@ void EVNSensorHelper::printPortScanner()
 	for (uint8_t t = 0; t < 8; t++)
 	{
 		this->selectPort(1, t);
-		Serial.print("Bus 1 Port #");
-		Serial.println(t);
+		Serial.print("---Bus 1 Port #");
+		Serial.print(t);
+		Serial.println("---");
 
 		for (uint8_t addr = 0; addr <= 127; addr++)
 		{
@@ -67,7 +68,7 @@ void EVNSensorHelper::printPortScanner()
 	}
 }
 
-void EVNSensorHelper::selectPort(uint8_t bus, uint8_t port)
+void EVNPortSelector::selectPort(uint8_t bus, uint8_t port)
 {
 	if (bus > 1 || port > 7)
 		return;
@@ -88,15 +89,10 @@ void EVNSensorHelper::selectPort(uint8_t bus, uint8_t port)
 	}
 }
 
-uint8_t EVNSensorHelper::getPort(uint8_t bus)
+uint8_t EVNPortSelector::getPort(uint8_t bus)
 {
 	if (bus > 1)
 		return -1;
 
 	return (bus == 0) ? _wire0SensorPort : _wire1SensorPort;
-}
-
-double EVNSensorHelper::calibrate(double reading, double low, double high)
-{
-	return (reading - low) / (high - low);
 }

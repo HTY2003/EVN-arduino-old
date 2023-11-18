@@ -1,5 +1,5 @@
-#ifndef EVNSensorHelper_h
-#define EVNSensorHelper_h
+#ifndef EVNPortSelector_h
+#define EVNPortSelector_h
 
 #include <Arduino.h>
 #include <Wire.h>
@@ -14,15 +14,14 @@
 #define SERIAL2_RX 9
 #define SERIAL2_TX 8
 
-class EVNSensorHelper
+class EVNPortSelector
 {
 public:
-	EVNSensorHelper();
+	EVNPortSelector();
 	void init();
 	void selectPort(uint8_t bus, uint8_t port);
 	uint8_t getPort(uint8_t bus);
-	double calibrate(double reading, double low, double high);
-	void printPortScanner();
+	void printPorts();
 
 private:
 	uint8_t _wire0SensorPort, _wire1SensorPort;
