@@ -10,7 +10,8 @@
 #define SCREEN_WIDTH 128
 #define LOGO_HEIGHT 54
 #define LOGO_WIDTH 95
-#define NO_OF_ROWS (SCREEN_HEIGHT / 8)
+#define NO_OF_ROWS 8
+#define MAX_CHAR 16
 
 class EVNDisplay
 {
@@ -20,31 +21,57 @@ public:
   void splashEVN();
   void rotate();
   void clear();
-  void setRowName(uint8_t row, char const* name);
+  void clearLine(uint8_t row);
 
-
-  template <typename T> //template so func can receive any data type as input
-  void setRowInfo(uint8_t row, T info)
+  template <typename D> //template so func can receive any data type as input
+  void writeData(uint8_t row, D data)
   {
     uint8_t rowc = constrain(row, 0, NO_OF_ROWS - 1);
-    //clear previous row data in buffer
-    _display->setDrawColor(0);
-    _display->drawBox(_rownamelen[rowc] * 8, rowc * 8, (SCREEN_WIDTH - (_rownamelen[rowc] * 8)), 8);
-    // write row data(placed after row name) to buffer
-    _display->setDrawColor(1);
-    _display->setCursor(_rownamelen[rowc] * 8, (rowc + 1) * 8);
-    _display->print(info);
-  }
+    String datas = String(data);
+    if (datas.length() > (MAX_CHAR - _rownamelen[rowc]))
+    {
+      datas = datas.substring(0, (MAX_CHAR - _rownamelen[rowc]));
+    }
 
+    for (int i = _rownamelen[rowc] + datas.length(); i < MAX_CHAR; i++)
+    {
+      _display8x8->drawGlyph(i, rowc, ' ');
+    }
 
-  void updateRowName(uint8_t row);
-  void updateRowInfo(uint8_t row);
+    _display8x8->setCursor(_rownamelen[rowc], rowc);
+    _display8x8->print(datas);
+  };
+
+  template <typename L> //template so func can receive any data type as input
+  void writeLabel(uint8_t row, L label)
+  {
+    uint8_t rowc = constrain(row, 0, NO_OF_ROWS - 1);
+    String labels = String(label);
+    if (labels.length() > MAX_CHAR)
+    {
+      labels = labels.substring(0, MAX_CHAR);
+    }
+    uint8_t namelen = labels.length();
+    if (namelen < _rownamelen[rowc])
+    {
+      for (int i = namelen; i < _rownamelen[rowc]; i++)
+      {
+        _display8x8->drawGlyph(i, rowc, ' ');
+      }
+    }
+    _rownamelen[rowc] = namelen;
+    _display8x8->setCursor(0, rowc);
+    _display8x8->print(labels);
+  };
 
 private:
   uint8_t _bus;
   bool _rotate = false;
   U8G2* _display;
-  uint8_t _rownamelen[NO_OF_ROWS] = { 0 }, _rownamelen_prev[NO_OF_ROWS] = { 0 };
+  U8X8* _display8x8;
+
+public:
+  uint8_t _rownamelen[NO_OF_ROWS] = { 0 };
 };
 
 static const unsigned char logo[] = {
