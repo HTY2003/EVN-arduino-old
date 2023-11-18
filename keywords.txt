@@ -2,7 +2,7 @@
 
 # Datatypes (KEYWORD1)
 EVNButton	KEYWORD1
-EVNSensorHelper	KEYWORD1
+EVNPortSelector	KEYWORD1
 EVNDisplay	KEYWORD1
 EVNMotor	KEYWORD1
 EVNDrivebase	KEYWORD1
@@ -12,13 +12,14 @@ PIDController	KEYWORD1
 # Methods and Functions (KEYWORD2)
 init	KEYWORD2
 read	KEYWORD2
+
 clear	KEYWORD2
+clearLine	KEYWORD2
 rotate	KEYWORD2
 splashEVN	KEYWORD2
-setRowName	KEYWORD2
-setRowInfo	KEYWORD2
-updateRowName	KEYWORD2
-updateRowInfo	KEYWORD2
+setLabel	KEYWORD2
+setData	KEYWORD2
+
 writePWM	KEYWORD2
 getPos	KEYWORD2
 resetPos	KEYWORD2
@@ -31,10 +32,14 @@ hold	KEYWORD2
 runTime	KEYWORD2
 runDegrees	KEYWORD2
 runSpeed	KEYWORD2
+
+steer		KEYWORD2
+
 getPort	KEYWORD2
 selectPort	KEYWORD2
+printPorts	KEYWORD2
+
 calibrate	KEYWORD2
-printPortScanner	KEYWORD2
 compute	KEYWORD2
 
 
