@@ -3,7 +3,7 @@
 
 #include <Arduino.h>
 #include <Wire.h>
-#include <U8g2lib.h>
+#include "U8g2/src/U8g2lib.h"
 
 #define OLED_ADDR 0x3C
 #define SCREEN_HEIGHT 64
@@ -16,8 +16,8 @@
 class EVNDisplay
 {
 public:
-  EVNDisplay(uint8_t bus);
-  void init(bool rotate = false);
+  EVNDisplay(uint8_t bus, bool rotate = false);
+  void init();
   void splashEVN();
   void rotate();
   void clear();

@@ -1,9 +1,8 @@
-#include <EVNDisplay.h>
+#include "EVNDisplay.h"
 #include <Arduino.h>
 #include <Wire.h>
-#include <U8g2lib.h>
 
-EVNDisplay::EVNDisplay(uint8_t bus)
+EVNDisplay::EVNDisplay(uint8_t bus, bool rotate)
 {
     _bus = constrain(bus, 0, 1);
     if (_bus)
@@ -16,16 +15,17 @@ EVNDisplay::EVNDisplay(uint8_t bus)
         _display = new U8G2_SSD1306_128X64_NONAME_F_HW_I2C(U8G2_R0, U8X8_PIN_NONE);
         _display8x8 = new U8X8_SSD1306_128X64_NONAME_HW_I2C(U8X8_PIN_NONE);
     }
+    _rotate = rotate;
 }
 
-void EVNDisplay::init(bool rotate)
+void EVNDisplay::init()
 {
     _display->begin();
     _display8x8->begin();
     _display8x8->setFont(u8x8_font_pxplusibmcgathin_f);
 
     this->clear(); //clear graphics from previous program
-    if (rotate)
+    if (_rotate)
         this->rotate();
 }
 
