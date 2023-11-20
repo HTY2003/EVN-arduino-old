@@ -1,47 +1,50 @@
 #include "EVNButton.h"
 #include <Arduino.h>
 
-button_state_t* EVNButton::buttonArg;
+button_state_t EVNButton::button;
 
-EVNButton::EVNButton(bool toggle, bool linkLED)
+EVNButton::EVNButton(uint8_t mode, uint8_t linkLED)
 {
 	button.state = false;
-	button.toggle = toggle;
-	button.linkLED = linkLED;
+	button.mode = constrain(mode, 0, 2);
+	button.linkLED = constrain(linkLED, 0, 1);
 }
 
-void EVNButton::init()
+void EVNButton::begin()
 {
-	if (button.toggle)
+	if (button.mode != BUTTON_DISABLE)
 	{
-		attach_button_interrupt(&button);
-	}
-	pinMode(BUTTONPIN, INPUT_PULLUP);
-	if (button.linkLED)
-	{
-		pinMode(LEDPIN, OUTPUT_8MA);
+		pinMode(BUTTONPIN, INPUT_PULLUP);
+		attachInterrupt(BUTTONPIN, isr, FALLING);
+		if (button.linkLED == LED_LINK)
+			pinMode(LEDPIN, OUTPUT_8MA);
 	}
 }
 
 bool EVNButton::read()
 {
-	if (button.toggle)
+	if (button.mode == BUTTON_DISABLE)
+	{
+		return true;
+	}
+	if (button.mode == BUTTON_TOGGLE)
 	{
 		return button.state;
 	}
 	else {
-		bool reading = digitalRead(BUTTONPIN);
-		if (button.linkLED)
-		{
-			if (reading)
-			{
-				digitalWrite(LEDPIN, LOW);
-			}
-			else
-			{
-				digitalWrite(LEDPIN, HIGH);
-			}
-		}
-		return reading;
+		bool reading = false;
+		if ((millis() - button.last_pressed) > DEBOUNCE_TIMING_MS) reading = digitalRead(BUTTONPIN);
+		if (button.linkLED == LED_LINK)	digitalWrite(LEDPIN, !reading);
+		return !reading;
 	}
+}
+
+void EVNButton::setMode(uint8_t mode)
+{
+	button.mode = constrain(mode, 0, 2);
+}
+
+void EVNButton::setLinkLED(uint8_t linkLED)
+{
+	button.linkLED = constrain(linkLED, 0, 1);
 }

@@ -6,9 +6,12 @@ speed_pid_t* EVNMotor::speedArgs[];
 position_pid_t* EVNMotor::posArgs[];
 time_pid_t* EVNMotor::timeArgs[];
 
-EVNMotor::EVNMotor(uint8_t port, uint8_t motortype, EVNButton* button)
+EVNMotor::EVNMotor(uint8_t port, uint8_t motortype, uint8_t motor_dir, uint8_t enc_dir)
 {
-	if (button)	speed_pid.button = button;
+	uint8_t motor_dirc = constrain(motor_dir, 0, 1);
+	uint8_t enc_dirc = constrain(enc_dir, 0, 1);
+	uint8_t portc = constrain(port, 1, 4);
+	_motortype = constrain(motortype, 0, 2);
 
 	switch (port)
 	{
@@ -38,31 +41,49 @@ EVNMotor::EVNMotor(uint8_t port, uint8_t motortype, EVNButton* button)
 		break;
 	}
 
-	_motortype = constrain(motortype, 0, 2);
-
 	switch (motortype)
 	{
 	case EV3_LARGE:
 		_maxrpm = EV3_LARGE_MAX_RPM;
 		speed_pid.pid = new PIDController(SPEED_PID_KP_EV3_LARGE, SPEED_PID_KI_EV3_LARGE, SPEED_PID_KD_EV3_LARGE, DIRECT);
 		pos_pid.pid = new PIDController(POS_PID_KP_EV3_LARGE, POS_PID_KI_EV3_LARGE, POS_PID_KD_EV3_LARGE, DIRECT);
+		encoder.ppr = LEGO_PPR;
 		break;
 	case NXT_LARGE:
 		_maxrpm = NXT_LARGE_MAX_RPM;
 		speed_pid.pid = new PIDController(SPEED_PID_KP_NXT_LARGE, SPEED_PID_KI_NXT_LARGE, SPEED_PID_KD_NXT_LARGE, DIRECT);
 		pos_pid.pid = new PIDController(POS_PID_KP_NXT_LARGE, POS_PID_KI_NXT_LARGE, POS_PID_KD_NXT_LARGE, DIRECT);
+		encoder.ppr = LEGO_PPR;
 		break;
 	case EV3_MED:
 		_maxrpm = EV3_MED_MAX_RPM;
 		speed_pid.pid = new PIDController(SPEED_PID_KP_EV3_MED, SPEED_PID_KI_EV3_MED, SPEED_PID_KD_EV3_MED, DIRECT);
 		pos_pid.pid = new PIDController(POS_PID_KP_EV3_MED, POS_PID_KI_EV3_MED, POS_PID_KD_EV3_MED, DIRECT);
+		encoder.ppr = LEGO_PPR;
 		break;
-	case CUSTOM:
-		_maxrpm = CUSTOM_MAX_RPM;
+	case CUSTOM_MOTOR:
+		_maxrpm = CUSTOM_MOTOR_MAX_RPM;
 		speed_pid.pid = new PIDController(SPEED_PID_KP_CUSTOM, SPEED_PID_KI_CUSTOM, SPEED_PID_KD_CUSTOM, DIRECT);
 		pos_pid.pid = new PIDController(POS_PID_KP_CUSTOM, POS_PID_KI_CUSTOM, POS_PID_KD_CUSTOM, DIRECT);
-
+		encoder.ppr = CUSTOM_PPR;
 		break;
+	}
+
+	if (motor_dirc == REVERSE)
+	{
+		uint8_t pin = _motora;
+		_motora = _motorb;
+		_motorb = pin;
+		pin = _enca;
+		_enca = _encb;
+		_encb = pin;
+	}
+
+	if (enc_dirc == REVERSE)
+	{
+		uint8_t pin = _enca;
+		_enca = _encb;
+		_encb = pin;
 	}
 
 	encoder.enca = _enca;
@@ -79,7 +100,7 @@ EVNMotor::EVNMotor(uint8_t port, uint8_t motortype, EVNButton* button)
 	time_pid.running = false;
 }
 
-void EVNMotor::init()
+void EVNMotor::begin()
 {
 	analogWriteFreq(OUTPUTPWMFREQ);
 	pinMode(_motora, OUTPUT_8MA);
@@ -191,7 +212,7 @@ void EVNMotor::brake()
 	pos_pid.running = false;
 	time_pid.running = false;
 	pos_pid.hold = false;
-	pos_pid.stop_action = STOP_ACTION_BRAKE;
+	pos_pid.stop_action = STOP_BRAKE;
 	stopAction_static(_motora, _motorb, &pos_pid, &encoder);
 }
 
@@ -201,7 +222,7 @@ void EVNMotor::coast()
 	pos_pid.running = false;
 	time_pid.running = false;
 	pos_pid.hold = false;
-	pos_pid.stop_action = STOP_ACTION_COAST;
+	pos_pid.stop_action = STOP_COAST;
 	stopAction_static(_motora, _motorb, &pos_pid, &encoder);
 }
 
@@ -210,7 +231,7 @@ void EVNMotor::hold()
 	speed_pid.running = false;
 	pos_pid.running = false;
 	time_pid.running = false;
-	pos_pid.stop_action = STOP_ACTION_HOLD;
+	pos_pid.stop_action = STOP_HOLD;
 	stopAction_static(_motora, _motorb, &pos_pid, &encoder);
 }
 
@@ -224,13 +245,11 @@ uint64_t EVNMotor::timeSinceLastCommand()
 	return millis() - lastcommand_ms;
 }
 
-EVNDrivebase::EVNDrivebase(uint32_t wheel_dia, uint32_t wheel_dist, EVNMotor* motor_left, EVNMotor* motor_right, uint8_t motor_left_inv, uint8_t motor_right_inv)
+EVNDrivebase::EVNDrivebase(uint32_t wheel_dia, uint32_t wheel_dist, EVNMotor* motor_left, EVNMotor* motor_right)
 {
 	_motor_left = motor_left;
 	_motor_right = motor_right;
 	_maxrpm = min(motor_left->maxrpm, motor_left->maxrpm);
-	_motor_left_inv = motor_left_inv;
-	_motor_right_inv = motor_right_inv;
 	_wheel_dist = wheel_dist;
 	_wheel_dia = wheel_dia;
 }
@@ -250,9 +269,6 @@ void EVNDrivebase::steer(double speed, double turn_rate)
 		rightspeed = speedc;
 		leftspeed = speedc + 2 * turn_ratec * speedc;
 	}
-
-	if (_motor_left_inv == REVERSE) leftspeed *= -1;
-	if (_motor_right_inv == REVERSE) rightspeed *= -1;
 
 	_motor_left->runSpeed(leftspeed);
 	_motor_right->runSpeed(rightspeed);

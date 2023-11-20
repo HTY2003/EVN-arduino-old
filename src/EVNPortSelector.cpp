@@ -6,7 +6,7 @@ EVNPortSelector::EVNPortSelector()
 {
 }
 
-void EVNPortSelector::init()
+void EVNPortSelector::begin()
 {
 	Wire.setSDA(WIRE0_SDA);
 	Wire.setSCL(WIRE0_SCL);
@@ -25,10 +25,10 @@ void EVNPortSelector::init()
 
 void EVNPortSelector::printPorts()
 {
-	for (uint8_t t = 0; t < 8; t++)
+	for (uint8_t t = 1; t < 9; t++)
 	{
-		this->selectPort(0, t);
-		Serial.print("---Bus 0 Port #");
+		this->setPort(t);
+		Serial.print("---Port ");
 		Serial.print(t);
 		Serial.println("---");
 
@@ -46,10 +46,10 @@ void EVNPortSelector::printPorts()
 		}
 	}
 
-	for (uint8_t t = 0; t < 8; t++)
+	for (uint8_t t = 9; t < 17; t++)
 	{
-		this->selectPort(1, t);
-		Serial.print("---Bus 1 Port #");
+		this->setPort(t);
+		Serial.print("---Port ");
 		Serial.print(t);
 		Serial.println("---");
 
@@ -68,31 +68,29 @@ void EVNPortSelector::printPorts()
 	}
 }
 
-void EVNPortSelector::selectPort(uint8_t bus, uint8_t port)
+void EVNPortSelector::setPort(uint8_t port)
 {
-	if (bus > 1 || port > 7)
-		return;
+	uint8_t portc = constrain(port, 1, 16);
 
-	if (bus == 0)
+	if (portc <= 8)
 	{
 		Wire.beginTransmission(TCAADDR);
-		Wire.write(1 << port);
+		Wire.write(1 << (portc - 1));
 		Wire.endTransmission();
-		_wire0SensorPort = port;
+		_wire0SensorPort = portc;
+		_port = portc;
 	}
 	else
 	{
 		Wire1.beginTransmission(TCAADDR);
-		Wire1.write(1 << port);
+		Wire1.write(1 << (portc - 9));
 		Wire1.endTransmission();
-		_wire1SensorPort = port;
+		_wire1SensorPort = portc;
+		_port = portc;
 	}
 }
 
-uint8_t EVNPortSelector::getPort(uint8_t bus)
+uint8_t EVNPortSelector::getPort()
 {
-	if (bus > 1)
-		return -1;
-
-	return (bus == 0) ? _wire0SensorPort : _wire1SensorPort;
+	return _port;
 }

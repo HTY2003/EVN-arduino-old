@@ -2,50 +2,44 @@
 #define EVNButton_h
 
 #include <Arduino.h>
-#define BUTTONPIN 24
-#define LEDPIN 25
-#define DEBOUNCE_TIMING_MS 300
+#include "pins_evn_alpha.h"
+
+#define DEBOUNCE_TIMING_MS	200
+
+#define BUTTON_DISABLE		0
+#define BUTTON_TOGGLE		1
+#define BUTTON_PUSHBUTTON	2
+#define LED_UNLINK	0
+#define LED_LINK	1
 
 typedef struct
 {
 	volatile bool state;
-	volatile bool linkLED;
-	volatile bool toggle;
-	volatile unsigned long last_pressed;
+	volatile uint8_t linkLED;
+	volatile uint8_t mode;
+	volatile unsigned long last_pressed = -DEBOUNCE_TIMING_MS;
 } button_state_t;
 
 class EVNButton
 {
 public:
-	EVNButton(bool toggle = true, bool linkLED = false);
-	void init();
+	EVNButton(uint8_t mode = BUTTON_TOGGLE, uint8_t linkLED = LED_UNLINK);
+	void begin();
 	bool read();
+	void setMode(uint8_t mode);
+	void setLinkLED(uint8_t linkLED);
 
-	button_state_t button;
-	static button_state_t* buttonArg; // static list of pointers to each instances' structs
+	static button_state_t button; // static list of pointers to each instances' structs
 
 private:
-	static void attach_button_interrupt(button_state_t* arg)
-	{
-		buttonArg = arg;
-		attachInterrupt(BUTTONPIN, isr, FALLING);
-	}
 	static void isr()
 	{
-		if ((millis() - buttonArg->last_pressed) > DEBOUNCE_TIMING_MS)
+		if ((millis() - button.last_pressed) > DEBOUNCE_TIMING_MS)
 		{
-			buttonArg->state = !buttonArg->state;
-			if (buttonArg->linkLED)
-			{
-				digitalWrite(LEDPIN, HIGH);
-			}
-			else
-			{
-				digitalWrite(LEDPIN, LOW);
-			}
-			buttonArg->last_pressed = millis();
+			button.state = !button.state;
+			if (button.mode == BUTTON_TOGGLE && button.linkLED == LED_LINK) digitalWrite(LEDPIN, button.state);
+			button.last_pressed = millis();
 		}
-
 	}
 };
 

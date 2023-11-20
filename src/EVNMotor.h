@@ -2,81 +2,67 @@
 #define EVNMotor_h
 
 #include <Arduino.h>
-#include "EVNButton.h"
+#include "EVNAlpha.h"
 #include "EVNISRTimer.h"
 #include "RPi_Pico_TimerInterrupt.h"
 #include "RPi_Pico_ISR_Timer.hpp"
 #include "PIDController.h"
+#include "pins_evn_alpha.h"
 
+//TUNING FOR CUSTOM GEARMOTOR
+#define SPEED_PID_KP_CUSTOM		5
+#define SPEED_PID_KI_CUSTOM		0.125
+#define SPEED_PID_KD_CUSTOM		0
+#define POS_PID_KP_CUSTOM		400
+#define POS_PID_KI_CUSTOM		0
+#define POS_PID_KD_CUSTOM		600
+#define CUSTOM_PPR				360
+#define CUSTOM_MOTOR_MAX_RPM	155
+
+//TUNING FOR LEGO MOTORS
+#define SPEED_PID_KP_EV3_LARGE	5
+#define SPEED_PID_KI_EV3_LARGE	0.125
+#define SPEED_PID_KD_EV3_LARGE	0
+#define POS_PID_KP_EV3_LARGE	400
+#define POS_PID_KI_EV3_LARGE	0
+#define POS_PID_KD_EV3_LARGE	600
+#define EV3_LARGE_MAX_RPM		155
+
+#define SPEED_PID_KP_NXT_LARGE	5
+#define SPEED_PID_KI_NXT_LARGE	0.125
+#define SPEED_PID_KD_NXT_LARGE	0
+#define POS_PID_KP_NXT_LARGE	400
+#define POS_PID_KI_NXT_LARGE	0
+#define POS_PID_KD_NXT_LARGE	600
+#define NXT_LARGE_MAX_RPM		155
+
+#define SPEED_PID_KP_EV3_MED	4.5
+#define SPEED_PID_KI_EV3_MED	0.125
+#define SPEED_PID_KD_EV3_MED	0
+#define POS_PID_KP_EV3_MED		300
+#define POS_PID_KI_EV3_MED		0
+#define POS_PID_KD_EV3_MED		600
+#define EV3_MED_MAX_RPM			230
+
+#define LEGO_PPR				360
+
+//INPUT PARAMETER OPTIONS
 #define DIRECT 0
 #define REVERSE 1
-
-#define OUTPUTPWMFREQ 20000
-#define PWM_MAX_VAL 255
-#define HW_TIMER_INTERVAL_MS 1
-#define PID_TIMER_INTERVAL_MS 2
-#define NO_OF_PULSES_TIMED 2
-
-#define SPEED_PID_KP_EV3_LARGE 5
-#define SPEED_PID_KI_EV3_LARGE 0.125
-#define SPEED_PID_KD_EV3_LARGE 0
-
-#define SPEED_PID_KP_NXT_LARGE 5
-#define SPEED_PID_KI_NXT_LARGE 0.125
-#define SPEED_PID_KD_NXT_LARGE 0
-
-#define SPEED_PID_KP_EV3_MED 4.5
-#define SPEED_PID_KI_EV3_MED 0.125
-#define SPEED_PID_KD_EV3_MED 0
-
-#define SPEED_PID_KP_CUSTOM 5
-#define SPEED_PID_KI_CUSTOM 0.125
-#define SPEED_PID_KD_CUSTOM 0
-
-#define POS_PID_KP_EV3_LARGE 400
-#define POS_PID_KI_EV3_LARGE 0
-#define POS_PID_KD_EV3_LARGE 600
-
-#define POS_PID_KP_NXT_LARGE 400
-#define POS_PID_KI_NXT_LARGE 0
-#define POS_PID_KD_NXT_LARGE 600
-
-#define POS_PID_KP_EV3_MED 300
-#define POS_PID_KI_EV3_MED 0
-#define POS_PID_KD_EV3_MED 600
-
-#define POS_PID_KP_CUSTOM 400
-#define POS_PID_KI_CUSTOM 0
-#define POS_PID_KD_CUSTOM 600
-
 #define EV3_LARGE 0
 #define NXT_LARGE 1
 #define EV3_MED 2
-#define CUSTOM 3
-#define EV3_LARGE_MAX_RPM 155
-#define NXT_LARGE_MAX_RPM 155
-#define EV3_MED_MAX_RPM 230
-#define CUSTOM_MAX_RPM 155
-#define STOP_ACTION_BRAKE 0
-#define STOP_ACTION_COAST 1
-#define STOP_ACTION_HOLD 2
+#define CUSTOM_MOTOR 3
 
-#define OUTPUT1MOTORA 29
-#define OUTPUT1MOTORB 28
-#define OUTPUT2MOTORA 27
-#define OUTPUT2MOTORB 26
-#define OUTPUT3MOTORA 23
-#define OUTPUT3MOTORB 22
-#define OUTPUT4MOTORA 21
-#define OUTPUT4MOTORB 20
-#define OUTPUT1ENCA 18
-#define OUTPUT1ENCB 19
-#define OUTPUT2ENCA 17
-#define OUTPUT2ENCB 16
-#define OUTPUT3ENCA 14
-#define OUTPUT3ENCB 15
-#define OUTPUT4ENCA 13
-#define OUTPUT4ENCB 12
+#define STOP_BRAKE 0
+#define STOP_COAST 1
+#define STOP_HOLD 2
+
+//HARDWARE STUFF
+#define OUTPUTPWMFREQ 20000
+#define PWM_MAX_VAL 255
+#define PID_TIMER_INTERVAL_MS 2
+#define NO_OF_PULSES_TIMED 2
 
 typedef struct
 {
@@ -88,6 +74,7 @@ typedef struct
 	volatile uint8_t lastpulseindex;
 	volatile uint64_t lastpulsetime;
 	volatile double avgpulsetiming;
+	volatile double ppr;
 	volatile double rpm;
 	volatile int8_t dir = 1;
 	volatile bool dataReady;
@@ -103,8 +90,6 @@ typedef struct
 	volatile double error;
 	volatile double output;
 	PIDController* pid;
-	EVNButton* button;
-
 } speed_pid_t;
 
 typedef struct
@@ -130,24 +115,24 @@ typedef struct
 class EVNMotor
 {
 public:
-	EVNMotor(uint8_t port, uint8_t motortype = EV3_LARGE, EVNButton* button = NULL);
-	void init();
+	EVNMotor(uint8_t port, uint8_t motortype = EV3_LARGE, uint8_t motor_dir = DIRECT, uint8_t enc_dir = DIRECT);
+	void begin();
 	void writePWM(double speed); // Directly write speed (-1 to 1) as PWM value to motor
 	double getPos();			  // Return absolute position in degrees
 	void resetPos();			  // Set current position as 0 deg
 	double getRPM();			  // Return velocity in RPM rotations per minute
 
 	bool commandFinished();
-	void runSpeed(double rpm);																	// Set motor to run at desired RPM
-	void runDegrees(double degrees, uint8_t stop_action = STOP_ACTION_BRAKE, bool wait = true); // Set motor to run desired angular displacement (in degrees)
-	void runTime(double rpm, uint32_t time_ms, uint8_t stop_action = STOP_ACTION_BRAKE, bool wait = true);
 	uint64_t timeSinceLastCommand();
+	double debugSpeedPID();
+	double debugPositionPID();
+
+	void runSpeed(double rpm);																	// Set motor to run at desired RPM
+	void runDegrees(double degrees, uint8_t stop_action = STOP_BRAKE, bool wait = true); // Set motor to run desired angular displacement (in degrees)
+	void runTime(double rpm, uint32_t time_ms, uint8_t stop_action = STOP_BRAKE, bool wait = true);
 	void brake();
 	void coast();
 	void hold();
-
-	double debugSpeedPID();
-	double debugPositionPID();
 
 private:
 	bool _encoded;
@@ -191,7 +176,7 @@ public:
 				pulsetimings += end - start;
 			}
 			arg->avgpulsetiming = pulsetimings / (NO_OF_PULSES_TIMED - 1);
-			arg->rpm = (1000000 / (arg->avgpulsetiming * 3)) * arg->dir;
+			arg->rpm = (1000000 / arg->avgpulsetiming) / (arg->ppr / 2) * 60 * arg->dir;
 			arg->dataReady = true;
 			arg->lastpulsetime = currentpulsetime;
 		}
@@ -258,15 +243,15 @@ public:
 	{
 		switch (posArg->stop_action)
 		{
-		case STOP_ACTION_BRAKE:
+		case STOP_BRAKE:
 			digitalWrite(motora, LOW);
 			digitalWrite(motorb, LOW);
 			break;
-		case STOP_ACTION_COAST:
+		case STOP_COAST:
 			digitalWrite(motora, HIGH);
 			digitalWrite(motorb, HIGH);
 			break;
-		case STOP_ACTION_HOLD:
+		case STOP_HOLD:
 			digitalWrite(motora, HIGH);
 			digitalWrite(motorb, HIGH);
 			posArg->hold = true;
@@ -282,7 +267,7 @@ public:
 		if (lastpulsetiming > encoderArg->avgpulsetiming)
 		{
 			double avgpulsetiming = (double)lastpulsetiming;
-			double rpm = (1000000 / (avgpulsetiming * 3)) * encoderArg->dir;
+			double rpm = (1000000 / avgpulsetiming) / (encoderArg->ppr / 2) * 60 * encoderArg->dir;
 			return rpm;
 		}
 		else
@@ -295,8 +280,9 @@ public:
 	{
 		bool buttonread;
 
-		if (speedArg->button == NULL) buttonread = true;
-		else buttonread = speedArg->button->read();
+		// if (EVNAlpha::sharedButton() == NULL) buttonread = true;
+		// else buttonread = EVNAlpha::sharedButton().read();
+		buttonread = EVNAlpha::sharedButton().read();
 
 		if (buttonread)
 		{
@@ -468,7 +454,7 @@ private:
 class EVNDrivebase
 {
 public:
-	EVNDrivebase(uint32_t wheel_dia, uint32_t wheel_dist, EVNMotor* _motor_left, EVNMotor* _motor_right, uint8_t motor_left_inv = DIRECT, uint8_t motor_right_inv = DIRECT);
+	EVNDrivebase(uint32_t wheel_dia, uint32_t wheel_dist, EVNMotor* _motor_left, EVNMotor* _motor_right);
 	void steer(double speed, double turn_rate);
 
 	// TODO
@@ -483,7 +469,6 @@ public:
 
 private:
 	EVNMotor* _motor_left, * _motor_right;
-	bool _motor_left_inv, _motor_right_inv;
 	uint32_t _wheel_dist, _wheel_dia;
 	double _maxrpm;
 };
