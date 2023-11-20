@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 #include <Wire.h>
+#include "EVNAlpha.h"
 #include "U8g2/src/U8g2lib.h"
 
 #define OLED_ADDR 0x3C
@@ -10,22 +11,27 @@
 #define SCREEN_WIDTH 128
 #define LOGO_HEIGHT 54
 #define LOGO_WIDTH 95
-#define NO_OF_ROWS 8
-#define MAX_CHAR 16
+#define NO_OF_ROWS (SCREEN_HEIGHT / 8)
+#define MAX_CHAR (SCREEN_WIDTH / 8)
+
+#define DISPLAY_0DEG false
+#define DISPLAY_180DEG true
 
 class EVNDisplay
 {
 public:
-  EVNDisplay(uint8_t bus, bool rotate = false);
-  void init();
+  EVNDisplay(uint8_t port, bool rotate = DISPLAY_0DEG);
+  void begin();
   void splashEVN();
   void rotate();
   void clear();
   void clearLine(uint8_t row);
 
-  template <typename D> //template so func can receive any data type as input
-  void writeData(uint8_t row, D data)
+  template <typename T>
+  void writeData(uint8_t row, T data)
   {
+    uint8_t prev_port = EVNAlpha::sharedPorts().getPort();
+    EVNAlpha::sharedPorts().setPort(_port);
     uint8_t rowc = constrain(row, 0, NO_OF_ROWS - 1);
     String datas = String(data);
     if (datas.length() > (MAX_CHAR - _rownamelen[rowc]))
@@ -40,11 +46,14 @@ public:
 
     _display8x8->setCursor(_rownamelen[rowc], rowc);
     _display8x8->print(datas);
+    EVNAlpha::sharedPorts().setPort(prev_port);
   };
 
-  template <typename L> //template so func can receive any data type as input
-  void writeLabel(uint8_t row, L label)
+  template <typename T>
+  void writeLabel(uint8_t row, T label)
   {
+    uint8_t prev_port = EVNAlpha::sharedPorts().getPort();
+    EVNAlpha::sharedPorts().setPort(_port);
     uint8_t rowc = constrain(row, 0, NO_OF_ROWS - 1);
     String labels = String(label);
     if (labels.length() > MAX_CHAR)
@@ -62,11 +71,18 @@ public:
     _rownamelen[rowc] = namelen;
     _display8x8->setCursor(0, rowc);
     _display8x8->print(labels);
+    EVNAlpha::sharedPorts().setPort(prev_port);
+  };
+
+  template <typename T>
+  void writeLine(uint8_t row, T line)
+  {
+    this->writeLine(row, line);
   };
 
 private:
-  uint8_t _bus;
-  bool _rotate = false;
+  uint8_t _port;
+  bool _rotate;
   U8G2* _display;
   U8X8* _display8x8;
 
