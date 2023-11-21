@@ -22,7 +22,7 @@ EVNMotor motord(4, CUSTOM_MOTOR, DIRECT, REVERSE);
 ```
 
 ## Functions
-#### `void begin()`
+##### `void begin()`
 Initializes motor hardware for position + speed measurement, and speed control (below functions).
 
 Example:
@@ -35,7 +35,7 @@ void setup1()
 
 
 ### Movement
-#### `void runSpeed(double rpm)`
+##### `void runSpeed(double rpm)`
 Sets motor to run at desired revolutions per minute (RPM) indefinitely, until next command is given.
 
 Arguments:
@@ -50,7 +50,7 @@ void loop()
 }
 ```
 
-#### `void runDegrees(double degrees, uint8_t stop_action = STOP_BRAKE, bool wait = true)`
+##### `void runDegrees(double degrees, uint8_t stop_action = STOP_BRAKE, bool wait = true)`
 Arguments:
 * degrees: desired rotation of motor from current position (in degrees). To run in the opposite direction, use negative values
 * stop_action:  `STOP_BRAKE` (default), `STOP_COAST`, or `STOP_HOLD`
@@ -69,7 +69,7 @@ void loop()
 }
 ```
 
-#### `void runTime(double rpm, double time_ms, uint8_t stop_action = STOP_BRAKE, bool wait = true)`
+##### `void runTime(double rpm, double time_ms, uint8_t stop_action = STOP_BRAKE, bool wait = true)`
 Arguments:
 * rpm: desired rotation of motor from current position (in degrees). To run in opposite direction, use negative values
 * time_ms: desired length of time to run motor (in milliseconds)
@@ -89,7 +89,7 @@ void loop()
 }
 ```
 
-#### `void brake()`
+##### `void brake()`
 Brings motor to a quick stop by effectively shorting the motor pins.
 
 Example:
@@ -101,7 +101,7 @@ void loop()
 }
 ```
 
-#### `void coast()`
+##### `void coast()`
 Brings motor to a gradual stop by effectively disconnecting the motor pins, allowing motor to slow down at its own rate.
 
 Example:
@@ -113,7 +113,7 @@ void loop()
 }
 ```
 
-#### `void hold()`
+##### `void hold()`
 Locks motor in its current encoder position. 
 If the motor shaft is turned due to external forces, the motor will run to restore its encoder position.
 

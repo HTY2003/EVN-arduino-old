@@ -2,7 +2,7 @@
 EVNAlpha is a class used to interface with the button, LED and port selector hardware built into EVN Alpha.
 
 ## Constructor
-`EVNAlpha(uint8_t mode = BUTTON_TOGGLE, uint8_t linkLED = LED_UNLINK)`
+##### `EVNAlpha(uint8_t mode = BUTTON_TOGGLE, uint8_t linkLED = LED_UNLINK)`
 
 Arguments:
 * mode: 
@@ -19,7 +19,7 @@ EVNAlpha board(BUTTON_PUSHBUTTON, LINK_LED);
 ```
 
 ## Functions
-#### `void begin()`
+##### `void begin()`
 Initializes button, LED and hardware for interfacing with sensors and peripherals.
 
 Example:
@@ -31,7 +31,7 @@ void setup1()
 ```
 
 ### LED
-#### `void ledWrite(bool state)`
+##### `void ledWrite(bool state)`
 Turns LED on or off.
 
 Arguments:
@@ -47,7 +47,7 @@ void loop()
 ```
 
 ### Button
-#### `bool buttonRead()`
+##### `bool buttonRead()`
 Returns reading of button state, depending on mode.
 
 Returns:
@@ -76,7 +76,7 @@ For the 16 I2C Ports on EVN Alpha, only one can be connected to the I2C bus at a
 
 Hence, before using an I2C peripheral on any port, the port must be selected with the below function first.
 
-#### `void setPort(uint8_t port)`
+##### `void setPort(uint8_t port)`
 Selects desired I2C port.
 
 Arguments:
@@ -92,7 +92,7 @@ void loop()
 }
 ```
 
-#### `uint8_t getPort()`
+##### `uint8_t getPort()`
 Returns currently selected I2C port.
 
 Returns:
