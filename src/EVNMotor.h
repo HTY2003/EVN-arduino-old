@@ -135,20 +135,16 @@ public:
 	void hold();
 
 private:
-	bool _encoded;
+	bool _started = false;
 	uint8_t _motora, _motorb, _enca, _encb, _motortype, _maxrpm;
 	uint32_t lastcommand_ms;
-
-public:
-	encoder_state_t encoder;
-	uint8_t maxrpm;
-
-	// private:
 	speed_pid_t speed_pid;
 	position_pid_t pos_pid;
 	time_pid_t time_pid;
 
 public:
+	encoder_state_t encoder;
+	uint8_t maxrpm;
 	static encoder_state_t* encoderArgs[8]; // static list of pointers to each instances' structs
 	static speed_pid_t* speedArgs[4];
 	static position_pid_t* posArgs[4];
@@ -280,8 +276,6 @@ public:
 	{
 		bool buttonread;
 
-		// if (EVNAlpha::sharedButton() == NULL) buttonread = true;
-		// else buttonread = EVNAlpha::sharedButton().read();
 		buttonread = EVNAlpha::sharedButton().read();
 
 		if (buttonread)

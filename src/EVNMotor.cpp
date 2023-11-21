@@ -101,14 +101,19 @@ EVNMotor::EVNMotor(uint8_t port, uint8_t motortype, uint8_t motor_dir, uint8_t e
 
 void EVNMotor::begin()
 {
-	analogWriteFreq(OUTPUTPWMFREQ);
-	pinMode(_motora, OUTPUT_8MA);
-	pinMode(_motorb, OUTPUT_8MA);
-	pinMode(_enca, INPUT);
-	pinMode(_encb, INPUT);
-	attach_enc_interrupt(_enca, &encoder);
-	attach_enc_interrupt(_encb, &encoder);
-	attach_pid_interrupt(_enca, &speed_pid, &pos_pid, &time_pid);
+	if (!_started)
+	{
+		analogWriteFreq(OUTPUTPWMFREQ);
+		pinMode(_motora, OUTPUT_8MA);
+		pinMode(_motorb, OUTPUT_8MA);
+		pinMode(_enca, INPUT);
+		pinMode(_encb, INPUT);
+		attach_enc_interrupt(_enca, &encoder);
+		attach_enc_interrupt(_encb, &encoder);
+		attach_pid_interrupt(_enca, &speed_pid, &pos_pid, &time_pid);
+
+		_started = true;
+	}
 }
 
 void EVNMotor::writePWM(double speed)
