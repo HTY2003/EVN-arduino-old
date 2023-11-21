@@ -3,8 +3,8 @@
 
 #include <Arduino.h>
 
-#define DIRECT 0
-#define REVERSE 1
+#define DIRECT	0
+#define REVERSE	1
 
 class PIDController
 {

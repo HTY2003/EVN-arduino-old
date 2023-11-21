@@ -9,8 +9,8 @@
 #define BUTTON_DISABLE		0
 #define BUTTON_TOGGLE		1
 #define BUTTON_PUSHBUTTON	2
-#define LED_UNLINK	0
-#define LED_LINK	1
+#define LED_UNLINK			0
+#define LED_LINK			1
 
 typedef struct
 {

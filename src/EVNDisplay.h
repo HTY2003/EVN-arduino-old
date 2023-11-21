@@ -6,13 +6,13 @@
 #include "EVNAlpha.h"
 #include "U8g2/src/U8g2lib.h"
 
-#define OLED_ADDR 0x3C
+#define OLED_ADDR     0x3C
 #define SCREEN_HEIGHT 64
-#define SCREEN_WIDTH 128
-#define LOGO_HEIGHT 54
-#define LOGO_WIDTH 95
-#define NO_OF_ROWS (SCREEN_HEIGHT / 8)
-#define MAX_CHAR (SCREEN_WIDTH / 8)
+#define SCREEN_WIDTH  128
+#define LOGO_HEIGHT   54
+#define LOGO_WIDTH    95
+#define NO_OF_ROWS    (SCREEN_HEIGHT / 8)
+#define MAX_CHAR      (SCREEN_WIDTH / 8)
 
 #define DISPLAY_0DEG false
 #define DISPLAY_180DEG true

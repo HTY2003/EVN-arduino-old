@@ -4,7 +4,7 @@
 #include "RPi_Pico_TimerInterrupt.h"
 #include "RPi_Pico_ISR_Timer.hpp"
 
-#define HW_TIMER_INTERVAL_MS 1
+#define HW_TIMER_INTERVAL_MS    1
 
 class EVNISRTimer
 {
