@@ -1,5 +1,4 @@
 #include "EVNButton.h"
-#include <Arduino.h>
 
 button_state_t EVNButton::button;
 

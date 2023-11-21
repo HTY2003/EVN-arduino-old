@@ -1,6 +1,4 @@
 #include "EVNPortSelector.h"
-#include <Arduino.h>
-#include <Wire.h>
 
 EVNPortSelector::EVNPortSelector()
 {

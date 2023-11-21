@@ -1,5 +1,4 @@
 #include "EVNMotor.h"
-#include <Arduino.h>
 
 encoder_state_t* EVNMotor::encoderArgs[];
 speed_pid_t* EVNMotor::speedArgs[];

@@ -1,5 +1,4 @@
 #include "PIDController.h"
-#include <Arduino.h>
 
 PIDController::PIDController(double kp, double ki, double kd, uint8_t dir)
 {
