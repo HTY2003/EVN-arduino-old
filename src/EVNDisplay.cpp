@@ -1,6 +1,4 @@
 #include "EVNDisplay.h"
-#include <Arduino.h>
-#include <Wire.h>
 
 EVNDisplay::EVNDisplay(uint8_t port, bool rotate)
 {
