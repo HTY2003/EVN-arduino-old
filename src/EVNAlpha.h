@@ -8,7 +8,7 @@
 
 class EVNAlpha {
 public:
-    EVNAlpha(uint8_t mode = BUTTON_TOGGLE, uint8_t linkLED = LED_UNLINK, uint16_t i2c_freq = DEFAULT_I2C_FREQ);
+    EVNAlpha(uint8_t mode = BUTTON_TOGGLE, uint8_t linkLED = LED_LINK, uint8_t linkMotors = MOTORS_LINK, uint16_t i2c_freq = DEFAULT_I2C_FREQ);
     void begin();
 
     static EVNPortSelector& sharedPorts() { return ports; }
@@ -23,7 +23,7 @@ public:
 private:
     static EVNButton button;
     static EVNPortSelector ports;
-    static uint8_t _linkLED, _mode;
+    static uint8_t _linkLED, _mode, _linkMotors;
     static uint16_t _i2c_freq;
 };
 

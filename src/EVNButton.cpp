@@ -2,11 +2,12 @@
 
 button_state_t EVNButton::button;
 
-EVNButton::EVNButton(uint8_t mode, uint8_t linkLED)
+EVNButton::EVNButton(uint8_t mode, uint8_t linkLED, uint8_t linkMotors)
 {
 	button.state = false;
 	button.mode = constrain(mode, 0, 2);
 	button.linkLED = constrain(linkLED, 0, 1);
+	button.linkMotors = constrain(linkMotors, 0, 1);
 }
 
 void EVNButton::begin()
@@ -46,4 +47,9 @@ void EVNButton::setMode(uint8_t mode)
 void EVNButton::setLinkLED(uint8_t linkLED)
 {
 	button.linkLED = constrain(linkLED, 0, 1);
+}
+
+void EVNButton::setLinkMotors(uint8_t linkMotors)
+{
+	button.linkMotors = constrain(linkMotors, 0, 1);
 }

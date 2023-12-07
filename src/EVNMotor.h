@@ -8,43 +8,7 @@
 #include "RPi_Pico_ISR_Timer.hpp"
 #include "PIDController.h"
 #include "pins_evn_alpha.h"
-
-//TUNING FOR CUSTOM GEARMOTOR
-#define SPEED_PID_KP_CUSTOM		5
-#define SPEED_PID_KI_CUSTOM		0.125
-#define SPEED_PID_KD_CUSTOM		0
-#define POS_PID_KP_CUSTOM		400
-#define POS_PID_KI_CUSTOM		0
-#define POS_PID_KD_CUSTOM		600
-#define CUSTOM_PPR				360
-#define CUSTOM_MOTOR_MAX_RPM	155
-
-//TUNING FOR LEGO MOTORS
-#define SPEED_PID_KP_EV3_LARGE	5
-#define SPEED_PID_KI_EV3_LARGE	0.125
-#define SPEED_PID_KD_EV3_LARGE	0
-#define POS_PID_KP_EV3_LARGE	400
-#define POS_PID_KI_EV3_LARGE	0
-#define POS_PID_KD_EV3_LARGE	600
-#define EV3_LARGE_MAX_RPM		155
-
-#define SPEED_PID_KP_NXT_LARGE	5
-#define SPEED_PID_KI_NXT_LARGE	0.125
-#define SPEED_PID_KD_NXT_LARGE	0
-#define POS_PID_KP_NXT_LARGE	400
-#define POS_PID_KI_NXT_LARGE	0
-#define POS_PID_KD_NXT_LARGE	600
-#define NXT_LARGE_MAX_RPM		155
-
-#define SPEED_PID_KP_EV3_MED	4.5
-#define SPEED_PID_KI_EV3_MED	0.125
-#define SPEED_PID_KD_EV3_MED	0
-#define POS_PID_KP_EV3_MED		300
-#define POS_PID_KI_EV3_MED		0
-#define POS_PID_KD_EV3_MED		600
-#define EV3_MED_MAX_RPM			230
-
-#define LEGO_PPR				360
+#include "evn_motor_pid.h"
 
 //INPUT PARAMETER OPTIONS
 #define DIRECT 0
@@ -145,7 +109,7 @@ private:
 public:
 	encoder_state_t encoder;
 	uint8_t maxrpm;
-	static encoder_state_t* encoderArgs[8]; // static list of pointers to each instances' structs
+	static encoder_state_t* encoderArgs[4]; // static list of pointers to each instances' structs
 	static speed_pid_t* speedArgs[4];
 	static position_pid_t* posArgs[4];
 	static time_pid_t* timeArgs[4];
@@ -274,9 +238,12 @@ public:
 
 	static bool pid_update(speed_pid_t* speedArg, position_pid_t* posArg, time_pid_t* timeArg, encoder_state_t* encoderArg)
 	{
-		bool buttonread;
+		bool buttonread, buttonlink;
 
 		buttonread = EVNAlpha::sharedButton().read();
+		buttonlink = EVNAlpha::sharedButton().button.linkMotors;
+
+		if (!buttonlink) buttonread = true;
 
 		if (buttonread)
 		{
@@ -348,31 +315,31 @@ private:
 			attachInterrupt(OUTPUT1ENCA, isr0, CHANGE);
 			break;
 		case OUTPUT1ENCB:
-			encoderArgs[1] = enc;
+			encoderArgs[0] = enc;
 			attachInterrupt(OUTPUT1ENCB, isr1, CHANGE);
 			break;
 		case OUTPUT2ENCA:
-			encoderArgs[2] = enc;
+			encoderArgs[1] = enc;
 			attachInterrupt(OUTPUT2ENCA, isr2, CHANGE);
 			break;
 		case OUTPUT2ENCB:
-			encoderArgs[3] = enc;
+			encoderArgs[1] = enc;
 			attachInterrupt(OUTPUT2ENCB, isr3, CHANGE);
 			break;
 		case OUTPUT3ENCA:
-			encoderArgs[4] = enc;
+			encoderArgs[2] = enc;
 			attachInterrupt(OUTPUT3ENCA, isr4, CHANGE);
 			break;
 		case OUTPUT3ENCB:
-			encoderArgs[5] = enc;
+			encoderArgs[2] = enc;
 			attachInterrupt(OUTPUT3ENCB, isr5, CHANGE);
 			break;
 		case OUTPUT4ENCA:
-			encoderArgs[6] = enc;
+			encoderArgs[3] = enc;
 			attachInterrupt(OUTPUT4ENCA, isr6, CHANGE);
 			break;
 		case OUTPUT4ENCB:
-			encoderArgs[7] = enc;
+			encoderArgs[3] = enc;
 			attachInterrupt(OUTPUT4ENCB, isr7, CHANGE);
 			break;
 		}
@@ -419,30 +386,30 @@ private:
 		update(encoderArgs[0]);
 		rpm_update(encoderArgs[0]);
 	}
-	static void isr1() { update(encoderArgs[1]); }
+	static void isr1() { update(encoderArgs[0]); }
 	static void isr2()
+	{
+		update(encoderArgs[1]);
+		rpm_update(encoderArgs[1]);
+	}
+	static void isr3() { update(encoderArgs[1]); }
+	static void isr4()
 	{
 		update(encoderArgs[2]);
 		rpm_update(encoderArgs[2]);
 	}
-	static void isr3() { update(encoderArgs[3]); }
-	static void isr4()
-	{
-		update(encoderArgs[4]);
-		rpm_update(encoderArgs[4]);
-	}
-	static void isr5() { update(encoderArgs[5]); }
+	static void isr5() { update(encoderArgs[2]); }
 	static void isr6()
 	{
-		update(encoderArgs[6]);
-		rpm_update(encoderArgs[6]);
+		update(encoderArgs[3]);
+		rpm_update(encoderArgs[3]);
 	}
-	static void isr7() { update(encoderArgs[7]); }
+	static void isr7() { update(encoderArgs[3]); }
 
 	static void pidtimer0() { pid_update(speedArgs[0], posArgs[0], timeArgs[0], encoderArgs[0]); }
-	static void pidtimer1() { pid_update(speedArgs[1], posArgs[1], timeArgs[1], encoderArgs[2]); }
-	static void pidtimer2() { pid_update(speedArgs[2], posArgs[2], timeArgs[2], encoderArgs[4]); }
-	static void pidtimer3() { pid_update(speedArgs[3], posArgs[3], timeArgs[3], encoderArgs[6]); }
+	static void pidtimer1() { pid_update(speedArgs[1], posArgs[1], timeArgs[1], encoderArgs[1]); }
+	static void pidtimer2() { pid_update(speedArgs[2], posArgs[2], timeArgs[2], encoderArgs[2]); }
+	static void pidtimer3() { pid_update(speedArgs[3], posArgs[3], timeArgs[3], encoderArgs[3]); }
 };
 
 class EVNDrivebase
