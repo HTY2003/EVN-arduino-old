@@ -9,6 +9,7 @@
 #include "PIDController.h"
 #include "pins_evn_alpha.h"
 #include "evn_motor_pid.h"
+#include <cfloat>
 
 //INPUT PARAMETER OPTIONS
 #define DIRECT 0
@@ -24,9 +25,10 @@
 
 //HARDWARE STUFF
 #define OUTPUTPWMFREQ 20000
-#define PWM_MAX_VAL 255
+#define PWM_MAX_VAL 2047
 #define PID_TIMER_INTERVAL_MS 2
 #define NO_OF_PULSES_TIMED 2
+#define ENCODER_PULSE_TIMEOUT 166667
 
 typedef struct
 {
@@ -36,12 +38,10 @@ typedef struct
 	volatile double position; // if any ISR writes a value to it, use volatile
 	volatile uint64_t pulsetimes[NO_OF_PULSES_TIMED];
 	volatile uint8_t lastpulseindex;
-	volatile uint64_t lastpulsetime;
 	volatile double avgpulsetiming;
 	volatile double ppr;
 	volatile double rpm;
 	volatile int8_t dir = 1;
-	volatile bool dataReady;
 } encoder_state_t;
 
 typedef struct
@@ -62,9 +62,17 @@ typedef struct
 	volatile bool running;
 	volatile bool hold;
 	volatile uint8_t stop_action;
+	volatile double targetrpm;
+
+	volatile double x0;
+	volatile double xdminusx0;
+	volatile uint64_t start;
+	volatile double T;
+
 	volatile double targetpos;
 	volatile double error;
 	volatile double output;
+	volatile bool flip;
 	PIDController* pid;
 } position_pid_t;
 
@@ -92,7 +100,7 @@ public:
 	double debugPositionPID();
 
 	void runSpeed(double rpm);																	// Set motor to run at desired RPM
-	void runDegrees(double degrees, uint8_t stop_action = STOP_BRAKE, bool wait = true); // Set motor to run desired angular displacement (in degrees)
+	void runDegrees(double rpm, double degrees, uint8_t stop_action = STOP_BRAKE, bool wait = true); // Set motor to run desired angular displacement (in degrees)
 	void runTime(double rpm, uint32_t time_ms, uint8_t stop_action = STOP_BRAKE, bool wait = true);
 	void brake();
 	void coast();
@@ -121,7 +129,6 @@ public:
 		if (new_p0)
 		{
 			uint64_t currentpulsetime = micros();
-			arg->dataReady = false;
 			arg->lastpulseindex++;
 			arg->lastpulseindex %= NO_OF_PULSES_TIMED;
 			arg->pulsetimes[arg->lastpulseindex] = currentpulsetime;
@@ -137,8 +144,6 @@ public:
 			}
 			arg->avgpulsetiming = pulsetimings / (NO_OF_PULSES_TIMED - 1);
 			arg->rpm = (1000000 / arg->avgpulsetiming) / (arg->ppr / 2) * 60 * arg->dir;
-			arg->dataReady = true;
-			arg->lastpulsetime = currentpulsetime;
 		}
 	}
 
@@ -215,7 +220,6 @@ public:
 			digitalWrite(motora, HIGH);
 			digitalWrite(motorb, HIGH);
 			posArg->hold = true;
-			posArg->targetpos = (double)encoderArg->position / 2;
 			break;
 		}
 	}
@@ -223,10 +227,14 @@ public:
 	static double getRPM_static(encoder_state_t* encoderArg)
 	{
 		uint64_t currenttime = micros();
-		uint64_t lastpulsetiming = (encoderArg->dataReady) ? (currenttime - encoderArg->pulsetimes[encoderArg->lastpulseindex]) : (currenttime - encoderArg->lastpulsetime);
-		if (lastpulsetiming > encoderArg->avgpulsetiming)
+		uint64_t lastpulsetiming = currenttime - encoderArg->pulsetimes[encoderArg->lastpulseindex];
+		if (lastpulsetiming > ENCODER_PULSE_TIMEOUT)
 		{
-			double avgpulsetiming = (double)lastpulsetiming;
+			return 0;
+		}
+		else if (lastpulsetiming > encoderArg->avgpulsetiming)
+		{
+			double avgpulsetiming = (encoderArg->avgpulsetiming * NO_OF_PULSES_TIMED + lastpulsetiming) / (NO_OF_PULSES_TIMED + 1);
 			double rpm = (1000000 / avgpulsetiming) / (encoderArg->ppr / 2) * 60 * encoderArg->dir;
 			return rpm;
 		}
@@ -238,6 +246,8 @@ public:
 
 	static bool pid_update(speed_pid_t* speedArg, position_pid_t* posArg, time_pid_t* timeArg, encoder_state_t* encoderArg)
 	{
+		posArg->flip = !posArg->flip;
+
 		bool buttonread, buttonlink;
 
 		buttonread = EVNAlpha::sharedButton().read();
@@ -249,7 +259,35 @@ public:
 		{
 			double rpm = getRPM_static(encoderArg);
 
-			if (speedArg->running || timeArg->running)
+			if ((posArg->running || posArg->hold) && posArg->flip)
+			{
+				if (posArg->running && (fabs(posArg->x0 + posArg->xdminusx0 - ((double)encoderArg->position) / 2) <= 0.5))
+				{
+					stopAction_static(speedArg->motora, speedArg->motorb, posArg, encoderArg);
+					posArg->running = false;
+					posArg->pid->reset();
+					return true;
+				}
+
+				uint64_t now = millis();
+				double T = fabs(posArg->xdminusx0) / (posArg->targetrpm / 60 * 360);
+				if (T == 0) T = FLT_MIN;
+				double t = (((double)now - (double)posArg->start) / 1000.0);
+
+				t = constrain(t, 0, T);
+				posArg->targetpos = posArg->x0 + posArg->xdminusx0
+					* (10 * pow(t / T, 3)
+						- 15 * pow(t / T, 4)
+						+ 6 * pow(t / T, 5));
+
+				posArg->error = (posArg->targetpos - ((double)encoderArg->position) / 2) / 360;
+				posArg->output = posArg->pid->compute(posArg->error);
+
+				speedArg->targetrpm = posArg->output * speedArg->maxrpm;
+				speedArg->targetrpm = constrain(speedArg->targetrpm, -posArg->targetrpm, posArg->targetrpm);
+			}
+
+			if ((speedArg->running || timeArg->running) || ((posArg->running || posArg->hold) && posArg->flip))
 			{
 				if (timeArg->running && ((millis() - timeArg->starttime) >= timeArg->time_ms))
 				{
@@ -263,31 +301,8 @@ public:
 
 				speedArg->error = (speedArg->targetrpm - rpm) / speedArg->maxrpm;
 				speedArg->output = speedArg->pid->compute(speedArg->error);
-
 				if (speedArg->targetrpm == 0) writePWM_static(speedArg->motora, speedArg->motorb, 0);
 				else writePWM_static(speedArg->motora, speedArg->motorb, speedArg->output);
-			}
-			else if (posArg->running || posArg->hold)
-			{
-				if (posArg->running && (fabs(posArg->targetpos - ((double)encoderArg->position) / 2) < 1))
-				{
-					posArg->counter += 1;
-					if (posArg->counter > 10)
-					{
-						stopAction_static(speedArg->motora, speedArg->motorb, posArg, encoderArg);
-						posArg->running = false;
-						posArg->pid->reset();
-						return true;
-					}
-				}
-				else
-				{
-					posArg->counter = 0;
-				}
-
-				posArg->error = (posArg->targetpos - ((double)encoderArg->position) / 2) / 360;
-				posArg->output = posArg->pid->compute(posArg->error);
-				writePWM_static(speedArg->motora, speedArg->motorb, posArg->output);
 			}
 		}
 		else
@@ -412,14 +427,25 @@ private:
 	static void pidtimer3() { pid_update(speedArgs[3], posArgs[3], timeArgs[3], encoderArgs[3]); }
 };
 
+typedef struct
+{
+	volatile double speed;
+	volatile double turn_rate;
+	volatile double maxrpm;
+	volatile uint32_t wheel_dia;
+	volatile uint32_t wheel_dist;
+	volatile bool running;
+	EVNMotor* motor_left;
+	EVNMotor* motor_right;
+}	drivebase_state_t;
+
 class EVNDrivebase
 {
 public:
 	EVNDrivebase(uint32_t wheel_dia, uint32_t wheel_dist, EVNMotor* _motor_left, EVNMotor* _motor_right);
+	void begin();
 	void steer(double speed, double turn_rate);
-
 	// TODO
-	// void steer_better(double speed, double turn_rate);
 	// void steerTime(double speed, double turn_rate, uint32_t time_ms);
 	// void steerDistance(double speed, double turning_rate, uint32_t distance_mm);
 	//  uint32_t timeSinceLastCommand();
@@ -429,9 +455,70 @@ public:
 	void hold();
 
 private:
-	EVNMotor* _motor_left, * _motor_right;
-	uint32_t _wheel_dist, _wheel_dia;
-	double _maxrpm;
+	drivebase_state_t db;
+	static drivebase_state_t* dbArg;
+
+	static void attach_db_interrupt(drivebase_state_t* arg)
+	{
+		dbArg = arg;
+		EVNISRTimer::sharedISRTimer().setInterval(PID_TIMER_INTERVAL_MS * 2, pidtimer0);
+	}
+
+	static void pidtimer0() { pid_update(dbArg); }
+
+	static void pid_update(drivebase_state_t* arg)
+	{
+		if (arg->running)
+		{
+			double turn_radius, arclen_outer, arclen_inner, target_angvel_outer, target_angvel_inner;
+			double angvel_outer, angvel_inner;
+
+			if (fabs(arg->turn_rate) == 0.5)
+			{
+				if (arg->turn_rate > 0)
+				{
+					arg->motor_left->runSpeed(arg->speed);
+					arg->motor_right->hold();
+				}
+				else {
+					arg->motor_right->runSpeed(arg->speed);
+					arg->motor_left->hold();
+				}
+				return;
+			}
+
+			double targetleftspeed, targetrightspeed, actualleftspeed, actualrightspeed, ratio;
+
+			actualleftspeed = arg->motor_left->getRPM();
+			actualrightspeed = arg->motor_right->getRPM();
+
+			if (arg->turn_rate >= 0)
+			{
+				targetleftspeed = arg->speed;
+				targetrightspeed = arg->speed - 2 * arg->turn_rate * arg->speed;
+				ratio = targetrightspeed / targetleftspeed;
+
+				// if (fabs(targetleftspeed - actualleftspeed) >= fabs(targetrightspeed - actualrightspeed))
+				targetrightspeed = actualleftspeed * ratio;
+				// else
+				// 	targetleftspeed = actualrightspeed / ratio;
+
+			}
+			else
+			{
+				targetrightspeed = arg->speed;
+				targetleftspeed = arg->speed - 2 * arg->turn_rate * arg->speed;
+				ratio = targetleftspeed / targetrightspeed;
+				// if (fabs(targetleftspeed - actualleftspeed) >= fabs(targetrightspeed - actualrightspeed))
+				// 	targetrightspeed = actualleftspeed / ratio;
+				// else
+				targetleftspeed = actualrightspeed * ratio;
+			}
+
+			arg->motor_left->runSpeed(targetleftspeed);
+			arg->motor_right->runSpeed(targetrightspeed);
+		}
+	}
 };
 
 #endif
