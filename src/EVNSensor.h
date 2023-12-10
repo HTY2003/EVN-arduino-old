@@ -19,6 +19,11 @@ public:
             _wire = &Wire1;
     };
 
+    void beginPortSelector()
+    {
+        EVNAlpha::sharedPorts().begin();
+    };
+
     void write8(uint8_t addr, uint8_t reg, uint8_t value)
     {
         uint8_t prev_port = EVNAlpha::sharedPorts().getPort();

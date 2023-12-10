@@ -10,6 +10,12 @@ class PIDController
 {
 public:
 	PIDController(double kp, double ki, double kd, uint8_t dir);
+	void setKp(double kp);
+	double getKp();
+	void setKi(double ki);
+	double getKi();
+	void setKd(double kd);
+	double getKd();
 	double compute(double error);
 	void reset();
 

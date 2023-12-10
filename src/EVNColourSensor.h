@@ -1,5 +1,5 @@
 #ifndef EVNColourSensor_h
-#define EVColourNSensor_h
+#define EVNColourSensor_h
 
 #include <Arduino.h>
 #include <Wire.h>
@@ -73,7 +73,7 @@ public:
 
     bool begin()
     {
-        EVNAlpha::sharedPorts().begin();
+        this->beginPortSelector();
 
         uint8_t id = read8(I2C_ADDR, (uint8_t)reg::ID);
         if (id != ID_REG_PART_NUMBER && id != ALT_ID_REG_PART_NUMBER) return false;

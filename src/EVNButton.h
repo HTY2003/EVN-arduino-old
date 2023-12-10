@@ -4,7 +4,7 @@
 #include <Arduino.h>
 #include "pins_evn_alpha.h"
 
-#define DEBOUNCE_TIMING_MS	200
+#define DEBOUNCE_TIMING_MS	300
 
 #define BUTTON_DISABLE		0
 #define BUTTON_TOGGLE		1

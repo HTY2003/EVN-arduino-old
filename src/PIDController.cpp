@@ -8,6 +8,36 @@ PIDController::PIDController(double kp, double ki, double kd, uint8_t dir)
 	_dir = dir;
 }
 
+void PIDController::setKp(double kp)
+{
+	_kp = kp;
+}
+
+double PIDController::getKp()
+{
+	return _kp;
+}
+
+void PIDController::setKi(double ki)
+{
+	_ki = ki;
+}
+
+double PIDController::getKi()
+{
+	return _ki;
+}
+
+void PIDController::setKd(double kd)
+{
+	_kd = kd;
+}
+
+double PIDController::getKd()
+{
+	return _kd;
+}
+
 double PIDController::compute(double error)
 {
 	double errorc = constrain(error, -1, 1);
