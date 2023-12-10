@@ -11,7 +11,8 @@ Software Repository for EVN Alpha
   - [Usage in Arduino IDE](#usage-in-arduino-ide)
 
 ## App Installation
-The following apps should be installed
+The following versions of Arduino IDE will **both** work with this library
+* [Arduino IDE 2.2.1] (https://www.arduino.cc/en/software)
 * [Arduino IDE 1.8.19] (https://www.arduino.cc/en/software)
 
 ## Board Installation
