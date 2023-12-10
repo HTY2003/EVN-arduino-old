@@ -18,6 +18,16 @@ EVNAlpha::EVNAlpha(uint8_t mode, uint8_t linkLED, uint8_t linkMotors, uint16_t i
 void EVNAlpha::begin()
 {
     pinMode(LEDPIN, OUTPUT_8MA);
+    Wire.setSDA(WIRE0_SDA);
+    Wire.setSCL(WIRE0_SCL);
+    Wire1.setSDA(WIRE1_SDA);
+    Wire1.setSCL(WIRE1_SCL);
+
+    Serial1.setRX(SERIAL1_RX);
+    Serial1.setTX(SERIAL1_TX);
+    Serial2.setRX(SERIAL2_RX);
+    Serial2.setTX(SERIAL2_TX);
+
     ports.begin();
     button.begin();
 }

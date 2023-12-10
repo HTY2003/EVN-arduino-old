@@ -3,10 +3,9 @@
 
 #include <Arduino.h>
 #include <Wire.h>
-#include "pins_evn_alpha.h"
 
 #define TCAADDR	0x70
-#define DEFAULT_I2C_FREQ (uint16_t)400000
+#define DEFAULT_I2C_FREQ (uint16_t)100000
 
 class EVNPortSelector
 {

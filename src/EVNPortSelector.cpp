@@ -9,20 +9,8 @@ void EVNPortSelector::begin()
 {
 	if (!_started)
 	{
-		Wire.setSDA(WIRE0_SDA);
-		Wire.setSCL(WIRE0_SCL);
-		Wire1.setSDA(WIRE1_SDA);
-		Wire1.setSCL(WIRE1_SCL);
-
-		Serial1.setRX(SERIAL1_RX);
-		Serial1.setTX(SERIAL1_TX);
-		Serial2.setRX(SERIAL2_RX);
-		Serial2.setTX(SERIAL2_TX);
-
 		Wire.begin();
 		Wire1.begin();
-		Wire.setClock(_i2c_freq);
-		Wire1.setClock(_i2c_freq);
 		Serial.begin();
 		_started = true;
 	}
