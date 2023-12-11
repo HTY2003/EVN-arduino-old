@@ -47,7 +47,7 @@ public:
         EVNAlpha::sharedPorts().setPort(prev_port);
         return out;
     };
-    uint16_t read16(uint8_t addr, uint8_t reg)
+    uint16_t read16(uint8_t addr, uint8_t reg, bool lsb_start = true)
     {
         uint8_t prev_port = EVNAlpha::sharedPorts().getPort();
         EVNAlpha::sharedPorts().setPort(_port);
@@ -56,8 +56,17 @@ public:
         _wire->write(COMMAND_BIT | reg);
         _wire->endTransmission();
         _wire->requestFrom(addr, (uint8_t)2);
-        low = _wire->read();
-        high = _wire->read();
+
+        if (lsb_start)
+        {
+            low = _wire->read();
+            high = _wire->read();
+        }
+        else
+        {
+            high = _wire->read();
+            low = _wire->read();
+        }
         high <<= 8;
         high |= low;
         EVNAlpha::sharedPorts().setPort(prev_port);

@@ -5,6 +5,7 @@
 #include "EVNMotor.h"
 #include "EVNDisplay.h"
 #include "EVNColourSensor.h"
+#include "EVNMagSensor.h"
 #include "PIDController.h"
 #include "RPi_Pico_ISR_Timer.h"
 
