@@ -2,20 +2,22 @@
 EVNAlpha is a class used to interface with the button, LED and port selector hardware built into EVN Alpha.
 
 ## Constructor
-##### `EVNAlpha(uint8_t mode = BUTTON_TOGGLE, uint8_t linkLED = LED_UNLINK)`
+##### `EVNAlpha(uint8_t mode = BUTTON_TOGGLE, uint8_t linkLED = LED_LINK, uint8_t linkMotors = MOTORS_LINK)`
 
 Arguments:
-* mode: 
+* mode: `BUTTON_TOGGLE` (default, one press toggles buttonRead() output high and low), `BUTTON_PUSHBUTTON`(buttonRead() only returns true when pressed) or `BUTTON_DISABLE`(buttonRead() always returns true).
 
-* linkLED: 
+* linkLED: `LED_LINK` (default, LED matches output of buttonRead()) or `LED_UNLINK` (LED controlled independently)
+
+* linkMotors: `MOTORS_LINK` (default, all EVNMotor commands will end instantly and motors will pause when buttonRead() outputs low) or `MOTORS_UNLINK` (motors controlled separately)
 
 Example:
 ```
 EVNAlpha board();
 ```
-Or
+Another example:
 ```
-EVNAlpha board(BUTTON_PUSHBUTTON, LINK_LED);
+EVNAlpha board(BUTTON_PUSHBUTTON, LED_LINK, MOTOR_UNLINK);
 ```
 
 ## Functions
