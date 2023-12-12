@@ -83,14 +83,47 @@ public:
         if (id != ID_REG_PART_NUMBER) return false;
 
         setDataRate((uint8_t)datarate::DATARATE_75HZ);
-        setSamples((uint8_t)samples::SAMPLES_2);
-        setRange((uint8_t)range::RANGE_2_5GA);
+        setSamples((uint8_t)samples::SAMPLES_1);
+        setRange((uint8_t)range::RANGE_4GA);
         setMeasurementMode((uint8_t)mode::MODE_CONTINUOUS);
+
+        // write8(I2C_ADDR, (uint8_t)reg::REG_CONFIG_A, 0x70);
+        // write8(I2C_ADDR, (uint8_t)reg::REG_CONFIG_B, 0xA0);
+        // write8(I2C_ADDR, (uint8_t)reg::REG_MODE, 0x00);
+        // _freq = 15;
+        // _gain = 390;
         return true;
     };
 
-    void setRange(uint8_t range) {
-        write8(I2C_ADDR, reg::REG_CONFIG_B, range << 5);
+    void setRange(uint8_t value) {
+        switch ((range)value)
+        {
+        case range::RANGE_0_88GA:
+            _gain = 1370;
+            break;
+        case range::RANGE_1_3GA:
+            _gain = 1090;
+            break;
+        case range::RANGE_1_9GA:
+            _gain = 820;
+            break;
+        case range::RANGE_2_5GA:
+            _gain = 660;
+            break;
+        case range::RANGE_4GA:
+            _gain = 440;
+            break;
+        case range::RANGE_4_7GA:
+            _gain = 390;
+            break;
+        case range::RANGE_5_6GA:
+            _gain = 330;
+            break;
+        case range::RANGE_8_1GA:
+            _gain = 230;
+            break;
+        }
+        write8(I2C_ADDR, reg::REG_CONFIG_B, value << 5);
     };
 
     void setMeasurementMode(uint8_t mode)
@@ -104,6 +137,31 @@ public:
 
     void setDataRate(uint8_t dataRate)
     {
+        switch ((datarate)dataRate)
+        {
+        case datarate::DATARATE_0_75HZ:
+            _freq = 0.75;
+            break;
+        case datarate::DATARATE_1_5HZ:
+            _freq = 1.5;
+            break;
+        case datarate::DATARATE_3HZ:
+            _freq = 3;
+            break;
+        case datarate::DATARATE_7_5HZ:
+            _freq = 7.5;
+            break;
+        case datarate::DATARATE_15HZ:
+            _freq = 15;
+            break;
+        case datarate::DATARATE_30HZ:
+            _freq = 30;
+            break;
+        case datarate::DATARATE_75HZ:
+            _freq = 75;
+            break;
+        }
+
         uint8_t value;
         value = read8(I2C_ADDR, reg::REG_CONFIG_A);
         value &= 0b11100011;
@@ -120,7 +178,6 @@ public:
         write8(I2C_ADDR, reg::REG_CONFIG_A, value);
     };
 
-    // calibrate in begin()
     bool isCalibrated()
     {
         bool output = _calibrated;
@@ -129,38 +186,42 @@ public:
 
     void update()
     {
-        _x = read16(I2C_ADDR, (uint8_t)reg::REG_OUT_X_M);
-        _y = read16(I2C_ADDR, (uint8_t)reg::REG_OUT_Y_M);
-        _z = read16(I2C_ADDR, (uint8_t)reg::REG_OUT_Z_M);
+        if ((micros() - _last_reading_us) >= (1000000 / _freq))
+        {
+            _x = read16(I2C_ADDR, (uint8_t)reg::REG_OUT_X_M, false);
+            _y = read16(I2C_ADDR, (uint8_t)reg::REG_OUT_Y_M, false);
+            _z = read16(I2C_ADDR, (uint8_t)reg::REG_OUT_Z_M, false);
+            _last_reading_us = micros();
+        }
     };
 
-    int16_t readRawX()
+    double readRawX()
     {
         this->update();
-        return _x;
+        return (double)_x / _gain;
     };
 
-    int16_t readRawY()
+    double readRawY()
     {
         this->update();
-        return _y;
+        return (double)_y / _gain;
     };
 
-    int16_t readRawZ()
+    double readRawZ()
     {
         this->update();
-        return _z;
+        return (double)_z / _gain;
     };
 
     void calibrate()
     {
         double x0, y0, z0;
-        x0 = (double)_x - _x_hard_offset;
-        y0 = (double)_y - _y_hard_offset;
-        z0 = (double)_z - _z_hard_offset;
-        _xcal = x0 * _x_soft_offset[0] + y0 * _x_soft_offset[1] + z0 * _x_soft_offset[2];
-        _ycal = x0 * _y_soft_offset[0] + y0 * _y_soft_offset[1] + z0 * _y_soft_offset[2];
-        _zcal = x0 * _z_soft_offset[0] + y0 * _z_soft_offset[1] + z0 * _z_soft_offset[2];
+        x0 = (double)_x - _x_hard_cal;
+        y0 = (double)_y - _y_hard_cal;
+        z0 = (double)_z - _z_hard_cal;
+        _xcal = x0 * _x_soft_cal[0] + y0 * _x_soft_cal[1] + z0 * _x_soft_cal[2];
+        _ycal = x0 * _y_soft_cal[0] + y0 * _y_soft_cal[1] + z0 * _y_soft_cal[2];
+        _zcal = x0 * _z_soft_cal[0] + y0 * _z_soft_cal[1] + z0 * _z_soft_cal[2];
     };
 
     double read() {
@@ -187,10 +248,11 @@ private:
     int16_t _reading, _x, _y, _z;
     double _xcal, _ycal, _zcal;
     double _yaw_offset = 0;
-    double _x_hard_offset, _x_soft_offset[3];
-    double _y_hard_offset, _y_soft_offset[3];
-    double _z_hard_offset, _z_soft_offset[3];
-    uint32_t _last_reading_us;
+    double _x_hard_cal = 0, _x_soft_cal[3] = { 1,0,0 };
+    double _y_hard_cal = 0, _y_soft_cal[3] = { 0,1,0 };
+    double _z_hard_cal = 0, _z_soft_cal[3] = { 0,0,1 };
+    double _freq, _gain;
+    uint32_t _last_reading_us = 0;
     bool _calibrated = false;
 };
 
