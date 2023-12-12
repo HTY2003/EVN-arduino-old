@@ -25,10 +25,10 @@
 
 //HARDWARE STUFF
 #define OUTPUTPWMFREQ 20000
-#define PWM_MAX_VAL 2047
+#define PWM_MAX_VAL 255
 #define PID_TIMER_INTERVAL_MS 2
 #define NO_OF_PULSES_TIMED 2
-#define ENCODER_PULSE_TIMEOUT 166667
+#define ENCODER_PULSE_TIMEOUT 166667*2
 
 typedef struct
 {
@@ -234,7 +234,8 @@ public:
 		}
 		else if (lastpulsetiming > encoderArg->avgpulsetiming)
 		{
-			double avgpulsetiming = (encoderArg->avgpulsetiming * NO_OF_PULSES_TIMED + lastpulsetiming) / (NO_OF_PULSES_TIMED + 1);
+			// double avgpulsetiming = (encoderArg->avgpulsetiming * NO_OF_PULSES_TIMED + lastpulsetiming) / (NO_OF_PULSES_TIMED + 1);
+			double avgpulsetiming = lastpulsetiming;
 			double rpm = (1000000 / avgpulsetiming) / (encoderArg->ppr / 2) * 60 * encoderArg->dir;
 			return rpm;
 		}
@@ -488,17 +489,24 @@ private:
 			}
 
 			double targetleftspeed, targetrightspeed, actualleftspeed, actualrightspeed, ratio;
+			double lefterror, righterror, speederror, angleerror;
 
 			actualleftspeed = arg->motor_left->getRPM();
 			actualrightspeed = arg->motor_right->getRPM();
+			targetleftspeed = arg->speed;
+			targetrightspeed = arg->speed - 2 * arg->turn_rate * arg->speed;
+			ratio = targetrightspeed / targetleftspeed;
+
+			lefterror = fabs((targetleftspeed - actualleftspeed) / (2 * targetleftspeed));
+			righterror = fabs((targetrightspeed - actualrightspeed) / (2 * targetrightspeed));
+			speederror = (lefterror + righterror) / 2;
+			angleerror = (lefterror - righterror) / 2;
+
+
 
 			if (arg->turn_rate >= 0)
 			{
-				targetleftspeed = arg->speed;
-				targetrightspeed = arg->speed - 2 * arg->turn_rate * arg->speed;
-				ratio = targetrightspeed / targetleftspeed;
-
-				// if (fabs(targetleftspeed - actualleftspeed) >= fabs(targetrightspeed - actualrightspeed))
+				// if (lefterror >= righterror)
 				targetrightspeed = actualleftspeed * ratio;
 				// else
 				// 	targetleftspeed = actualrightspeed / ratio;
@@ -506,13 +514,10 @@ private:
 			}
 			else
 			{
-				targetrightspeed = arg->speed;
-				targetleftspeed = arg->speed - 2 * arg->turn_rate * arg->speed;
-				ratio = targetleftspeed / targetrightspeed;
 				// if (fabs(targetleftspeed - actualleftspeed) >= fabs(targetrightspeed - actualrightspeed))
 				// 	targetrightspeed = actualleftspeed / ratio;
 				// else
-				targetleftspeed = actualrightspeed * ratio;
+				targetleftspeed = actualrightspeed / ratio;
 			}
 
 			arg->motor_left->runSpeed(targetleftspeed);
