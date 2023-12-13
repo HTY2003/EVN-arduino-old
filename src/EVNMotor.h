@@ -189,18 +189,27 @@ public:
 	static void writePWM_static(uint8_t motora, uint8_t motorb, double speed)
 	{
 		double speedc = constrain(speed, -1, 1);
-		if (speedc >= 0)
+
+		bool buttonread, buttonlink;
+		buttonread = EVNAlpha::sharedButton().read();
+		buttonlink = EVNAlpha::sharedButton().button.linkMotors;
+		if (!buttonlink) buttonread = true;
+
+		if (buttonread)
 		{
-			if (speedc == 0)
-				digitalWrite(motora, LOW);
+			if (speedc >= 0)
+			{
+				if (speedc == 0)
+					digitalWrite(motora, LOW);
+				else
+					analogWrite(motora, speedc * PWM_MAX_VAL);
+				digitalWrite(motorb, LOW);
+			}
 			else
-				analogWrite(motora, speedc * PWM_MAX_VAL);
-			digitalWrite(motorb, LOW);
-		}
-		else
-		{
-			analogWrite(motorb, -speedc * PWM_MAX_VAL);
-			digitalWrite(motora, LOW);
+			{
+				analogWrite(motorb, -speedc * PWM_MAX_VAL);
+				digitalWrite(motora, LOW);
+			}
 		}
 	}
 
@@ -250,10 +259,8 @@ public:
 		posArg->flip = !posArg->flip;
 
 		bool buttonread, buttonlink;
-
 		buttonread = EVNAlpha::sharedButton().read();
 		buttonlink = EVNAlpha::sharedButton().button.linkMotors;
-
 		if (!buttonlink) buttonread = true;
 
 		if (buttonread)
@@ -308,7 +315,7 @@ public:
 		}
 		else
 		{
-			posArg->stop_action = 0;
+			posArg->stop_action = STOP_BRAKE;
 			stopAction_static(speedArg->motora, speedArg->motorb, posArg, encoderArg);
 			speedArg->running = false;
 			posArg->running = false;
