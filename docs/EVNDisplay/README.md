@@ -15,14 +15,14 @@ Note: EVNDisplay does the port selection and deselection automatically, so users
 
 
 ## List of Functions
-- [Constructor](#evndisplay)
+- [Constructor](#constructor)
 - [begin()](#void-begin)
 - [rotate()](#void-rotate)
 - [splashEVN()](#void-splashevn)
 - [clear()](#void-clear)
-- [clearLine()](#void-clearline)
-- [writeLabel()](#void-writelabel) / [writeLine()](#void-writeline) / [write()](#void-write) / [print()](#void-print) 
-- [writeData()](#void-writedata)
+- [clearLine()](#void-clearlineuint8t-row)
+- [writeLabel()](#void-writelabeluint8t-row-label) / [writeLine()](#void-writelineuint8t-row-label) / [write()](#void-writeuint8t-row-label) / [print()](#void-printuint8t-row-label) 
+- [writeData()](#void-writedatauint8t-row-data)
 
 ## Constructor
 ##### `EVNDisplay(rotate = DISPLAY_0DEG)`
@@ -94,7 +94,7 @@ void setup()
 }
 ```
 
-##### `void clearLine(uint8_t row)`
+### **void clearLine(uint8_t row)**
 Clears data in given row.
 
 Arguments:
@@ -108,7 +108,7 @@ void loop()
 }
 ```
 
-##### `void writeLabel(uint8_t row, data)`
+##### `void writeLabel(uint8_t row, label)`
 Writes data to the start of the given row
 
 Returns:
@@ -125,12 +125,12 @@ void setup()
 }
 ```
 
-##### `void writeLine(uint8_t row, data)`
-##### `void write(uint8_t row, data)`
-##### `void print(uint8_t row, data)`
-Same as [writeLabel()](#void-writelabel).
+##### `void writeLine(uint8_t row, label)`
+##### `void write(uint8_t row, label)`
+##### `void print(uint8_t row, label)`
+Same as [writeLabel()](#void-writelabeluint8t-row-label).
 
-##### `void writeLabel(uint8_t row, data)`
+##### `void writeData(uint8_t row, data)`
 Writes data to the given row, after the row label
 
 Returns:

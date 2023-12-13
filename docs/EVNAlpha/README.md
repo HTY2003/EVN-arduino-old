@@ -14,11 +14,11 @@ Note: EVN-specific peripheral libaries (e.g. EVNColourSensor) do the port select
 Note 2: for Ports 9-16, 3rd party libraries and end-user code have to use Wire1 to interface with their sensors, as these ports are on the I2C1 bus.
 
 ## List of Functions
-- [Constructor](#evnalpha)
+- [Constructor](#constructor)
 - [begin()](#void-begin)
 - [buttonRead()](#bool-buttonread)
-- [ledWrite()](#void-ledwrite)
-- [setPort()](#void-setport)
+- [ledWrite()](#void-ledwritebool-state)
+- [setPort()](#void-setportuint8t-port)
 - [getPort()](#uint8t-getport)
 
 ## Constructor

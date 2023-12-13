@@ -11,12 +11,12 @@ Note 2: A gearmotor and a LEGO motor should not be simultaneously plugged into t
 Note 3: By default, EVNMotor objects will not run the motor until the user button is pressed. See EVNAlpha's README for more info.
 
 ## List of Functions
-- [Constructor](#evnmotor)
+- [Constructor](#constructor)
 - [begin()](#void-begin)
-- [writePWM()](#void-writepwm)
-- [runSpeed()](#void-runspeed)
-- [runDegrees()](#void-rundegrees)
-- [runTime()](#void-runtime)
+- [writePWM()](#void-writepwmdouble-pwm)
+- [runSpeed()](#void-runspeeddouble-rpm)
+- [runDegrees()](#void-rundegreesdouble-rpm-double-degrees-uint8t-stopaction-stopbrake-bool-wait-true)
+- [runTime()](#void-runtimedouble-rpm-double-timems-uint8t-stopaction-stopbrake-bool-wait-true)
 - [brake()](#void-brake)
 - [coast()](#void-coast)
 - [hold()](#void-hold)
@@ -96,8 +96,8 @@ Arguments:
 * degrees: desired rotation of motor from current position (in degrees). To run in the opposite direction, use negative values
 * stop_action: behaviour upon reaching desired position.
     * `STOP_BRAKE` (default, same behaviour as [brake()](#void-brake))
-    * `STOP_COAST` (default, same behaviour as [coast()](#void-coast))
-    * `STOP_HOLD` (default, same behaviour as [hold()](#void-hold))
+    * `STOP_COAST` (same behaviour as [coast()](#void-coast))
+    * `STOP_HOLD` (same behaviour as [hold()](#void-hold))
 * wait: whether program will wait for motor to complete its command (true), or proceed without waiting (false)
 
 Example:
@@ -119,8 +119,8 @@ Arguments:
 * time_ms: desired duration to run motor (in milliseconds)
 * stop_action: behaviour after running for desired duration.
     * `STOP_BRAKE` (default, same behaviour as [brake()](#void-brake))
-    * `STOP_COAST` (default, same behaviour as [coast()](#void-coast))
-    * `STOP_HOLD` (default, same behaviour as [hold()](#void-hold))
+    * `STOP_COAST` (same behaviour as [coast()](#void-coast))
+    * `STOP_HOLD` (same behaviour as [hold()](#void-hold))
 * wait: whether program will wait for motor to complete its command (true), or proceed without waiting (false)
 
 Example:
