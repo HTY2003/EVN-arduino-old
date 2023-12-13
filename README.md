@@ -74,7 +74,6 @@ void setup()
 void setup1()
 {
     //initializing motors on second core improves performance, if the 2nd core is not in use
-
     //however, motors can still be initialized on 1st core
     motora.begin(); 
     motorb.begin();
@@ -84,3 +83,4 @@ void setup1()
 ```
 
 Detailed functions of each class will be outlined in its own README in the `/docs` folder.
+Examples of each class will be shown in the `/examples` folder.

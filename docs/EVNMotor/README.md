@@ -1,17 +1,45 @@
 # EVNMotor
 EVNMotor is a class used to interface EVN Alpha with LEGO EV3 and NXT motors, as well as gearmotors plugged into the 6-pin headers.
 
+## Some Technical Details
+EVNMotor uses timer-generated interrupts from the [RPi_PICO_TimerInterrupt](https://github.com/khoih-prog/RPI_PICO_TimerInterrupt) library to achieve consistent PID speed and position control. This means that when the motor is set to run at 30RPM, it will attempt to maintain speed regardless of the load on the motor. Using these functions, we have tried to replicate most of the standard functions EV3 users will be familiar with. We have provided PID presets for NXT Large Motors, EV3 Medium Motors and EV3 Large Motors, but the user may edit them if they wish to.
+
+Note: for gearmotors plugged into the 6-pin headers, users will have to set additional parameters in `src/evn_motor_pids.h`, such as the rated RPM and PPR (pulses per revolution of their encoders).
+
+Note 2: A gearmotor and a LEGO motor should not be simultaneously plugged into the same motor port, as the 6-pin headers are mapped to the LEGO ports.
+
+Note 3: By default, EVNMotor objects will not run the motor until the user button is pressed. See EVNAlpha's README for more info.
+
+## List of Functions
+- [Constructor](#evnmotor)
+- [begin()](#void-begin)
+- [writePWM()](#void-writepwm)
+- [runSpeed()](#void-runspeed)
+- [runDegrees()](#void-rundegrees)
+- [runTime()](#void-runtime)
+- [brake()](#void-brake)
+- [coast()](#void-coast)
+- [hold()](#void-hold)
+
 ## Constructor
 `EVNMotor(uint8_t port, uint8_t motortype = EV3_LARGE, uint8_t motor_dir = DIRECT, uint8_t enc_dir = DIRECT)`
 
 Arguments:
 * port: integer from 1-4 indicating which port the motor is connected to
 
-* motortype: `EV3_LARGE` (default, EV3 Large Motor), `EV3_MED`(EV3 Medium Motor), `NXT_LARGE`(NXT Large Motor), or `CUSTOM_MOTOR` (Custom Motor)
+* motortype:
+    * `EV3_LARGE` (default, EV3 Large Motor)
+    * `EV3_MED`(EV3 Medium Motor)
+    * `NXT_LARGE`(NXT Large Motor)
+    * `CUSTOM_MOTOR` (Custom Motor)
 
-* motor_dir: `DIRECT` (default) or `REVERSE`. `REVERSE` swaps the 2 motor pins and 2 encoder pins to change motor direction
+* motor_dir: 
+    * `DIRECT` (default)
+    * `REVERSE` (swaps the 2 motor pins and 2 encoder pins to flip motor direction)
 
-* enc_dir: `DIRECT` (default) or `REVERSE`. `REVERSE` swaps the 2 encoder pins to change encoder direction. Unnecessary for LEGO gearmotors, but may be useful for gearmotors increasing PWM values leads to negative RPM with default settings.
+* enc_dir:
+    * `DIRECT` (default)
+    * `REVERSE` (only swaps the 2 encoder pins to change encoder direction, unnecessary for LEGO gearmotors)
 
 Example:
 ```
@@ -23,7 +51,7 @@ EVNMotor motord(4, CUSTOM_MOTOR, DIRECT, REVERSE);
 
 ## Functions
 ##### `void begin()`
-Initializes motor hardware for position + speed measurement, and speed control (below functions).
+Initializes motor hardware. This function can be run in `void setup()` but it should be run in `void setup1()` for better performance.
 
 Example:
 ```
@@ -33,8 +61,21 @@ void setup1()
 }
 ```
 
+#### `void writePWM(double pwm)`
+Writes PWM value to motor. With this command, the motor's speed is not regulated using PID.
 
-### Movement
+Arguments:
+* pwm: floating point value from -1 to 1. To run in opposite direction, use negative values.
+
+Example:
+```
+void loop()
+{
+    motor.writePWM(0.5);
+    //...
+}
+```
+
 ##### `void runSpeed(double rpm)`
 Sets motor to run at desired revolutions per minute (RPM) indefinitely, until next command is given.
 
@@ -50,10 +91,13 @@ void loop()
 }
 ```
 
-##### `void runDegrees(double degrees, uint8_t stop_action = STOP_BRAKE, bool wait = true)`
+##### `void runDegrees(double rpm, double degrees, uint8_t stop_action = STOP_BRAKE, bool wait = true)`
 Arguments:
 * degrees: desired rotation of motor from current position (in degrees). To run in the opposite direction, use negative values
-* stop_action:  `STOP_BRAKE` (default), `STOP_COAST`, or `STOP_HOLD`
+* stop_action: behaviour upon reaching desired position.
+    * `STOP_BRAKE` (default, same behaviour as [brake()](#void-brake))
+    * `STOP_COAST` (default, same behaviour as [coast()](#void-coast))
+    * `STOP_HOLD` (default, same behaviour as [hold()](#void-hold))
 * wait: whether program will wait for motor to complete its command (true), or proceed without waiting (false)
 
 Example:
@@ -72,8 +116,11 @@ void loop()
 ##### `void runTime(double rpm, double time_ms, uint8_t stop_action = STOP_BRAKE, bool wait = true)`
 Arguments:
 * rpm: desired rotation of motor from current position (in degrees). To run in opposite direction, use negative values
-* time_ms: desired length of time to run motor (in milliseconds)
-* stop_action:  `STOP_BRAKE` (default), `STOP_COAST`, or `STOP_HOLD`
+* time_ms: desired duration to run motor (in milliseconds)
+* stop_action: behaviour after running for desired duration.
+    * `STOP_BRAKE` (default, same behaviour as [brake()](#void-brake))
+    * `STOP_COAST` (default, same behaviour as [coast()](#void-coast))
+    * `STOP_HOLD` (default, same behaviour as [hold()](#void-hold))
 * wait: whether program will wait for motor to complete its command (true), or proceed without waiting (false)
 
 Example:
