@@ -13,6 +13,8 @@ Note 3: By default, EVNMotor objects will not run the motor until the user butto
 ## List of Functions
 - [Constructor](#constructor)
 - [begin()](#void-begin)
+- [getRPM()](#void-getrpm)
+- [getPos()](#void-getpos)
 - [writePWM()](#void-writepwmdouble-pwm)
 - [runSpeed()](#void-runspeeddouble-rpm)
 - [runDegrees()](#void-rundegreesdouble-rpm-double-degrees-uint8t-stopaction--stopbrake-bool-wait--true)
@@ -60,6 +62,36 @@ void setup1()
     motor.begin();
 }
 ```
+
+#### `double getRPM()`
+Returns signed velocity of motor in revolutions per minute (RPM).
+
+Returns:
+* velocity of motor in RPM
+
+Example:
+```
+void loop()
+{
+    double vel = motor.getRPM();
+}
+```
+
+
+#### `double getPos()`
+Returns absolute position of motor in degrees, to a resolution of 0.5deg.
+
+Returns:
+* absolute position of motor in degrees
+
+Example:
+```
+void loop()
+{
+    double position = motor.getPos();
+}
+```
+
 
 #### `void writePWM(double pwm)`
 Writes PWM value to motor. With this command, the motor's speed is not regulated using PID.
