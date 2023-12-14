@@ -91,7 +91,7 @@ public:
 	void begin();
 	void writePWM(double speed); // Directly write speed (-1 to 1) as PWM value to motor
 	double getPos();			  // Return absolute position in degrees
-	void resetPos();			  // Set current position as 0 deg
+	// void resetPos();			  // Set current position as 0 deg
 	double getRPM();			  // Return velocity in RPM rotations per minute
 
 	bool commandFinished();

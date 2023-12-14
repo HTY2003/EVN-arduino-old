@@ -131,10 +131,11 @@ double EVNMotor::getPos()
 	return (double)encoder.position / 2;
 }
 
-void EVNMotor::resetPos()
-{
-	encoder.position = 0;
-}
+//TODO: Do resetPos properly using offset
+// void EVNMotor::resetPos()
+// {
+// 	encoder.position = 0;
+// }
 
 double EVNMotor::getRPM()
 {
