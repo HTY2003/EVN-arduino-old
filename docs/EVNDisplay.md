@@ -11,7 +11,7 @@ EVNDisplay is a wrapper library for u8x8 from [u8g2](https://github.com/olikraus
 This library attempts to address both problems by focusing on using the display for data logging. The functions below allow the user to print to 1 of 8 rows. They can print a row label once in `void setup()`, which appears at the start of the row. In `void loop`, they can print data which appears after the row label. By only refreshing pixels after the row label, time is saved for other timing-critical functions in the loop.
 
 
-Note: EVNDisplay does the port selection and deselection automatically, so users do not need to call `setPort()` on their `EVNAlpha` objects.
+Note: EVNDisplay does port selection and deselection automatically, so users do not need to call `setPort()` on their `EVNAlpha` objects.
 
 
 ## List of Functions
@@ -25,9 +25,10 @@ Note: EVNDisplay does the port selection and deselection automatically, so users
 - [writeData()](#void-writedatauint8t-row-data)
 
 ## Constructor
-##### `EVNDisplay(rotate = DISPLAY_0DEG)`
+##### `EVNDisplay(port, rotate = DISPLAY_0DEG)`
 
 Arguments:
+* port: the I2C port the display is connected to (1-16, left to right)
 * rotate:
     * `DISPLAY_0DEG` (default, text is displayed in the same orientation as the connector labels)
     * `DISPLAY_180DEG` (display is rotated by 180deg)
