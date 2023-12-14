@@ -35,11 +35,11 @@ Arguments:
 
 Example:
 ```
-EVNDisplay display;
+EVNDisplay display(5);
 ```
 Another example:
 ```
-EVNDisplay display(DISPLAY_180DEG);
+EVNDisplay display(5, DISPLAY_180DEG);
 ```
 
 ## Functions
