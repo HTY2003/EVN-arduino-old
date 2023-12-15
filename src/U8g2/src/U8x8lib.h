@@ -39,7 +39,9 @@
 #ifndef U8X8LIB_HH
 #define U8X8LIB_HH
 
+//below 2 lines added for EVN Library
 #define WIRE_INTERFACES_COUNT 2
+#define U8X8_NO_HW_SPI
 
 #ifdef ARDUINO
 #include <Arduino.h>
@@ -282,7 +284,8 @@ bool begin(uint8_t menu_select_pin, uint8_t menu_next_pin, uint8_t menu_prev_pin
   setMenuUpPin(menu_up_pin);
   setMenuDownPin(menu_down_pin);
   setMenuHomePin(menu_home_pin);
-  return begin(); }
+  return begin();
+ }
 #endif
 
     void setFlipMode(uint8_t mode) {
