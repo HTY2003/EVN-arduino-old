@@ -126,16 +126,16 @@ void EVNMotor::writePWM(double speed)
 	writePWM_static(_motora, _motorb, speed);
 }
 
+//TODO: make position readout proper for custom motors
 double EVNMotor::getPos()
 {
-	return (double)encoder.position / 2;
+	return getAbsPos_static(&encoder) - _position_offset;
 }
 
-//TODO: Do resetPos properly using offset
-// void EVNMotor::resetPos()
-// {
-// 	encoder.position = 0;
-// }
+void EVNMotor::resetPos()
+{
+	_position_offset = getAbsPos_static(&encoder);
+}
 
 double EVNMotor::getRPM()
 {
@@ -168,6 +168,12 @@ void EVNMotor::runSpeed(double rpm)
 	pos_pid.hold = false;
 }
 
+void EVNMotor::runPosition(double rpm, double position, uint8_t stop_action, bool wait)
+{
+	double degrees = position - this->getPos();
+	this->runDegrees(rpm, degrees, stop_action, wait);
+}
+
 void EVNMotor::runDegrees(double rpm, double degrees, uint8_t stop_action, bool wait)
 {
 	uint8_t stop_actionc = min(3, stop_action);
@@ -182,7 +188,7 @@ void EVNMotor::runDegrees(double rpm, double degrees, uint8_t stop_action, bool 
 
 	pos_pid.x0 = this->getPos();
 	pos_pid.start = millis();
-	pos_pid.xdminusx0 = degrees;
+	pos_pid.xdminusx0 = degreesc;
 	pos_pid.targetrpm = rpmc;
 	pos_pid.stop_action = stop_actionc;
 

@@ -1,8 +1,8 @@
 #ifndef EVNISRTimer_h
 #define EVNISRTimer_h
 #include <Arduino.h>
-#include "RPi_Pico_TimerInterrupt.h"
-#include "RPi_Pico_ISR_Timer.hpp"
+#include "RPI_PICO_TimerInterrupt/src/RPi_Pico_TimerInterrupt.h"
+#include "RPI_PICO_TimerInterrupt/src/RPi_Pico_ISR_Timer.hpp"
 
 #define HW_TIMER_INTERVAL_MS    1
 

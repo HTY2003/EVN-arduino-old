@@ -4,8 +4,6 @@
 #include <Arduino.h>
 #include "EVNAlpha.h"
 #include "EVNISRTimer.h"
-#include "RPi_Pico_TimerInterrupt.h"
-#include "RPi_Pico_ISR_Timer.hpp"
 #include "PIDController.h"
 #include "pins_evn_alpha.h"
 #include "evn_motor_pid.h"
@@ -91,7 +89,7 @@ public:
 	void begin();
 	void writePWM(double speed); // Directly write speed (-1 to 1) as PWM value to motor
 	double getPos();			  // Return absolute position in degrees
-	// void resetPos();			  // Set current position as 0 deg
+	void resetPos();			  // Set current position as 0 deg
 	double getRPM();			  // Return velocity in RPM rotations per minute
 
 	bool commandFinished();
@@ -99,7 +97,8 @@ public:
 	double debugSpeedPID();
 	double debugPositionPID();
 
-	void runSpeed(double rpm);																	// Set motor to run at desired RPM
+	void runSpeed(double rpm); // Set motor to run at desired RPM
+	void runPosition(double rpm, double degrees, uint8_t stop_action = STOP_BRAKE, bool wait = true); // Set motor to run to absolute position
 	void runDegrees(double rpm, double degrees, uint8_t stop_action = STOP_BRAKE, bool wait = true); // Set motor to run desired angular displacement (in degrees)
 	void runTime(double rpm, uint32_t time_ms, uint8_t stop_action = STOP_BRAKE, bool wait = true);
 	void brake();
@@ -110,6 +109,8 @@ private:
 	bool _started = false;
 	uint8_t _motora, _motorb, _enca, _encb, _motortype, _maxrpm;
 	uint32_t lastcommand_ms;
+	double _position_offset = 0;
+
 	speed_pid_t speed_pid;
 	position_pid_t pos_pid;
 	time_pid_t time_pid;
@@ -143,7 +144,7 @@ public:
 				pulsetimings += end - start;
 			}
 			arg->avgpulsetiming = pulsetimings / (NO_OF_PULSES_TIMED - 1);
-			arg->rpm = (1000000 / arg->avgpulsetiming) / (arg->ppr / 2) * 60 * arg->dir;
+			arg->rpm = (1000000 / arg->avgpulsetiming) / arg->ppr * 60 * arg->dir;
 		}
 	}
 
@@ -233,6 +234,12 @@ public:
 		}
 	}
 
+	static double getAbsPos_static(encoder_state_t* encoderArg)
+	{
+		//resolution of encoder readout is in CPR (4 * PPR)
+		return (double)encoderArg->position / 4 * 360 / encoderArg->ppr;
+	}
+
 	static double getRPM_static(encoder_state_t* encoderArg)
 	{
 		uint64_t currenttime = micros();
@@ -245,7 +252,7 @@ public:
 		{
 			// double avgpulsetiming = (encoderArg->avgpulsetiming * NO_OF_PULSES_TIMED + lastpulsetiming) / (NO_OF_PULSES_TIMED + 1);
 			double avgpulsetiming = lastpulsetiming;
-			double rpm = (1000000 / avgpulsetiming) / (encoderArg->ppr / 2) * 60 * encoderArg->dir;
+			double rpm = (1000000 / avgpulsetiming) / encoderArg->ppr * 60 * encoderArg->dir;
 			return rpm;
 		}
 		else
@@ -269,7 +276,7 @@ public:
 
 			if ((posArg->running || posArg->hold) && posArg->flip)
 			{
-				if (posArg->running && (fabs(posArg->x0 + posArg->xdminusx0 - ((double)encoderArg->position) / 2) <= 0.5))
+				if (posArg->running && (fabs(posArg->x0 + posArg->xdminusx0 - getAbsPos_static(encoderArg)) <= 0.5))
 				{
 					stopAction_static(speedArg->motora, speedArg->motorb, posArg, encoderArg);
 					posArg->running = false;
@@ -288,7 +295,7 @@ public:
 						- 15 * pow(t / T, 4)
 						+ 6 * pow(t / T, 5));
 
-				posArg->error = (posArg->targetpos - ((double)encoderArg->position) / 2) / 360;
+				posArg->error = (posArg->targetpos - getAbsPos_static(encoderArg)) / 360;
 				posArg->output = posArg->pid->compute(posArg->error);
 
 				speedArg->targetrpm = posArg->output * speedArg->maxrpm;
