@@ -5,9 +5,10 @@
 #include "EVNMotor.h"
 #include "EVNDisplay.h"
 #include "EVNColourSensor.h"
-#include "EVNMagSensor.h"
+#include "EVNCompassSensor.h"
+#include "EVNDistanceSensor.h"
 #include "PIDController.h"
-#include "RPi_Pico_ISR_Timer.h"
+#include "RPI_PICO_TimerInterrupt/src/RPi_Pico_ISR_Timer.h"
 
 #define calibrate(reading, low, high) ((reading - low) / (high - low))
 
