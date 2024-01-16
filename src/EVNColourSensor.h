@@ -17,6 +17,7 @@ public:
     static const uint8_t I2C_ADDR = 0x29;
     static const uint8_t ID_REG_PART_NUMBER = 0x44;
     static const uint8_t ALT_ID_REG_PART_NUMBER = 0x4D;
+    static const uint8_t TCS34725_COMMAND_BIT = 0x80;
 
     enum class reg : uint8_t
     {
@@ -61,29 +62,29 @@ public:
     void setGain(uint8_t gain)
     {
         _gain = constrain(gain, 0, 3);
-        write8(I2C_ADDR, (uint8_t)reg::CONTROL, _gain);
+        write8(I2C_ADDR, TCS34725_COMMAND_BIT | (uint8_t)reg::CONTROL, _gain);
     };
 
     void setIntegrationCycles(uint8_t integration_cycles)
     {
         _int_cycles = constrain(integration_cycles, 1, 255);
-        write8(I2C_ADDR, (uint8_t)reg::ATIME, (uint8_t)(255 - (_int_cycles - 1)));
+        write8(I2C_ADDR, TCS34725_COMMAND_BIT | (uint8_t)reg::ATIME, (uint8_t)(255 - (_int_cycles - 1)));
         _int_time_ms = _int_cycles * 2.4;
     };
 
     bool begin()
     {
-        this->beginPortSelector();
+        EVNAlpha::sharedPorts().begin();
 
-        uint8_t id = read8(I2C_ADDR, (uint8_t)reg::ID);
+        uint8_t id = read8(I2C_ADDR, TCS34725_COMMAND_BIT | (uint8_t)reg::ID);
         if (id != ID_REG_PART_NUMBER && id != ALT_ID_REG_PART_NUMBER) return false;
 
         this->setIntegrationCycles(_int_cycles);
         this->setGain(_gain);
 
-        write8(I2C_ADDR, (uint8_t)reg::ENABLE, (uint8_t)mask::ENABLE_PON);
+        write8(I2C_ADDR, TCS34725_COMMAND_BIT | (uint8_t)reg::ENABLE, (uint8_t)mask::ENABLE_PON);
         delay(3);
-        write8(I2C_ADDR, (uint8_t)reg::ENABLE, (uint8_t)mask::ENABLE_PON | (uint8_t)mask::ENABLE_AEN);
+        write8(I2C_ADDR, TCS34725_COMMAND_BIT | (uint8_t)reg::ENABLE, (uint8_t)mask::ENABLE_PON | (uint8_t)mask::ENABLE_AEN);
 
         return true;
     };
@@ -120,7 +121,7 @@ public:
     {
         if ((micros() - _r_time_us) > _int_time_ms * 1000)
         {
-            _r = read16(I2C_ADDR, (uint8_t)reg::RDATAL);
+            _r = read16(I2C_ADDR, TCS34725_COMMAND_BIT | (uint8_t)reg::RDATAL);
             _r_time_us = micros();
         }
         return _r;
@@ -129,7 +130,7 @@ public:
     {
         if ((micros() - _g_time_us) > _int_time_ms * 1000)
         {
-            _g = read16(I2C_ADDR, (uint8_t)reg::GDATAL);
+            _g = read16(I2C_ADDR, TCS34725_COMMAND_BIT | (uint8_t)reg::GDATAL);
             _g_time_us = micros();
         }
         return _g;
@@ -138,7 +139,7 @@ public:
     {
         if ((micros() - _b_time_us) > _int_time_ms * 1000)
         {
-            _b = read16(I2C_ADDR, (uint8_t)reg::BDATAL);
+            _b = read16(I2C_ADDR, TCS34725_COMMAND_BIT | (uint8_t)reg::BDATAL);
             _b_time_us = micros();
         }
         return _b;
@@ -147,7 +148,7 @@ public:
     {
         if ((micros() - _c_time_us) > _int_time_ms * 1000)
         {
-            _c = read16(I2C_ADDR, (uint8_t)reg::CDATAL);
+            _c = read16(I2C_ADDR, TCS34725_COMMAND_BIT | (uint8_t)reg::CDATAL);
             _c_time_us = micros();
         }
         return _c;

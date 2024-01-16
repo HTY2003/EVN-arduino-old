@@ -7,8 +7,6 @@
 
 class EVNSensor {
 
-    static const uint8_t COMMAND_BIT = 0x80;
-
 public:
     EVNSensor(uint8_t port)
     {
@@ -19,41 +17,38 @@ public:
             _wire = &Wire1;
     };
 
-    void beginPortSelector()
-    {
-        EVNAlpha::sharedPorts().begin();
-    };
-
-    void write8(uint8_t addr, uint8_t reg, uint8_t value)
+    void write8(uint8_t addr, uint8_t reg, uint8_t value, bool control_port = true)
     {
         uint8_t prev_port = EVNAlpha::sharedPorts().getPort();
-        EVNAlpha::sharedPorts().setPort(_port);
+        if (control_port) { EVNAlpha::sharedPorts().setPort(_port); }
         _wire->beginTransmission(addr);
-        _wire->write(COMMAND_BIT | reg);
+        _wire->write(reg);
         _wire->write(value);
         _wire->endTransmission();
-        EVNAlpha::sharedPorts().setPort(prev_port);
+        if (control_port) EVNAlpha::sharedPorts().setPort(prev_port);
     };
 
-    uint8_t read8(uint8_t addr, uint8_t reg)
+    uint8_t read8(uint8_t addr, uint8_t reg, bool control_port = true)
     {
         uint8_t prev_port = EVNAlpha::sharedPorts().getPort();
-        EVNAlpha::sharedPorts().setPort(_port);
+        if (control_port) { EVNAlpha::sharedPorts().setPort(_port); }
+
         _wire->beginTransmission(addr);
-        _wire->write(COMMAND_BIT | reg);
+        _wire->write(reg);
         _wire->endTransmission();
         _wire->requestFrom(addr, (uint8_t)1);
         uint8_t out = _wire->read();
-        EVNAlpha::sharedPorts().setPort(prev_port);
+        if (control_port) EVNAlpha::sharedPorts().setPort(prev_port);
         return out;
     };
-    uint16_t read16(uint8_t addr, uint8_t reg, bool lsb_start = true)
+    uint16_t read16(uint8_t addr, uint8_t reg, bool lsb_start = true, bool control_port = true)
     {
         uint8_t prev_port = EVNAlpha::sharedPorts().getPort();
-        EVNAlpha::sharedPorts().setPort(_port);
+        if (control_port) { EVNAlpha::sharedPorts().setPort(_port); }
+
         uint16_t high, low;
         _wire->beginTransmission(addr);
-        _wire->write(COMMAND_BIT | reg);
+        _wire->write(reg);
         _wire->endTransmission();
         _wire->requestFrom(addr, (uint8_t)2);
 
@@ -69,11 +64,11 @@ public:
         }
         high <<= 8;
         high |= low;
-        EVNAlpha::sharedPorts().setPort(prev_port);
         return high;
+        if (control_port) EVNAlpha::sharedPorts().setPort(prev_port);
     };
 
-private:
+protected:
     uint8_t _port;
     TwoWire* _wire;
 };
