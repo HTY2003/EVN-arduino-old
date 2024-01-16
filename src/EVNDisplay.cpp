@@ -12,13 +12,20 @@ EVNDisplay::EVNDisplay(uint8_t port, bool rotate)
     _rotate = rotate;
 }
 
-void EVNDisplay::begin()
+bool EVNDisplay::begin()
 {
+    EVNAlpha::sharedPorts().begin();
+
     uint8_t prev_port = EVNAlpha::sharedPorts().getPort();
     EVNAlpha::sharedPorts().setPort(_port);
 
     //init, set font, wipe prev display
-    _display8x8->begin();
+    if (_display8x8->begin())
+    {
+        EVNAlpha::sharedPorts().setPort(prev_port);
+        return false;
+    }
+
     _display8x8->setFont(u8x8_font_pxplusibmcgathin_f);
     this->clear();
 
@@ -29,6 +36,7 @@ void EVNDisplay::begin()
     }
 
     EVNAlpha::sharedPorts().setPort(prev_port);
+    return true;
 }
 
 void EVNDisplay::clear()

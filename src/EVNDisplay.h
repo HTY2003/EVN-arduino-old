@@ -19,7 +19,7 @@ class EVNDisplay
 {
 public:
   EVNDisplay(uint8_t port, bool rotate = DISPLAY_0DEG);
-  void begin();
+  bool begin();
   void splashEVN();
   void rotate();
   void clear();
