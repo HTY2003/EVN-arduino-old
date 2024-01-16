@@ -13,9 +13,9 @@ Note: EVNColourSensor does port selection and deselection automatically, so user
 
 ## List of Functions
 - [Constructor](#constructor)
-- [begin()](#void-begin)
-- [setIntegrationCycles()](#void-setintegrationcycles)
-- [setGain()](#void-setgain)
+- [begin()](#bool-begin)
+- [setIntegrationCycles()](#void-setintegrationcyclesuint8t-integrationcycles)
+- [setGain()](#void-setgainuint8t-gain)
 - [setRedRange()](#void-setredrangeuint16t-low-uint16t-high)
 - [setGreenRange()](#void-setgreenrangeuint16t-low-uint16t-high)
 - [setBlueRange()](#void-setbluerangeuint16t-low-uint16t-high)
@@ -51,8 +51,11 @@ EVNColourSensor cs(5, 10, GAIN_1X); //24ms integration time, 1x gain
 ```
 
 ## Functions
-##### `void begin()`
+##### `bool begin()`
 Initializes colour sensor to start running in continuous mode.
+
+Returns:
+* `true` if successfully detected and initialized, `false` otherwise
 
 Example:
 ```

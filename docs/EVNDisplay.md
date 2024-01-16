@@ -16,7 +16,7 @@ Note: EVNDisplay does port selection and deselection automatically, so users do 
 
 ## List of Functions
 - [Constructor](#constructor)
-- [begin()](#void-begin)
+- [begin()](#bool-begin)
 - [rotate()](#void-rotate)
 - [splashEVN()](#void-splashevn)
 - [clear()](#void-clear)
@@ -43,8 +43,11 @@ EVNDisplay display(5, DISPLAY_180DEG);
 ```
 
 ## Functions
-##### `void begin()`
+##### `bool begin()`
 Initializes display and clears any on-screen data from a previous program.
+
+Returns:
+* `true` if successfully detected and initialized, `false` otherwise
 
 Example:
 ```
