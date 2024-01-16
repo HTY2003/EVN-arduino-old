@@ -12,3 +12,14 @@
 - Dependencies added (will be removed when published on Arduino's Library Manager)
 - Fixed bug with EVNPortSelector, where port 1 should be selected at startup, but no "select port 1" I2C commands were actually sent.
 - Rectified some math in EVNMotor such that any variables labelled PPR (pulse per revolution) actually reflect real-world motor encoder PPR
+
+
+
+0.6.1 (17/1/24)
+- Put changelog in correct folder
+
+-- Features -- 
+- Modified settings for VL53L0X for greater range (1.8m)
+
+-- Bugfixes --
+- Fixed bug to allow for EVNDistanceSensor to work on I2C ports 9-16

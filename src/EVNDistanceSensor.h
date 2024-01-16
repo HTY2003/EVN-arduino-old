@@ -18,17 +18,24 @@ public:
 
     bool begin()
     {
+        if (_port > 8)
+            sensor.setBus(&Wire1);
+
         EVNAlpha::sharedPorts().begin();
 
         uint8_t prev_port = EVNAlpha::sharedPorts().getPort();
         EVNAlpha::sharedPorts().setPort(_port);
 
-        sensor.setTimeout(500);
+        sensor.setTimeout(0);
         if (!sensor.init())
         {
             EVNAlpha::sharedPorts().setPort(prev_port);
             return false;
         }
+
+        sensor.setSignalRateLimit(0.15);
+        sensor.setVcselPulsePeriod(VL53L0X::VcselPeriodPreRange, 18);
+        sensor.setVcselPulsePeriod(VL53L0X::VcselPeriodFinalRange, 12);
 
         sensor.startContinuous(_timing_budget_ms);
         EVNAlpha::sharedPorts().setPort(prev_port);
