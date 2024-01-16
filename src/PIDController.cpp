@@ -40,17 +40,22 @@ double PIDController::getKd()
 
 double PIDController::compute(double error)
 {
+	//constain input
 	double errorc = constrain(error, -1, 1);
+
+	//calculate output value
 	_preverror = _error;
 	_error = errorc;
 	_summederror += errorc;
-
 	_output = _kp * _error + _kd * (_error - _preverror) + _ki * _summederror;
+
+	//flip value if needed
 	if (_dir == REVERSE)
-	{
-		_output = -_output;
-	}
+		_output *= -1;
+
+	//constrain output
 	_output = constrain(_output, -1, 1);
+
 	return _output;
 }
 
