@@ -13,6 +13,17 @@ void EVNPortSelector::begin()
 		Wire1.begin();
 		Serial.begin();
 		_started = true;
+
+		Wire1.beginTransmission(TCAADDR);
+		Wire1.write(1 << 0);
+		Wire1.endTransmission();
+		_wire1SensorPort = 9;
+
+		Wire.beginTransmission(TCAADDR);
+		Wire.write(1 << 0);
+		Wire.endTransmission();
+		_wire0SensorPort = 1;
+		_port = 1;
 	}
 }
 
