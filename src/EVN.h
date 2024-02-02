@@ -7,6 +7,7 @@
 #include "EVNColourSensor.h"
 #include "EVNCompassSensor.h"
 #include "EVNDistanceSensor.h"
+#include "EVNBluetooth.h"
 #include "PIDController.h"
 
 #endif

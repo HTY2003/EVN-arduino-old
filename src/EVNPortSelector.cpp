@@ -1,30 +1,29 @@
 #include "EVNPortSelector.h"
 
-EVNPortSelector::EVNPortSelector(uint16_t i2c_freq)
+EVNPortSelector::EVNPortSelector(uint32_t i2c_freq)
 {
 	_i2c_freq = i2c_freq;
 }
 
 void EVNPortSelector::begin()
 {
-	if (!_started)
-	{
-		Wire.begin();
-		Wire1.begin();
-		Serial.begin();
-		_started = true;
+	Wire.begin();
+	Wire1.begin();
+	Serial.begin();
 
-		Wire1.beginTransmission(TCAADDR);
-		Wire1.write(1 << 0);
-		Wire1.endTransmission();
-		_wire1SensorPort = 9;
+	Wire.setClock(_i2c_freq);
+	Wire1.setClock(_i2c_freq);
 
-		Wire.beginTransmission(TCAADDR);
-		Wire.write(1 << 0);
-		Wire.endTransmission();
-		_wire0SensorPort = 1;
-		_port = 1;
-	}
+	Wire1.beginTransmission(I2C_ADDR);
+	Wire1.write(1 << 0);
+	Wire1.endTransmission();
+	_wire1_port = 9;
+
+	Wire.beginTransmission(I2C_ADDR);
+	Wire.write(1 << 0);
+	Wire.endTransmission();
+	_wire0_port = 1;
+	_port = 1;
 }
 
 void EVNPortSelector::printPorts()
@@ -38,7 +37,7 @@ void EVNPortSelector::printPorts()
 
 		for (uint8_t addr = 0; addr <= 127; addr++)
 		{
-			if (addr == TCAADDR)
+			if (addr == I2C_ADDR)
 				continue;
 			Wire.beginTransmission(addr);
 			if (!Wire.endTransmission())
@@ -59,7 +58,7 @@ void EVNPortSelector::printPorts()
 
 		for (uint8_t addr = 0; addr <= 127; addr++)
 		{
-			if (addr == TCAADDR)
+			if (addr == I2C_ADDR)
 				continue;
 			Wire1.beginTransmission(addr);
 			if (!Wire1.endTransmission())
@@ -78,26 +77,35 @@ void EVNPortSelector::setPort(uint8_t port)
 
 	if (portc != _port)
 	{
-		if (portc <= 8)
+		if (portc <= 8 && _wire0_port != portc)
 		{
-			Wire.beginTransmission(TCAADDR);
+			Wire.beginTransmission(I2C_ADDR);
 			Wire.write(1 << (portc - 1));
 			Wire.endTransmission();
-			_wire0SensorPort = portc;
-			_port = portc;
+			_wire0_port = portc;
 		}
-		else
+		else if (portc > 8 && _wire1_port != portc)
 		{
-			Wire1.beginTransmission(TCAADDR);
+			Wire1.beginTransmission(I2C_ADDR);
 			Wire1.write(1 << (portc - 9));
 			Wire1.endTransmission();
-			_wire1SensorPort = portc;
-			_port = portc;
+			_wire1_port = portc;
 		}
+		_port = portc;
 	}
 }
 
 uint8_t EVNPortSelector::getPort()
 {
 	return _port;
+}
+
+uint8_t EVNPortSelector::getWire0Port()
+{
+	return _wire0_port;
+}
+
+uint8_t EVNPortSelector::getWire1Port()
+{
+	return _wire1_port;
 }

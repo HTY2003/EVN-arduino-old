@@ -20,7 +20,7 @@ bool EVNDisplay::begin()
     EVNAlpha::sharedPorts().setPort(_port);
 
     //init, set font, wipe prev display
-    if (_display8x8->begin())
+    if (!_display8x8->begin())
     {
         EVNAlpha::sharedPorts().setPort(prev_port);
         return false;
@@ -50,6 +50,7 @@ void EVNDisplay::clear()
     for (int i = 0; i < 8; i++)
         _rownamelen[i] = 0;
 
+    _display8x8->setFlipMode(_rotate);
 
     EVNAlpha::sharedPorts().setPort(prev_port);
 }

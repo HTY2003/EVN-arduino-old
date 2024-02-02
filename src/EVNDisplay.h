@@ -6,17 +6,18 @@
 #include "EVNAlpha.h"
 #include "U8g2/src/U8x8lib.h"
 
-#define OLED_ADDR     0x3C
-#define SCREEN_HEIGHT 64
-#define SCREEN_WIDTH  128
-#define NO_OF_ROWS    (SCREEN_HEIGHT / 8)
-#define MAX_CHAR      (SCREEN_WIDTH / 8)
-
 #define DISPLAY_0DEG false
 #define DISPLAY_180DEG true
 
 class EVNDisplay
 {
+private:
+  static const uint8_t OLED_ADDR = 0x3C;
+  static const uint16_t SCREEN_HEIGHT = 64;
+  static const uint16_t SCREEN_WIDTH = 128;
+  static const uint16_t NO_OF_ROWS = (SCREEN_HEIGHT / 8);
+  static const uint16_t MAX_CHAR = (SCREEN_WIDTH / 8);
+
 public:
   EVNDisplay(uint8_t port, bool rotate = DISPLAY_0DEG);
   bool begin();
@@ -115,8 +116,6 @@ private:
   uint8_t _port;
   bool _rotate;
   U8X8* _display8x8;
-
-public:
   uint8_t _rownamelen[NO_OF_ROWS] = { 0 };
 };
 

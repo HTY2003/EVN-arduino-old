@@ -21,10 +21,12 @@ public:
     {
         uint8_t prev_port = EVNAlpha::sharedPorts().getPort();
         if (control_port) { EVNAlpha::sharedPorts().setPort(_port); }
+
         _wire->beginTransmission(addr);
         _wire->write(reg);
         _wire->write(value);
         _wire->endTransmission();
+
         if (control_port) EVNAlpha::sharedPorts().setPort(prev_port);
     };
 
@@ -38,7 +40,9 @@ public:
         _wire->endTransmission();
         _wire->requestFrom(addr, (uint8_t)1);
         uint8_t out = _wire->read();
+
         if (control_port) EVNAlpha::sharedPorts().setPort(prev_port);
+
         return out;
     };
     uint16_t read16(uint8_t addr, uint8_t reg, bool lsb_start = true, bool control_port = true)
@@ -64,8 +68,10 @@ public:
         }
         high <<= 8;
         high |= low;
-        return high;
+
         if (control_port) EVNAlpha::sharedPorts().setPort(prev_port);
+
+        return high;
     };
 
 protected:

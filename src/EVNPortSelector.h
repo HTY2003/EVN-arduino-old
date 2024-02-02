@@ -4,22 +4,23 @@
 #include <Arduino.h>
 #include <Wire.h>
 
-#define TCAADDR	0x70
-#define DEFAULT_I2C_FREQ (uint16_t)100000
+#define DEFAULT_I2C_FREQ (uint32_t)100000
 
 class EVNPortSelector
 {
 public:
-	EVNPortSelector(uint16_t i2c_freq = DEFAULT_I2C_FREQ);
+	static const uint8_t I2C_ADDR = 0x70;
+	EVNPortSelector(uint32_t i2c_freq = DEFAULT_I2C_FREQ);
 	void begin();
 	void setPort(uint8_t port);
 	uint8_t getPort();
+	uint8_t getWire0Port();
+	uint8_t getWire1Port();
 	void printPorts();
 
 private:
-	uint8_t _wire0SensorPort = 1, _wire1SensorPort = 9, _port = 1;
-	uint16_t _i2c_freq;
-	bool _started = false;
+	uint8_t _wire0_port = 1, _wire1_port = 9, _port = 1;
+	uint32_t _i2c_freq;
 };
 
 #endif
