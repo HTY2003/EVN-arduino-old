@@ -1,3 +1,5 @@
+//PIN DEFINITIONS FOR EVN ALPHA
+
 #define BUTTONPIN       24
 #define LEDPIN          25
 
@@ -9,6 +11,7 @@
 #define OUTPUT3MOTORB   22
 #define OUTPUT4MOTORA   21
 #define OUTPUT4MOTORB   20
+
 #define OUTPUT1ENCA     18
 #define OUTPUT1ENCB     19
 #define OUTPUT2ENCA     17
@@ -22,6 +25,7 @@
 #define WIRE0_SCL       5
 #define WIRE1_SDA       6
 #define WIRE1_SCL       7
+
 #define SERIAL1_RX      1
 #define SERIAL1_TX      0
 #define SERIAL2_RX      9

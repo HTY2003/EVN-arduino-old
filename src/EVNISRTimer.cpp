@@ -1,4 +1,4 @@
 #include "EVNISRTimer.h"
 
-RPI_PICO_Timer EVNISRTimer::timer(3);
-RPI_PICO_ISR_Timer EVNISRTimer::ISRtimer;
+struct repeating_timer EVNISRTimer::timers[16];
+struct alarm_pool* EVNISRTimer::pool = alarm_pool_create(0, 16);

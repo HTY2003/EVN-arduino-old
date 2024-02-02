@@ -5,9 +5,9 @@ EVNPortSelector EVNAlpha::ports(_i2c_freq);
 uint8_t EVNAlpha::_mode;
 uint8_t EVNAlpha::_linkLED;
 uint8_t EVNAlpha::_linkMotors;
-uint16_t EVNAlpha::_i2c_freq;
+uint32_t EVNAlpha::_i2c_freq;
 
-EVNAlpha::EVNAlpha(uint8_t mode, uint8_t linkLED, uint8_t linkMotors, uint16_t i2c_freq)
+EVNAlpha::EVNAlpha(uint8_t mode, uint8_t linkLED, uint8_t linkMotors, uint32_t i2c_freq)
 {
     _mode = constrain(mode, 0, 2);
     _linkLED = constrain(linkLED, 0, 1);
@@ -17,7 +17,8 @@ EVNAlpha::EVNAlpha(uint8_t mode, uint8_t linkLED, uint8_t linkMotors, uint16_t i
 
 void EVNAlpha::begin()
 {
-    pinMode(LEDPIN, OUTPUT_8MA);
+    //Set correct I2C and Serial pins
+    //TODO: To be removed after getting our board in arduino-pico core
     Wire.setSDA(WIRE0_SDA);
     Wire.setSCL(WIRE0_SCL);
     Wire1.setSDA(WIRE1_SDA);
@@ -28,6 +29,7 @@ void EVNAlpha::begin()
     Serial2.setRX(SERIAL2_RX);
     Serial2.setTX(SERIAL2_TX);
 
+    //Initialize helper objects
     ports.begin();
     button.begin();
 }

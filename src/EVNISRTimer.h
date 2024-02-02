@@ -1,27 +1,20 @@
 #ifndef EVNISRTimer_h
 #define EVNISRTimer_h
 #include <Arduino.h>
-#include "RPI_PICO_TimerInterrupt/src/RPi_Pico_TimerInterrupt.h"
-#include "RPI_PICO_TimerInterrupt/src/RPi_Pico_ISR_Timer.hpp"
-
-#define HW_TIMER_INTERVAL_MS    1
+#include <stdio.h>
+#include "pico/stdlib.h"
+#include "pico/time.h"
 
 class EVNISRTimer
 {
 public:
-    static RPI_PICO_ISR_Timer& sharedISRTimer() { static EVNISRTimer shared; return shared.ISRtimer; }
+    EVNISRTimer() {};
+    static repeating_timer& sharedISRTimer(uint8_t timer_no) { static EVNISRTimer shared; return shared.timers[timer_no]; }
+    static alarm_pool* sharedAlarmPool() { static EVNISRTimer shared; return shared.pool; }
 
 private:
-    static RPI_PICO_ISR_Timer ISRtimer; // means that no other class can use the ISRtimer (I think)
-    static RPI_PICO_Timer timer;		// static timer shared by all instances
-
-    EVNISRTimer() { timer.attachInterruptInterval(HW_TIMER_INTERVAL_MS * 1000, isr); };
-
-    static bool isr(struct repeating_timer* t)
-    {
-        ISRtimer.run();
-        return true;
-    }
+    static struct alarm_pool* pool;
+    static struct repeating_timer timers[16];
 };
 
 #endif

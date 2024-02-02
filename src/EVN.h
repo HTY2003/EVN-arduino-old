@@ -8,8 +8,5 @@
 #include "EVNCompassSensor.h"
 #include "EVNDistanceSensor.h"
 #include "PIDController.h"
-#include "RPI_PICO_TimerInterrupt/src/RPi_Pico_ISR_Timer.h"
-
-#define calibrate(reading, low, high) ((reading - low) / (high - low))
 
 #endif
