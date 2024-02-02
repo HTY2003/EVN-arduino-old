@@ -39,8 +39,7 @@
 #ifndef U8X8LIB_HH
 #define U8X8LIB_HH
 
-//below 2 lines added for EVN Library
-#define WIRE_INTERFACES_COUNT 2
+//below line added for EVN Library (to not compile SPI lib)
 #define U8X8_NO_HW_SPI
 
 #ifdef ARDUINO
