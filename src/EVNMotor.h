@@ -92,7 +92,6 @@ public:
 	double getPos();			  // Return absolute position in degrees
 	void resetPos();			  // Set current position as 0 deg
 	double getRPM();			  // Return velocity in RPM rotations per minute
-	double getAccel();			  // Return acceleration in RPM / ms
 	bool commandFinished();
 
 	void setSpeedPID(double p, double i, double d);
