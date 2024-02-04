@@ -6,6 +6,7 @@ uint8_t EVNAlpha::_mode;
 uint8_t EVNAlpha::_linkLED;
 uint8_t EVNAlpha::_linkMotors;
 uint32_t EVNAlpha::_i2c_freq;
+// bool EVNAlpha::_has_battery_adc;
 
 EVNAlpha::EVNAlpha(uint8_t mode, uint8_t linkLED, uint8_t linkMotors, uint32_t i2c_freq)
 {
@@ -32,4 +33,6 @@ void EVNAlpha::begin()
     //Initialize helper objects
     ports.begin();
     button.begin();
+
+    // if (batt.begin()) _has_battery_adc = true;
 }

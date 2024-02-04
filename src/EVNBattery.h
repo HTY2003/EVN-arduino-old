@@ -37,7 +37,7 @@ public:
 		EVNAlpha::sharedPorts().begin();
 
 		//check for BQ25887 part number
-		//NOTE: BQ25887 not in use for our V1.2 customers
+		//NOTE: BQ25887 not in use for our V1.2 users
 		uint8_t id = (read8(I2C_ADDR, (uint8_t)reg::PART_INFO) & PART_INFO_MASK) >> 3;
 		if (id != ID_REG_PART_NUMBER) return false;
 
@@ -69,7 +69,7 @@ public:
 		return 0;
 	};
 
-	int16_t getNominalVoltage() { return getVoltage(BATT_NOMINAL); };
+	int16_t getBattVoltage() { return getVoltage(BATT_NOMINAL); };
 	int16_t getCell1Voltage() { return getVoltage(BATT_CELL1); };
 	int16_t getCell2Voltage() { return getVoltage(BATT_CELL2); };
 };
