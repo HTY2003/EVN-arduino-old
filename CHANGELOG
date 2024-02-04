@@ -23,3 +23,16 @@
 
 -- Bugfixes --
 - Fixed bug to allow for EVNDistanceSensor to work on I2C ports 9-16
+
+
+0.7.0 (04/02/24)
+- Removed RPi_PICO_TimerInterrupt dependency and replaced with C++ SDK code
+- To be added soon: more docs and examples
+
+-- Features --
+- Added libraries for EVNBluetooth and EVNBattery (using BQ25887 IC on V1.4 boards onwards)
+- Added accel and decel settings to EVNMotor, along with functions to edit PPR, max RPM, and PID controls
+
+-- Bugfixes --
+- Fixed bug in EVNDisplay::begin() making it fail to start
+- Fixed bug in EVNPortSelector (helper for EVNAlpha) to allow for I2C clock speeds over 100kHz

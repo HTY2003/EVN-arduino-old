@@ -2,16 +2,22 @@
 
 # Datatypes (KEYWORD1)
 EVNAlpha	KEYWORD1
-EVNDisplay	KEYWORD1
 EVNMotor	KEYWORD1
 EVNDrivebase	KEYWORD1
+EVNDisplay	KEYWORD1
 EVNColourSensor	KEYWORD1
+EVNCompassSensor	KEYWORD1
+EVNDistanceSensor	KEYWORD1
+EVNBluetooth	KEYWORD1
 PIDController	KEYWORD1
 
 # Methods and Functions (KEYWORD2)
+# All
 begin	KEYWORD2
 read	KEYWORD2
 
+# EVNDisplay
+splashEVN	KEYWORD2
 clear	KEYWORD2
 clearLine	KEYWORD2
 rotate	KEYWORD2
@@ -19,49 +25,100 @@ splashEVN	KEYWORD2
 writeLabel	KEYWORD2
 writeData	KEYWORD2
 writeLine	KEYWORD2
+print		KEYWORD2
+write		KEYWORD2
 
-writePWM	KEYWORD2
+# EVNMotor
 getPos	KEYWORD2
 resetPos	KEYWORD2
 getRPM	KEYWORD2
 commandFinished	KEYWORD2
-timeSinceLastCommand	KEYWORD2
+
+setSpeedPID	KEYWORD2
+setPosPID	KEYWORD2
+setPPR	KEYWORD2
+setMaxRPM	KEYWORD2
+setAccel	KEYWORD2
+setDecel	KEYWORD2
+
+writePWM	KEYWORD2
+runTime	KEYWORD2
+runDegrees	KEYWORD2
+runPosition	KEYWORD2
+runSpeed	KEYWORD2
 brake	KEYWORD2
 coast	KEYWORD2
 hold	KEYWORD2
-runTime	KEYWORD2
-runDegrees	KEYWORD2
-runSpeed	KEYWORD2
 
+# EVNDrivebase
 steer		KEYWORD2
+steerTime		KEYWORD2
 
+# EVNAlpha
 buttonRead  KEYWORD2
-ledWrite    KEYWORD 2
+ledWrite    KEYWORD2
 getPort	KEYWORD2
+getWire0Port	KEYWORD2
+getWire1Port	KEYWORD2
 setPort	KEYWORD2
 printPorts	KEYWORD2
+getBattVoltage	KEYWORD2
+getCell1Voltage	KEYWORD2
+getCell2Voltage	KEYWORD2
 
-calibrate	KEYWORD2
+# PIDController
 compute	KEYWORD2
+setKp	KEYWORD2
+setKi	KEYWORD2
+setKd	KEYWORD2
 
+# EVNColourSensor
 setIntegrationCycles	KEYWORD2
 setGain	KEYWORD2
-readRed	KEYWORD2
-readGreen	KEYWORD2
-readBlue	KEYWORD2
-readClear	KEYWORD2
-readRedCal	KEYWORD2
-readGreenCal	KEYWORD2
-readBlueCal	KEYWORD2
-readClearCal	KEYWORD2
 setRedRange	KEYWORD2
 setGreenRange	KEYWORD2
 setBlueRange	KEYWORD2
 setClearRange	KEYWORD2
 
-board   KEYWORD3
-display KEYWORD3
-drivebase	KEYWORD3
+readRed	KEYWORD2
+readGreen	KEYWORD2
+readBlue	KEYWORD2
+readClear	KEYWORD2
+
+readRedCal	KEYWORD2
+readGreenCal	KEYWORD2
+readBlueCal	KEYWORD2
+readClearCal	KEYWORD2
+
+# EVNDistanceSensor
+setTimingBudget	KEYWORD2
+getTimingBudget	KEYWORD2
+
+# EVNCompassSensor
+calibrate KEYWORD2
+
+# EVNBluetooth
+inProgramMode	KEYWORD2
+exitProgramMode	KEYWORD2
+factoryReset	KEYWORD2
+
+setName	KEYWORD2
+setHostMode	KEYWORD2
+setRemoteMode	KEYWORD2
+setBaudRate	KEYWORD2
+
+getBaudRate	KEYWORD2
+getMode	KEYWORD2
+getAddress	KEYWORD2
+getVersion	KEYWORD2
+getName	KEYWORD2
+
+printBaudRate	KEYWORD2
+printMode	KEYWORD2
+printAddress	KEYWORD2
+printVersion	KEYWORD2
+printName	KEYWORD2
+printAll	KEYWORD2
 
 # Constants (LITERAL1)
 DIRECT	LITERAL1
