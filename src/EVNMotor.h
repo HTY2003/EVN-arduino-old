@@ -86,6 +86,7 @@ private:
 
 public:
 	friend class EVNDrivebase;
+	friend class EVNOmniDrivebase;
 
 	EVNMotor(uint8_t port, uint8_t motortype = EV3_LARGE, uint8_t motor_dir = DIRECT, uint8_t enc_dir = DIRECT);
 	void begin();
@@ -498,12 +499,12 @@ public:
 		double turn_ratec = constrain(turn_rate, -1, 1);
 		if (turn_ratec > 0)
 		{
-			_left->steer(speedc);
-			_right->steer(speedc * (1 - turn_ratec));
+			_left->runSpeed(speedc);
+			_right->runSpeed(speedc * (1 - turn_ratec));
 		}
 		else {
-			_right->steer(speedc);
-			_left->steer(speedc * (1 - turn_ratec));
+			_right->runSpeed(speedc);
+			_left->runSpeed(speedc * (1 - turn_ratec));
 		}
 	};
 

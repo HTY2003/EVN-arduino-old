@@ -25,6 +25,7 @@
 - Fixed bug to allow for EVNDistanceSensor to work on I2C ports 9-16
 
 
+
 0.7.0 (04/02/24)
 - Removed RPi_PICO_TimerInterrupt dependency and replaced with C++ SDK code
 - To be added soon: more docs and examples
@@ -36,3 +37,17 @@
 -- Bugfixes --
 - Fixed bug in EVNDisplay::begin() making it fail to start
 - Fixed bug in EVNPortSelector (helper for EVNAlpha) to allow for I2C clock speeds over 100kHz
+
+
+
+0.7.1 (28/02/24)
+This is meant to be a stable release for current pre-release users, until the EVNMotor rewrite and drivebase classes with motor sync are released
+
+-- Features --
+- Added a temporary version of EVNDrivebase and EVNOmniDrivebase (no motor sync yet!)
+- Minor doc corrections
+
+-- Bugfixes --
+- Fixed many bugs in EVNMotor including a stray debug print
+- Fixed a bug in EVNButton causing non-default settings to fail (stuck on defaults)
+- Higher I2C frequencies now supported by EVN Alpha object! (Tested at 400kHz)
