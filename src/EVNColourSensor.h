@@ -117,6 +117,11 @@ public:
         _c_high = max(low + 1, high);
     };
 
+    uint16_t read()
+    {
+        return this->readClear();
+    };
+
     uint16_t readRed()
     {
         if ((micros() - _r_time_us) > _int_time_ms * 1000)

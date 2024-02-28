@@ -16,7 +16,7 @@ Software Repository for EVN Alpha
 * [Arduino IDE 1.8.19] (https://www.arduino.cc/en/software)
 
 ## Board Installation
-After installing Arduino IDE, install Earle F Philhower's Arduino-Pico core. This is done in 2 steps:
+After installing Arduino IDE, install Earle F Philhower's Arduino-Pico core (V3.6.3+). This is done in 4 steps:
 
 1. Open Preferences in Arduino IDE (`File` - `Preferences`)
 
@@ -47,7 +47,7 @@ Note: We plan to publish the EVN library to the Arduino IDE Library Manager by o
 ## Test Upload
 Start by opening the Blink example sketch in Arduino (`File` - `Examples` - `01.Basics` - `Blink`).
 
-To upload to EVN Alpha, select Generic RP2040 as your board (`Tools` - `Board` - `Raspberry Pi RP2040 Boards` - `Generic RP2040`), then the Generic SPI/2 Boot Stage 2 option (`Tools` - `Boot Stage 2` - `Generic SPI /4`). These settings ensure that the USB Serial connection and upload process are stable.
+To upload to EVN Alpha, select Generic RP2040 as your board (`Tools` - `Board` - `Raspberry Pi RP2040 Boards` - `Generic RP2040`), then the Generic SPI /2 Boot Stage 2 option (`Tools` - `Boot Stage 2` - `Generic SPI /2`). These settings ensure that the USB Serial connection and upload process are stable.
 
 After selecting the correct board, press the Upload button (right arrow) in the top left corner. For fresh installs of the Arduino-Pico core, the first compile may take a while, but subsequent uploads should take less time.
 

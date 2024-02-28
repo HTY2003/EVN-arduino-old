@@ -3,8 +3,8 @@
 
 #include <Arduino.h>
 
-#define DIRECT	0
-#define REVERSE	1
+#define DIRECT	1
+#define REVERSE	0
 
 class PIDController
 {
@@ -16,7 +16,9 @@ public:
 	double getKi();
 	void setKd(double kd);
 	double getKd();
-	double compute(double error);
+	double compute(double error, bool constrain_integral = false, bool constrain_input = false, bool constrain_output = false);
+	void constrainIntegral(double low, double high);
+	void resetIntegral();
 	void reset();
 
 private:

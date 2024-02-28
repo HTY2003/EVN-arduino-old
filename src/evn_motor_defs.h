@@ -1,5 +1,6 @@
 //TUNING FOR CUSTOM GEARMOTOR
 //edit this to change CUSTOM_MOTOR defaults
+//example settings below are for the JGA25-370 motor, 6V 77RPM version
 #define SPEED_PID_KP_CUSTOM		5       //speed PID gains (PI controller)
 #define SPEED_PID_KI_CUSTOM		0.125
 #define SPEED_PID_KD_CUSTOM		0
@@ -9,7 +10,7 @@
 #define CUSTOM_MOTOR_MAX_RPM	77      //max RPM of the motor shaft
 #define CUSTOM_MOTOR_ACCEL      770     //deceleration in rpm/s (60 means it takes 1 second to accelerate from 0RPM to 60)
 #define CUSTOM_MOTOR_DECEL      770     //deceleration in rpm/s (60 means it takes 1 second to decelerate from 60RPM to 0)
-#define CUSTOM_PPR				1000    //pulses on 1 encoder wheel for 1 revolution of the motor shaft
+#define CUSTOM_PPR				11*78     //pulses on 1 encoder wheel for 1 revolution of the motor shaft
 
 //LEGO MOTORS
 #define LEGO_PPR				180

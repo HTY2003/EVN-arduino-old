@@ -395,9 +395,10 @@ public:
     };
 
 private:
-    int16_t _reading, _x, _y, _z;
+    int16_t _x, _y, _z;
     double _xcal, _ycal, _zcal;
     double _yaw_offset = 0;
+    double _reading;
     double _x_hard_cal = 0, _x_soft_cal[3] = { 1,0,0 };
     double _y_hard_cal = 0, _y_soft_cal[3] = { 0,1,0 };
     double _z_hard_cal = 0, _z_soft_cal[3] = { 0,0,1 };

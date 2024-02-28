@@ -10,8 +10,8 @@
 #include <cfloat>
 
 //INPUT PARAMETER MACROS
-#define DIRECT 0
-#define REVERSE 1
+#define DIRECT 1
+#define REVERSE 0
 
 #define EV3_LARGE 0
 #define NXT_LARGE 1
@@ -64,11 +64,11 @@ typedef struct
 
 	//runDegrees variables
 	volatile bool run_deg;
-
 	volatile double run_deg_target_rpm;
 	volatile double x0;
 	volatile double xdminusx0;
 	volatile uint8_t counter;
+	volatile bool drivebase_run_pos;
 
 	volatile bool hold;
 	volatile uint8_t stop_action;
@@ -103,9 +103,10 @@ public:
 
 	void writePWM(double speed); // Directly write speed (-1 to 1) as PWM value to motor
 	void runSpeed(double rpm); // Set motor to run at desired RPM
-	void runPosition(double rpm, double degrees, uint8_t stop_action = STOP_BRAKE, bool wait = true); // Set motor to run to absolute position
+	void runPosition(double rpm, double position, uint8_t stop_action = STOP_BRAKE, bool wait = true); // Set motor to run to absolute position
 	void runDegrees(double rpm, double degrees, uint8_t stop_action = STOP_BRAKE, bool wait = true); // Set motor to run desired angular displacement (in degrees)
 	void runTime(double rpm, uint32_t time_ms, uint8_t stop_action = STOP_BRAKE, bool wait = true);
+	void stop();
 	void brake();
 	void coast();
 	void hold();
@@ -182,13 +183,12 @@ protected:
 		double speedc = constrain(speed, -1, 1);
 
 		// if button is set to enable motors / button is unlinked from motors
-		if (EVNAlpha::sharedButton().read() || !EVNAlpha::sharedButton().sharedState().linkMotors)
+		if (EVNAlpha::sharedButton().read() || !EVNAlpha::sharedButton().sharedState()->linkMotors)
 		{
 			if (speedc == 0)
 			{
 				digitalWrite(pidArg->motora, HIGH);
 				digitalWrite(pidArg->motorb, HIGH);
-				Serial.println("wtf");
 			}
 			else if (speedc > 0)
 			{
@@ -270,41 +270,44 @@ protected:
 		double rpm = getRPM_static(encoderArg);
 
 		// if button is set to enable motors / button is unlinked from motors
-		if (EVNAlpha::sharedButton().read() || !EVNAlpha::sharedButton().sharedState().linkMotors)
+		if (EVNAlpha::sharedButton().read() || !EVNAlpha::sharedButton().sharedState()->linkMotors)
 		{
 			double accel_rpm = 0, decel_rpm = 1000000;
 			if (pidArg->run_deg || pidArg->hold)
 			{
-				if (pidArg->run_deg)
+				if (!pidArg->drivebase_run_pos)
 				{
-					//if error is <= acceptable error for enough loops, stop position PID control
-					if (pidArg->counter >= RUNDEGREES_MIN_LOOP_COUNT)
+					if (pidArg->run_deg)
 					{
-						pidArg->counter = 0;
-						stopAction_static(pidArg, encoderArg);
-						return;
+						//if error is <= acceptable error for enough loops, stop position PID control
+						if (pidArg->counter >= RUNDEGREES_MIN_LOOP_COUNT)
+						{
+							pidArg->counter = 0;
+							stopAction_static(pidArg, encoderArg);
+							return;
+						}
+
+						//if error <= acceptable error, increment a counter to count no. of consecutive loops with acceptable error
+						if (fabs(pidArg->x0 + pidArg->xdminusx0 - getAbsPos_static(encoderArg)) <= (double)RUNDEGREES_MIN_ERROR_DEG)
+						{
+							pidArg->counter += 1;
+							digitalWrite(pidArg->motora, HIGH);
+							digitalWrite(pidArg->motorb, HIGH);
+							return;
+						}
+
+						//if error > acceptable error, reset counter
+						else pidArg->counter = 0;
 					}
 
-					//if error <= acceptable error, increment a counter to count no. of consecutive loops with acceptable error
-					if (fabs(pidArg->x0 + pidArg->xdminusx0 - getAbsPos_static(encoderArg)) <= (double)RUNDEGREES_MIN_ERROR_DEG)
+					if (pidArg->hold)
 					{
-						pidArg->counter += 1;
-						digitalWrite(pidArg->motora, HIGH);
-						digitalWrite(pidArg->motorb, HIGH);
-						return;
-					}
-
-					//if error > acceptable error, reset counter
-					else pidArg->counter = 0;
-				}
-
-				if (pidArg->hold)
-				{
-					if (fabs(pidArg->x0 + pidArg->xdminusx0 - getAbsPos_static(encoderArg)) <= (double)RUNDEGREES_MIN_ERROR_DEG)
-					{
-						digitalWrite(pidArg->motora, HIGH);
-						digitalWrite(pidArg->motorb, HIGH);
-						return;
+						if (fabs(pidArg->x0 + pidArg->xdminusx0 - getAbsPos_static(encoderArg)) <= (double)RUNDEGREES_MIN_ERROR_DEG)
+						{
+							digitalWrite(pidArg->motora, HIGH);
+							digitalWrite(pidArg->motorb, HIGH);
+							return;
+						}
 					}
 				}
 
@@ -317,22 +320,28 @@ protected:
 				error = (target_pos - getAbsPos_static(encoderArg)) / 360;
 				output = pidArg->pos_pid->compute(error);
 
-				// time taken to decel from target RPM to 0 (in ms)
-				double timetodecel = (pidArg->run_deg_target_rpm / pidArg->decel * 1000);
+				if (output > 0) pidArg->target_rpm = min(pidArg->run_deg_target_rpm, output * pidArg->max_rpm);
+				else pidArg->target_rpm = max(-pidArg->run_deg_target_rpm, output * pidArg->max_rpm);
 
-				// deceltriangle = area under the v-t curve from start of decel to end of decel (RPM = 0)
-				// area under v-t curve = displacement from start of decel to end of decel
-				// however, this displacement is in RPM*ms so we /60000 to convert it to revolutions
-				double deceltriangle = 0.5 * timetodecel * (pidArg->run_deg_target_rpm / 60000);
+				if (!pidArg->drivebase_run_pos)
+				{
+					// time taken to decel from target RPM to 0 (in ms)
+					double timetodecel = (pidArg->run_deg_target_rpm / pidArg->decel * 1000);
 
-				// now we treat displacement error as area under curve from current time to end of decel (similar to decel triangle)
-				// by sq rooting the ratio between the 2 triangles we get the scale factor between each triangle's v (v of decel triangle is target_rpm)
-				// decel_rpm is target_rpm multiplied by scaling factor
-				// as error decreases, decel_rpm will decrease along decel curve (to the end)
-				decel_rpm = sqrt(fabs(error) / deceltriangle) * pidArg->run_deg_target_rpm;
+					// deceltriangle = area under the v-t curve from start of decel to end of decel (RPM = 0)
+					// area under v-t curve = displacement from start of decel to end of decel
+					// however, this displacement is in RPM*ms so we /60000 to convert it to revolutions
+					double deceltriangle = 0.5 * timetodecel * (pidArg->run_deg_target_rpm / 60000);
 
-				if (output > 0) pidArg->target_rpm = min(min(pidArg->run_deg_target_rpm, output * pidArg->max_rpm), decel_rpm);
-				else pidArg->target_rpm = max(max(-pidArg->run_deg_target_rpm, output * pidArg->max_rpm), -decel_rpm);
+					// now we treat displacement error as area under curve from current time to end of decel (similar to decel triangle)
+					// by sq rooting the ratio between the 2 triangles we get the scale factor between each triangle's v (v of decel triangle is target_rpm)
+					// decel_rpm is target_rpm multiplied by scaling factor
+					// as error decreases, decel_rpm will decrease along decel curve (to the end)
+					decel_rpm = sqrt(fabs(error) / deceltriangle) * pidArg->run_deg_target_rpm;
+
+					if (output > 0) pidArg->target_rpm = min(pidArg->target_rpm, decel_rpm);
+					else pidArg->target_rpm = max(pidArg->target_rpm, -decel_rpm);
+				}
 			}
 
 			if (pidArg->run_speed || pidArg->run_time || pidArg->run_deg || pidArg->hold)
@@ -354,19 +363,27 @@ protected:
 					else pidArg->target_rpm = max(pidArg->target_rpm, -decel_rpm);
 				}
 
-				if (pidArg->target_rpm_constrained <= pidArg->target_rpm)
+				if (!pidArg->drivebase_run_pos)
 				{
-					if (pidArg->target_rpm_constrained > 0) pidArg->target_rpm_constrained += (double)PID_TIMER_INTERVAL_MS / 1000.0 * (double)pidArg->accel;
-					else pidArg->target_rpm_constrained += (double)PID_TIMER_INTERVAL_MS / 1000.0 * pidArg->decel;
-					if (pidArg->target_rpm_constrained > pidArg->target_rpm) pidArg->target_rpm_constrained = pidArg->target_rpm;
+					//TODO: convert to use time instead of assuming ISR timer is accurate
+					if (pidArg->target_rpm_constrained <= pidArg->target_rpm)
+					{
+						if (pidArg->target_rpm_constrained > 0) pidArg->target_rpm_constrained += (double)PID_TIMER_INTERVAL_MS / 1000.0 * (double)pidArg->accel;
+						else pidArg->target_rpm_constrained += (double)PID_TIMER_INTERVAL_MS / 1000.0 * pidArg->decel;
+						if (pidArg->target_rpm_constrained > pidArg->target_rpm) pidArg->target_rpm_constrained = pidArg->target_rpm;
+					}
+					else
+					{
+						if (pidArg->target_rpm_constrained > 0) pidArg->target_rpm_constrained -= (double)PID_TIMER_INTERVAL_MS / 1000.0 * (double)pidArg->decel;
+						else pidArg->target_rpm_constrained -= (double)PID_TIMER_INTERVAL_MS / 1000.0 * pidArg->accel;
+						if (pidArg->target_rpm_constrained < pidArg->target_rpm) pidArg->target_rpm_constrained = pidArg->target_rpm;
+					}
 				}
 				else
 				{
-					if (pidArg->target_rpm_constrained > 0) pidArg->target_rpm_constrained -= (double)PID_TIMER_INTERVAL_MS / 1000.0 * (double)pidArg->decel;
-					else pidArg->target_rpm_constrained -= (double)PID_TIMER_INTERVAL_MS / 1000.0 * pidArg->accel;
-					if (pidArg->target_rpm_constrained < pidArg->target_rpm) pidArg->target_rpm_constrained = pidArg->target_rpm;
+					pidArg->target_rpm_constrained = pidArg->target_rpm;
 				}
-				// pidArg->target_rpm_constrained = constrain(pidArg->target_rpm_constrained, -pidArg->max_rpm, pidArg->max_rpm);
+				pidArg->target_rpm_constrained = constrain(pidArg->target_rpm_constrained, -pidArg->max_rpm, pidArg->max_rpm);
 
 				// calculate output PWM value from RPM error using PID controller
 				error = (pidArg->target_rpm_constrained - rpm) / pidArg->max_rpm;
@@ -376,7 +393,8 @@ protected:
 				if (pidArg->target_rpm_constrained == 0) writePWM_static(pidArg, 0);
 				else writePWM_static(pidArg, output);
 			}
-			else {
+			else
+			{
 				pidArg->target_rpm_constrained = getRPM_static(encoderArg);
 			}
 		}
@@ -465,135 +483,180 @@ protected:
 	static bool pidtimer3(struct repeating_timer* t) { pid_update(pidArgs[3], encoderArgs[3]); return true; }
 };
 
-//----------END OF EVNMOTOR CLASS----------
-//-------START OF EVNDRIVEBASE CLASS-------
-
-typedef struct
-{
-	volatile double target_rpm;
-	volatile double turn_rate;
-	volatile double max_rpm;
-
-	volatile uint32_t wheel_dia;
-	volatile uint32_t wheel_dist;
-
-	volatile bool steer;
-	volatile bool steer_time;
-	volatile bool steer_distance;
-
-	EVNMotor* motor_left;
-	EVNMotor* motor_right;
-
-	volatile uint64_t start_time;
-	volatile uint64_t time_ms;
-	volatile double distance;
-	volatile uint8_t stop_action;
-}	drivebase_state_t;
-
 class EVNDrivebase
 {
-private:
-	static const uint8_t PID_TIMER_INTERVAL_MS = 2;
-
 public:
 	EVNDrivebase(uint32_t wheel_dia, uint32_t wheel_dist, EVNMotor* _motor_left, EVNMotor* _motor_right);
-	void begin();
-	void steer(double speed, double turn_rate);
-	void steerTime(double speed, double turn_rate, double time_ms, uint8_t stop_action = STOP_BRAKE, bool wait = true);
-	bool commandFinished();
-	void brake();
-	void coast();
-	void hold();
+	void begin()
+	{
+		_max_rpm = min(_left->_pid_control.max_rpm, _right->_pid_control.max_rpm);
+	};
+
+	void steer(double speed, double turn_rate)
+	{
+		double speedc = constrain(speed, -_max_rpm, _max_rpm);
+		double turn_ratec = constrain(turn_rate, -1, 1);
+		if (turn_ratec > 0)
+		{
+			_left->steer(speedc);
+			_right->steer(speedc * (1 - turn_ratec));
+		}
+		else {
+			_right->steer(speedc);
+			_left->steer(speedc * (1 - turn_ratec));
+		}
+	};
+
+	void stop()
+	{
+		_left->brake();
+		_right->brake();
+	};
+
+	void brake()
+	{
+		_left->brake();
+		_right->brake();
+	};
+
+	void coast()
+	{
+		_left->coast();
+		_right->coast();
+	};
+
+	void hold()
+	{
+		_left->hold();
+		_right->hold();
+	};
 
 private:
-	drivebase_state_t db;
-	static drivebase_state_t* dbArg;
+	EVNMotor* _left;
+	EVNMotor* _right;
+	double _max_rpm;
+};
 
-	static void attach_db_interrupt(drivebase_state_t* arg)
+class EVNOmniDrivebase
+{
+public:
+	EVNOmniDrivebase(uint32_t wheel_dia, uint32_t wheel_dist, EVNMotor* fl, EVNMotor* fr, EVNMotor* bl, EVNMotor* br)
 	{
-		dbArg = arg;
-		add_repeating_timer_ms(PID_TIMER_INTERVAL_MS, pidtimer0, NULL, &EVNISRTimer::sharedISRTimer(4));
-	}
+		_fl = fl;
+		_fr = fr;
+		_bl = bl;
+		_br = br;
+	};
 
-	static bool pidtimer0(struct repeating_timer* t) { pid_update(dbArg); return true; }
-
-	static void stopAction_static(drivebase_state_t* arg)
+	void begin()
 	{
-		switch (arg->stop_action)
+		_max_rpm = min(min(_fl->_pid_control.max_rpm, _fr->_pid_control.max_rpm), min(_bl->_pid_control.max_rpm, _br->_pid_control.max_rpm));
+	};
+
+	void steer(double speed, double angle, double turn_rate)
+	{
+		double speedc, anglec, rotatec;
+		double anglec_rad, speedc_x, speedc_y;
+		double speedc_x_left, speedc_y_left, speedc_x_right, speedc_y_right;
+
+		speedc = constrain(speed, -_max_rpm, _max_rpm);
+		anglec = constrain(angle, 0, 360);
+		anglec = fmod(anglec + 45, 360);
+		rotatec = constrain(turn_rate, -1, 1);
+
+		anglec_rad = anglec / 180 * M_PI;
+		speedc_x = cos(anglec_rad) * speedc;
+		speedc_y = sin(anglec_rad) * speedc;
+
+		if (anglec >= 315 || anglec < 135)
 		{
-		case STOP_BRAKE:
-			arg->motor_left->brake();
-			arg->motor_right->brake();
-			break;
-		case STOP_COAST:
-			arg->motor_left->coast();
-			arg->motor_right->coast();
-			break;
-		case STOP_HOLD:
-			arg->motor_left->hold();
-			arg->motor_right->hold();
-			break;
+			if (rotatec >= 0)
+			{
+				speedc_y_right = speedc_y * (1 - 2 * rotatec);
+				speedc_y_left = speedc_y;
+			}
+			else {
+				speedc_y_left = speedc_y * (1 + 2 * rotatec);
+				speedc_y_right = speedc_y;
+			}
 		}
-	}
+		else {
+			if (rotatec >= 0)
+			{
+				speedc_y_left = speedc_y * (1 - 2 * rotatec);
+				speedc_y_right = speedc_y;
+			}
+			else {
+				speedc_y_right = speedc_y * (1 + 2 * rotatec);
+				speedc_y_left = speedc_y;
+			}
+		}
 
-	static void pid_update(drivebase_state_t* arg)
-	{
-		if (arg->steer)
+		if (anglec >= 225 || anglec < 45)
 		{
-			if (arg->steer_time)
+			if (rotatec >= 0)
 			{
-				if (millis() - arg->start_time >= arg->time_ms)
-				{
-					stopAction_static(arg);
-					arg->steer = false;
-					arg->steer_time = false;
-				}
+				speedc_x_left = speedc_x * (1 - 2 * rotatec);
+				speedc_x_right = speedc_x;
 			}
-
-			if (fabs(arg->turn_rate) == 0.5)
-			{
-				if (arg->turn_rate > 0)
-				{
-					arg->motor_left->runSpeed(arg->target_rpm);
-					arg->motor_right->hold();
-				}
-				else {
-					arg->motor_right->runSpeed(arg->target_rpm);
-					arg->motor_left->hold();
-				}
-				return;
+			else {
+				speedc_x_right = speedc_x * (1 + 2 * rotatec);
+				speedc_x_left = speedc_x;
 			}
-
-			double target_rpm_left, target_rpm_right, actual_rpm_left, actual_rpm_right, ratio;
-
-			//get actual RPM of motors
-			actual_rpm_left = arg->motor_left->getRPM();
-			actual_rpm_right = arg->motor_right->getRPM();
-
-			//calculate desired RPM of motors
-			if (arg->turn_rate > 0)
-			{
-				target_rpm_left = arg->target_rpm;
-				target_rpm_right = arg->target_rpm * (1 - 2 * arg->turn_rate);
-			}
-			else
-			{
-				target_rpm_left = arg->target_rpm;
-				target_rpm_right = arg->target_rpm * (1 + 2 * arg->turn_rate);
-			}
-			ratio = actual_rpm_left / target_rpm_left;
-
-			//sync the slower motor to the actual speed of the faster motor
-			if (arg->turn_rate >= 0)
-				target_rpm_right = actual_rpm_left * ratio;
-			else
-				target_rpm_left = actual_rpm_right / ratio;
-
-			//set motor velocities
-			arg->motor_left->runSpeed(target_rpm_left);
-			arg->motor_right->runSpeed(target_rpm_right);
 		}
-	}
+		else {
+			if (rotatec >= 0)
+			{
+				speedc_x_right = speedc_x * (1 - 2 * rotatec);
+				speedc_x_left = speedc_x;
+			}
+			else {
+				speedc_x_left = speedc_x * (1 + 2 * rotatec);
+				speedc_x_right = speedc_x;
+			}
+		}
+
+		_fl->runSpeed(speedc_x_left);
+		_br->runSpeed(speedc_x_right);
+		_fr->runSpeed(speedc_y_right);
+		_bl->runSpeed(speedc_y_left);
+	};
+
+	void stop()
+	{
+		this->brake();
+	};
+
+	void brake()
+	{
+		_fl->brake();
+		_fr->brake();
+		_bl->brake();
+		_br->brake();
+	};
+
+	void coast()
+	{
+		_fl->coast();
+		_fr->coast();
+		_bl->coast();
+		_br->coast();
+	};
+
+	void hold()
+	{
+		_fl->hold();
+		_fr->hold();
+		_bl->hold();
+		_br->hold();
+	};
+
+private:
+	EVNMotor* _fl;
+	EVNMotor* _fr;
+	EVNMotor* _bl;
+	EVNMotor* _br;
+	double _max_rpm;
 };
 
 #endif

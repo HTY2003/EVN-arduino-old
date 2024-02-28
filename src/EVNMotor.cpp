@@ -10,7 +10,7 @@ EVNMotor::EVNMotor(uint8_t port, uint8_t motortype, uint8_t motor_dir, uint8_t e
 	uint8_t motor_dirc = constrain(motor_dir, 0, 1);
 	uint8_t enc_dirc = constrain(enc_dir, 0, 1);
 	uint8_t portc = constrain(port, 1, 4);
-	uint8_t motortypec = constrain(motortype, 0, 2);
+	uint8_t motortypec = constrain(motortype, 0, 3);
 
 	// set pins
 	switch (port)
@@ -153,7 +153,6 @@ void EVNMotor::runSpeed(double rpm)
 	double rpmc = constrain(rpm, -_pid_control.max_rpm, _pid_control.max_rpm);
 
 	_pid_control.target_rpm = rpmc;
-
 	_pid_control.run_speed = true;
 	_pid_control.run_deg = false;
 	_pid_control.run_time = false;
@@ -230,81 +229,4 @@ void EVNMotor::hold()
 bool EVNMotor::commandFinished()
 {
 	return (!_pid_control.run_time && !_pid_control.run_deg);
-}
-
-drivebase_state_t* EVNDrivebase::dbArg;
-
-EVNDrivebase::EVNDrivebase(uint32_t wheel_dia, uint32_t wheel_dist, EVNMotor* motor_left, EVNMotor* motor_right)
-{
-	db.motor_left = motor_left;
-	db.motor_right = motor_right;
-	db.max_rpm = min(motor_left->_pid_control.max_rpm, motor_right->_pid_control.max_rpm);
-	db.wheel_dist = wheel_dist;
-	db.wheel_dia = wheel_dia;
-	db.steer = false;
-	db.steer_distance = false;
-	db.steer_time = false;
-}
-
-void EVNDrivebase::begin()
-{
-	attach_db_interrupt(&db);
-}
-
-void EVNDrivebase::steer(double speed, double turn_rate)
-{
-	double speedc = constrain(speed, -db.max_rpm, db.max_rpm);
-	double turn_ratec = constrain(turn_rate, -1, 1);
-
-	db.target_rpm = speedc;
-	db.turn_rate = turn_ratec;
-
-	db.steer = true;
-	db.steer_distance = false;
-	db.steer_time = false;
-}
-
-void EVNDrivebase::steerTime(double speed, double turn_rate, double time_ms, uint8_t stop_action, bool wait)
-{
-	double speedc = constrain(speed, -db.max_rpm, db.max_rpm);
-	double turn_ratec = constrain(turn_rate, -1, 1);
-	uint8_t stop_actionc = min(3, stop_action);
-
-	db.target_rpm = speedc;
-	db.turn_rate = turn_ratec;
-	db.start_time = millis();
-	db.time_ms = time_ms;
-
-	db.steer = true;
-	db.steer_time = true;
-	db.steer_distance = false;
-	db.stop_action = stop_actionc;
-
-	if (wait) { while (!this->commandFinished()); }
-}
-
-bool EVNDrivebase::commandFinished()
-{
-	return (!db.steer_time && !db.steer_distance);
-}
-
-void EVNDrivebase::brake()
-{
-	db.steer = false;
-	db.motor_left->brake();
-	db.motor_right->brake();
-}
-
-void EVNDrivebase::coast()
-{
-	db.steer = false;
-	db.motor_left->coast();
-	db.motor_right->coast();
-}
-
-void EVNDrivebase::hold()
-{
-	db.steer = false;
-	db.motor_left->hold();
-	db.motor_right->hold();
 }

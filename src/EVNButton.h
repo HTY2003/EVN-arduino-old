@@ -38,7 +38,7 @@ public:
 	void setLinkMotors(uint8_t linkMotors);
 
 	//singleton for state struct
-	button_state_t& sharedState() { static EVNButton shared; return shared.button; }
+	button_state_t* sharedState() { return &button; }
 
 private:
 	static button_state_t button;
