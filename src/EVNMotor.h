@@ -221,12 +221,12 @@ protected:
 		switch (pidArg->stop_action)
 		{
 		case STOP_BRAKE:
-			digitalWrite(pidArg->motora, LOW);
-			digitalWrite(pidArg->motorb, LOW);
-			break;
-		case STOP_COAST:
 			digitalWrite(pidArg->motora, HIGH);
 			digitalWrite(pidArg->motorb, HIGH);
+			break;
+		case STOP_COAST:
+			digitalWrite(pidArg->motora, LOW);
+			digitalWrite(pidArg->motorb, LOW);
 			break;
 		case STOP_HOLD:
 			digitalWrite(pidArg->motora, HIGH);
