@@ -487,9 +487,11 @@ protected:
 class EVNDrivebase
 {
 public:
-	EVNDrivebase(uint32_t wheel_dia, uint32_t wheel_dist, EVNMotor* _motor_left, EVNMotor* _motor_right);
+	EVNDrivebase(uint32_t wheel_dia, uint32_t wheel_dist, EVNMotor* motor_left, EVNMotor* motor_right);
 	void begin()
 	{
+		_left = motor_left;
+		_right = motor_right;
 		_max_rpm = min(_left->_pid_control.max_rpm, _right->_pid_control.max_rpm);
 	};
 
