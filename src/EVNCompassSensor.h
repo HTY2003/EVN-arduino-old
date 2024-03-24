@@ -117,6 +117,12 @@ public:
 
     EVNCompassSensor(uint8_t port) : EVNSensor(port)
     {
+        _x = 0;
+        _y = 0;
+        _z = 0;
+        _xcal = 0;
+        _ycal = 0;
+        _zcal = 0;
     };
 
     bool begin()
@@ -132,14 +138,12 @@ public:
         {
             id = read8(QMC_I2C_ADDR, (uint8_t)qmc_reg::REG_CHIP_ID);
             if (id == QMC_CHIP_ID)
-            {
                 _isqmc = true;
-            }
             else
-            {
-                return false;
-            }
+                return _sensor_started;
         }
+
+        _sensor_started = true;
 
         if (_isqmc)
         {
@@ -155,7 +159,7 @@ public:
             setRange((uint8_t)hmc_range::RANGE_4GA);
             setSamples((uint8_t)hmc_samples::SAMPLES_1);
         }
-        return true;
+        return _sensor_started;
     };
 
     bool isQMC()
@@ -170,228 +174,257 @@ public:
 
     void setMeasurementMode(uint8_t mode)
     {
-        if (_isqmc)
+        if (_sensor_started)
         {
-            uint8_t value;
-            value = read8(QMC_I2C_ADDR, qmc_reg::REG_CONFIG);
-            value &= 0b11111100;
-            value |= mode;
-            write8(QMC_I2C_ADDR, qmc_reg::REG_CONFIG, value);
-        }
-        else {
-            uint8_t value;
-            value = read8(HMC_I2C_ADDR, hmc_reg::REG_MODE);
-            value &= 0b11111100;
-            value |= mode;
-            write8(HMC_I2C_ADDR, hmc_reg::REG_MODE, value);
+            if (_isqmc)
+            {
+                uint8_t value;
+                value = read8(QMC_I2C_ADDR, qmc_reg::REG_CONFIG);
+                value &= 0b11111100;
+                value |= mode;
+                write8(QMC_I2C_ADDR, qmc_reg::REG_CONFIG, value);
+            }
+            else {
+                uint8_t value;
+                value = read8(HMC_I2C_ADDR, hmc_reg::REG_MODE);
+                value &= 0b11111100;
+                value |= mode;
+                write8(HMC_I2C_ADDR, hmc_reg::REG_MODE, value);
+            }
         }
     };
 
     void setDataRate(uint8_t dataRate)
     {
-        if (_isqmc)
+        if (_sensor_started)
         {
-            switch ((qmc_datarate)dataRate)
+            if (_isqmc)
             {
-            case qmc_datarate::DATARATE_10HZ:
-                _freq = 10;
-                break;
+                switch ((qmc_datarate)dataRate)
+                {
+                case qmc_datarate::DATARATE_10HZ:
+                    _freq = 10;
+                    break;
 
-            case qmc_datarate::DATARATE_50HZ:
-                _freq = 50;
-                break;
+                case qmc_datarate::DATARATE_50HZ:
+                    _freq = 50;
+                    break;
 
-            case qmc_datarate::DATARATE_100HZ:
-                _freq = 100;
-                break;
+                case qmc_datarate::DATARATE_100HZ:
+                    _freq = 100;
+                    break;
 
-            case qmc_datarate::DATARATE_200HZ:
-                _freq = 200;
-                break;
+                case qmc_datarate::DATARATE_200HZ:
+                    _freq = 200;
+                    break;
+                }
+                uint8_t value;
+                value = read8(QMC_I2C_ADDR, qmc_reg::REG_CONFIG);
+                value &= 0b11110011;
+                value |= (dataRate << 2);
+                write8(QMC_I2C_ADDR, qmc_reg::REG_CONFIG, value);
             }
-            uint8_t value;
-            value = read8(QMC_I2C_ADDR, qmc_reg::REG_CONFIG);
-            value &= 0b11110011;
-            value |= (dataRate << 2);
-            write8(QMC_I2C_ADDR, qmc_reg::REG_CONFIG, value);
-        }
-        else {
-            switch ((hmc_datarate)dataRate)
-            {
-            case hmc_datarate::DATARATE_0_75HZ:
-                _freq = 0.75;
-                break;
-            case hmc_datarate::DATARATE_1_5HZ:
-                _freq = 1.5;
-                break;
-            case hmc_datarate::DATARATE_3HZ:
-                _freq = 3;
-                break;
-            case hmc_datarate::DATARATE_7_5HZ:
-                _freq = 7.5;
-                break;
-            case hmc_datarate::DATARATE_15HZ:
-                _freq = 15;
-                break;
-            case hmc_datarate::DATARATE_30HZ:
-                _freq = 30;
-                break;
-            case hmc_datarate::DATARATE_75HZ:
-                _freq = 75;
-                break;
-            }
+            else {
+                switch ((hmc_datarate)dataRate)
+                {
+                case hmc_datarate::DATARATE_0_75HZ:
+                    _freq = 0.75;
+                    break;
+                case hmc_datarate::DATARATE_1_5HZ:
+                    _freq = 1.5;
+                    break;
+                case hmc_datarate::DATARATE_3HZ:
+                    _freq = 3;
+                    break;
+                case hmc_datarate::DATARATE_7_5HZ:
+                    _freq = 7.5;
+                    break;
+                case hmc_datarate::DATARATE_15HZ:
+                    _freq = 15;
+                    break;
+                case hmc_datarate::DATARATE_30HZ:
+                    _freq = 30;
+                    break;
+                case hmc_datarate::DATARATE_75HZ:
+                    _freq = 75;
+                    break;
+                }
 
-            uint8_t value;
-            value = read8(HMC_I2C_ADDR, hmc_reg::REG_CONFIG_A);
-            value &= 0b11100011;
-            value |= (dataRate << 2);
-            write8(HMC_I2C_ADDR, hmc_reg::REG_CONFIG_A, value);
+                uint8_t value;
+                value = read8(HMC_I2C_ADDR, hmc_reg::REG_CONFIG_A);
+                value &= 0b11100011;
+                value |= (dataRate << 2);
+                write8(HMC_I2C_ADDR, hmc_reg::REG_CONFIG_A, value);
+            }
         }
     };
 
-    void setRange(uint8_t range_value) {
-        if (_isqmc)
+    void setRange(uint8_t range_value)
+    {
+        if (_sensor_started)
         {
-            switch ((qmc_range)range_value)
+            if (_isqmc)
             {
-            case qmc_range::RANGE_2GA:
-                _gain = 12000;
-                break;
+                switch ((qmc_range)range_value)
+                {
+                case qmc_range::RANGE_2GA:
+                    _gain = 12000;
+                    break;
 
-            case qmc_range::RANGE_8GA:
-                _gain = 3000;
-                break;
+                case qmc_range::RANGE_8GA:
+                    _gain = 3000;
+                    break;
+                }
+                uint8_t value;
+                value = read8(QMC_I2C_ADDR, qmc_reg::REG_CONFIG);
+                value &= 0b11001111;
+                value |= (range_value << 4);
+                write8(QMC_I2C_ADDR, qmc_reg::REG_CONFIG, value);
             }
-            uint8_t value;
-            value = read8(QMC_I2C_ADDR, qmc_reg::REG_CONFIG);
-            value &= 0b11001111;
-            value |= (range_value << 4);
-            write8(QMC_I2C_ADDR, qmc_reg::REG_CONFIG, value);
-        }
-        else {
-            switch ((hmc_range)range_value)
-            {
-            case hmc_range::RANGE_0_88GA:
-                _gain = 1370;
-                break;
-            case hmc_range::RANGE_1_3GA:
-                _gain = 1090;
-                break;
-            case hmc_range::RANGE_1_9GA:
-                _gain = 820;
-                break;
-            case hmc_range::RANGE_2_5GA:
-                _gain = 660;
-                break;
-            case hmc_range::RANGE_4GA:
-                _gain = 440;
-                break;
-            case hmc_range::RANGE_4_7GA:
-                _gain = 390;
-                break;
-            case hmc_range::RANGE_5_6GA:
-                _gain = 330;
-                break;
-            case hmc_range::RANGE_8_1GA:
-                _gain = 230;
-                break;
+            else {
+                switch ((hmc_range)range_value)
+                {
+                case hmc_range::RANGE_0_88GA:
+                    _gain = 1370;
+                    break;
+                case hmc_range::RANGE_1_3GA:
+                    _gain = 1090;
+                    break;
+                case hmc_range::RANGE_1_9GA:
+                    _gain = 820;
+                    break;
+                case hmc_range::RANGE_2_5GA:
+                    _gain = 660;
+                    break;
+                case hmc_range::RANGE_4GA:
+                    _gain = 440;
+                    break;
+                case hmc_range::RANGE_4_7GA:
+                    _gain = 390;
+                    break;
+                case hmc_range::RANGE_5_6GA:
+                    _gain = 330;
+                    break;
+                case hmc_range::RANGE_8_1GA:
+                    _gain = 230;
+                    break;
+                }
+                write8(HMC_I2C_ADDR, hmc_reg::REG_CONFIG_B, range_value << 5);
             }
-            write8(HMC_I2C_ADDR, hmc_reg::REG_CONFIG_B, range_value << 5);
         }
     };
 
     void setSamples(uint8_t samples)
     {
-        if (_isqmc)
+        if (_sensor_started)
         {
-            uint8_t value;
-            value = read8(QMC_I2C_ADDR, qmc_reg::REG_CONFIG);
-            value &= 0b00111111;
-            value |= (samples << 6);
-            write8(QMC_I2C_ADDR, qmc_reg::REG_CONFIG, value);
-        }
-        else {
-            uint8_t value;
-            value = read8(HMC_I2C_ADDR, hmc_reg::REG_CONFIG_A);
-            value &= 0b10011111;
-            value |= (samples << 5);
-            write8(HMC_I2C_ADDR, hmc_reg::REG_CONFIG_A, value);
+            if (_isqmc)
+            {
+                uint8_t value;
+                value = read8(QMC_I2C_ADDR, qmc_reg::REG_CONFIG);
+                value &= 0b00111111;
+                value |= (samples << 6);
+                write8(QMC_I2C_ADDR, qmc_reg::REG_CONFIG, value);
+            }
+            else {
+                uint8_t value;
+                value = read8(HMC_I2C_ADDR, hmc_reg::REG_CONFIG_A);
+                value &= 0b10011111;
+                value |= (samples << 5);
+                write8(HMC_I2C_ADDR, hmc_reg::REG_CONFIG_A, value);
+            }
         }
     };
 
     bool isCalibrated()
     {
-        bool output = _calibrated;
-        return output;
+        return  _calibrated;
     };
 
-    void update()
+    void update(bool blocking = true)
     {
-        if ((micros() - _last_reading_us) >= (1000000 / _freq))
+        if (_sensor_started)
         {
-            if (_isqmc)
-            {
-                _x = read16(QMC_I2C_ADDR, (uint8_t)qmc_reg::REG_X_L);
-                _y = read16(QMC_I2C_ADDR, (uint8_t)qmc_reg::REG_Y_L);
-                _z = read16(QMC_I2C_ADDR, (uint8_t)qmc_reg::REG_Z_L);
+            if (blocking)
+                while ((micros() - _last_reading_us) < (1000000 / _freq));
 
+            if ((micros() - _last_reading_us) >= (1000000 / _freq))
+            {
+                if (_isqmc)
+                {
+                    _x = read16(QMC_I2C_ADDR, (uint8_t)qmc_reg::REG_X_L);
+                    _y = read16(QMC_I2C_ADDR, (uint8_t)qmc_reg::REG_Y_L);
+                    _z = read16(QMC_I2C_ADDR, (uint8_t)qmc_reg::REG_Z_L);
+
+                }
+                else {
+                    _x = read16(HMC_I2C_ADDR, (uint8_t)hmc_reg::REG_OUT_X_M, false);
+                    _y = read16(HMC_I2C_ADDR, (uint8_t)hmc_reg::REG_OUT_Y_M, false);
+                    _z = read16(HMC_I2C_ADDR, (uint8_t)hmc_reg::REG_OUT_Z_M, false);
+                }
+                _last_reading_us = micros();
             }
-            else {
-                _x = read16(HMC_I2C_ADDR, (uint8_t)hmc_reg::REG_OUT_X_M, false);
-                _y = read16(HMC_I2C_ADDR, (uint8_t)hmc_reg::REG_OUT_Y_M, false);
-                _z = read16(HMC_I2C_ADDR, (uint8_t)hmc_reg::REG_OUT_Z_M, false);
-            }
-            _last_reading_us = micros();
         }
     };
 
-    double readRawX()
+    double readRawX(bool blocking = true)
     {
-        this->update();
+        this->update(blocking);
         return (double)_x / _gain;
     };
 
-    double readRawY()
+    double readRawY(bool blocking = true)
     {
-        this->update();
+        this->update(blocking);
         return (double)_y / _gain;
     };
 
-    double readRawZ()
+    double readRawZ(bool blocking = true)
     {
-        this->update();
+        this->update(blocking);
         return (double)_z / _gain;
     };
 
     void calibrate()
     {
-        double x0, y0, z0;
-        x0 = (double)_x / _gain - _x_hard_cal;
-        y0 = (double)_y / _gain - _y_hard_cal;
-        z0 = (double)_z / _gain - _z_hard_cal;
-        _xcal = x0 * _x_soft_cal[0] + y0 * _x_soft_cal[1] + z0 * _x_soft_cal[2];
-        _ycal = x0 * _y_soft_cal[0] + y0 * _y_soft_cal[1] + z0 * _y_soft_cal[2];
-        _zcal = x0 * _z_soft_cal[0] + y0 * _z_soft_cal[1] + z0 * _z_soft_cal[2];
+        if (_sensor_started)
+        {
+            double x0, y0, z0;
+            x0 = (double)_x / _gain - _x_hard_cal;
+            y0 = (double)_y / _gain - _y_hard_cal;
+            z0 = (double)_z / _gain - _z_hard_cal;
+            _xcal = x0 * _x_soft_cal[0] + y0 * _x_soft_cal[1] + z0 * _x_soft_cal[2];
+            _ycal = x0 * _y_soft_cal[0] + y0 * _y_soft_cal[1] + z0 * _y_soft_cal[2];
+            _zcal = x0 * _z_soft_cal[0] + y0 * _z_soft_cal[1] + z0 * _z_soft_cal[2];
+        }
     };
 
-    double read() {
-        this->update();
-        if (_calibrated) {
-            this->calibrate();
-        }
-        else {
-            _xcal = (double)_x / _gain;
-            _ycal = (double)_y / _gain;
-            _zcal = (double)_z / _gain;
-        }
+    double read(bool blocking = true)
+    {
+        if (_sensor_started)
+        {
+            this->update(blocking);
 
-        _reading = (atan2(_ycal, _xcal) / M_PI * 180) + 180;
-        return fmod(_reading - _yaw_offset + 360, 360);
+            if (_calibrated)
+            {
+                this->calibrate();
+            }
+            else
+            {
+                _xcal = (double)_x / _gain;
+                _ycal = (double)_y / _gain;
+                _zcal = (double)_z / _gain;
+            }
+
+            _reading = (atan2(_ycal, _xcal) / M_PI * 180) + 180;
+            return fmod(_reading - _yaw_offset + 360, 360);
+        }
+        return 0;
     };
 
     void setNorth()
     {
-        _yaw_offset = this->read();
+        _yaw_offset = fmod(_reading - _yaw_offset + 360, 360);
     };
 
 private:

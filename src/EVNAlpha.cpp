@@ -1,25 +1,25 @@
 #include "EVNAlpha.h"
 
-EVNButton EVNAlpha::button(_mode, _linkLED, _linkMotors);
+EVNButton EVNAlpha::button(_mode, _link_led, _link_motors);
 EVNPortSelector EVNAlpha::ports(_i2c_freq);
 uint8_t EVNAlpha::_mode;
-uint8_t EVNAlpha::_linkLED;
-uint8_t EVNAlpha::_linkMotors;
+bool EVNAlpha::_link_led;
+bool EVNAlpha::_link_motors;
 uint32_t EVNAlpha::_i2c_freq;
-// bool EVNAlpha::_has_battery_adc;
 
-EVNAlpha::EVNAlpha(uint8_t mode, uint8_t linkLED, uint8_t linkMotors, uint32_t i2c_freq)
+EVNAlpha::EVNAlpha(uint8_t mode, bool link_led, bool link_motors, uint32_t i2c_freq)
 {
+    _battery_adc_started = false;
     _mode = constrain(mode, 0, 2);
-    _linkLED = constrain(linkLED, 0, 1);
-    _linkMotors = constrain(linkMotors, 0, 1);
+    _link_led = link_led;
+    _link_motors = link_motors;
     _i2c_freq = i2c_freq;
 }
 
 void EVNAlpha::begin()
 {
-    //Set correct I2C and Serial pins
-    //TODO: To be removed after getting our board in arduino-pico core
+    //set correct I2C and Serial pins
+    //TODO: to be removed after getting our board in arduino-pico core
     Wire.setSDA(WIRE0_SDA);
     Wire.setSCL(WIRE0_SCL);
     Wire1.setSDA(WIRE1_SDA);
@@ -30,9 +30,138 @@ void EVNAlpha::begin()
     Serial2.setRX(SERIAL2_RX);
     Serial2.setTX(SERIAL2_TX);
 
-    //Initialize helper objects
+    //initialize helper objects
     ports.begin();
     button.begin();
 
-    // if (batt.begin()) _has_battery_adc = true;
+    //initialize battery ADC if available
+    if (this->beginBatteryADC()) _battery_adc_started = true;
+}
+
+bool EVNAlpha::beginBatteryADC()
+{
+    uint8_t prev_port = this->sharedPorts().getPort();
+    this->sharedPorts().setPort(BQ25887_IC_I2C_PORT);
+
+    //check for BQ25887 ID
+    //NOTE: BQ25887 not in use for our pre-V1.3 users, so this is important
+    uint8_t id = 0;
+    if (BQ25887_IC_I2C_PORT > 8)
+    {
+        Wire1.beginTransmission(BQ25887_IC_I2C_ADDRESS);
+        Wire1.write(BQ25887_REG_PART_INFO);
+        Wire1.endTransmission();
+        Wire1.requestFrom(BQ25887_IC_I2C_ADDRESS, (uint8_t)1);
+        id = Wire1.read();
+    }
+    else
+    {
+        Wire.beginTransmission(BQ25887_IC_I2C_ADDRESS);
+        Wire.write(BQ25887_REG_PART_INFO);
+        Wire.endTransmission();
+        Wire.requestFrom(BQ25887_IC_I2C_ADDRESS, (uint8_t)1);
+        id = Wire.read();
+    }
+
+    id = (id & BQ25887_MASK_PART_INFO) >> 3;
+
+    if (id != BQ25887_ID)
+    {
+        this->sharedPorts().setPort(prev_port);
+        return false;
+    }
+
+    //enable ADCs on BQ25887
+    if (BQ25887_IC_I2C_PORT > 8)
+    {
+        Wire1.beginTransmission(BQ25887_IC_I2C_ADDRESS);
+        Wire1.write(BQ25887_REG_ADC_CONTROL);
+        Wire1.write(BQ25887_CMD_ADC_CONTROL_ENABLE);
+        Wire1.endTransmission();
+    }
+    else
+    {
+        Wire.beginTransmission(BQ25887_IC_I2C_ADDRESS);
+        Wire.write(BQ25887_REG_ADC_CONTROL);
+        Wire.write(BQ25887_CMD_ADC_CONTROL_ENABLE);
+        Wire.endTransmission();
+    }
+    this->sharedPorts().setPort(prev_port);
+
+    return true;
+}
+
+int16_t EVNAlpha::getBatteryVoltage()
+{
+    if (_battery_adc_started)
+    {
+        uint8_t prev_port = this->sharedPorts().getPort();
+        this->sharedPorts().setPort(BQ25887_IC_I2C_PORT);
+
+        uint16_t vnom = 0;
+        if (BQ25887_IC_I2C_PORT > 8)
+        {
+            Wire1.beginTransmission(BQ25887_IC_I2C_ADDRESS);
+            Wire1.write(BQ25887_REG_VBAT_ADC1);
+            Wire1.endTransmission();
+            Wire1.requestFrom(BQ25887_IC_I2C_ADDRESS, (uint8_t)2);
+            vnom = Wire1.read() << 8 | Wire1.read();
+        }
+        else
+        {
+            Wire.beginTransmission(BQ25887_IC_I2C_ADDRESS);
+            Wire.write(BQ25887_REG_VBAT_ADC1);
+            Wire.endTransmission();
+            Wire.requestFrom(BQ25887_IC_I2C_ADDRESS, (uint8_t)2);
+            vnom = Wire.read() << 8 | Wire.read();
+        }
+
+        this->sharedPorts().setPort(prev_port);
+
+        button.sharedState()->flash = (vnom < LOW_BATTERY_THRESHOLD_MV);
+
+        return vnom;
+    }
+    return 0;
+}
+
+int16_t EVNAlpha::getCell1Voltage()
+{
+    if (_battery_adc_started)
+    {
+        uint8_t prev_port = this->sharedPorts().getPort();
+        this->sharedPorts().setPort(BQ25887_IC_I2C_PORT);
+
+        uint16_t vcell1 = 0;
+        if (BQ25887_IC_I2C_PORT > 8)
+        {
+            Wire1.beginTransmission(BQ25887_IC_I2C_ADDRESS);
+            Wire1.write(BQ25887_REG_VCELLTOP_ADC1);
+            Wire1.endTransmission();
+            Wire1.requestFrom(BQ25887_IC_I2C_ADDRESS, (uint8_t)2);
+            vcell1 = Wire1.read() << 8 | Wire1.read();
+        }
+        else
+        {
+            Wire.beginTransmission(BQ25887_IC_I2C_ADDRESS);
+            Wire.write(BQ25887_REG_VCELLTOP_ADC1);
+            Wire.endTransmission();
+            Wire.requestFrom(BQ25887_IC_I2C_ADDRESS, (uint8_t)2);
+            vcell1 = Wire.read() << 8 | Wire.read();
+        }
+
+        this->sharedPorts().setPort(prev_port);
+        return vcell1;
+    }
+    return 0;
+}
+
+int16_t EVNAlpha::getCell2Voltage()
+{
+    if (_battery_adc_started)
+    {
+        //use total voltage reading / cell 1 voltage reading
+        return this->getBatteryVoltage() - this->getCell1Voltage();
+    }
+    return 0;
 }
