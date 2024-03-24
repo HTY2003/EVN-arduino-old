@@ -15,6 +15,8 @@ public:
             _wire = &Wire;
         else
             _wire = &Wire1;
+
+        _sensor_started = false;
     };
 
     void write8(uint8_t addr, uint8_t reg, uint8_t value, bool control_port = true)
@@ -75,6 +77,7 @@ public:
     };
 
 protected:
+    bool _sensor_started;
     uint8_t _port;
     TwoWire* _wire;
 };

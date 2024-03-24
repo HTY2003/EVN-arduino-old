@@ -1,49 +1,59 @@
 //TUNING FOR CUSTOM GEARMOTOR
 //edit this to change CUSTOM_MOTOR defaults
-//example settings below are for the JGA25-370 motor, 6V 77RPM version
-#define SPEED_PID_KP_CUSTOM		5       //speed PID gains (PI controller)
-#define SPEED_PID_KI_CUSTOM		0.125
-#define SPEED_PID_KD_CUSTOM		0
-#define POS_PID_KP_CUSTOM		8       //position PID gains (PD controller)
-#define POS_PID_KI_CUSTOM		0
-#define POS_PID_KD_CUSTOM		16
+#define KP_CUSTOM		        0.25       //position PID gains (PD controller)
+#define KI_CUSTOM	        	0.000125
+#define KD_MAX_CUSTOM		    5
 #define CUSTOM_MOTOR_MAX_RPM	77      //max RPM of the motor shaft
-#define CUSTOM_MOTOR_ACCEL      770     //deceleration in rpm/s (60 means it takes 1 second to accelerate from 0RPM to 60)
-#define CUSTOM_MOTOR_DECEL      770     //deceleration in rpm/s (60 means it takes 1 second to decelerate from 60RPM to 0)
-#define CUSTOM_PPR				11*78     //pulses on 1 encoder wheel for 1 revolution of the motor shaft
+#define CUSTOM_MOTOR_ACCEL      7700     //deceleration in rpm/s (60 means it takes 1 second to accelerate from 0RPM to 60)
+#define CUSTOM_MOTOR_DECEL      7700     //deceleration in rpm/s (60 means it takes 1 second to decelerate from 60RPM to 0)
+#define CUSTOM_PPR				1000    //pulses on 1 encoder wheel for 1 revolution of the motor shaft
 
 //LEGO MOTORS
 #define LEGO_PPR				180
 
+//TODO: add scale factor for kp during motor hold
 //TUNING FOR LEGO EV3 LARGE SERVO MOTOR
-#define SPEED_PID_KP_EV3_LARGE	5
-#define SPEED_PID_KI_EV3_LARGE	0.125
-#define SPEED_PID_KD_EV3_LARGE	0
-#define POS_PID_KP_EV3_LARGE    8
-#define POS_PID_KI_EV3_LARGE	0
-#define POS_PID_KD_EV3_LARGE	16
+#define KP_EV3_LARGE            0.35
+#define KI_EV3_LARGE	        0
+#define KD_MAX_EV3_LARGE	    2.45
 #define EV3_LARGE_MAX_RPM		155
-#define EV3_LARGE_ACCEL         1550
-#define EV3_LARGE_DECEL         1550
+#define EV3_LARGE_ACCEL         155 * 600
+#define EV3_LARGE_DECEL         155 * 600
 
 //TUNING FOR LEGO EV3 MEDIUM SERVO MOTOR
-#define SPEED_PID_KP_EV3_MED	4.5
-#define SPEED_PID_KI_EV3_MED	0.125
-#define SPEED_PID_KD_EV3_MED	0
-#define POS_PID_KP_EV3_MED	    8
-#define POS_PID_KI_EV3_MED		0
-#define POS_PID_KD_EV3_MED		16
-#define EV3_MED_MAX_RPM			230
-#define EV3_MED_ACCEL           2300
-#define EV3_MED_DECEL           2300
+#define KP_EV3_MED	            0.16
+#define KI_EV3_MED	            0
+#define KD_MAX_EV3_MED	        1.3
+#define EV3_MED_MAX_RPM			245
+#define EV3_MED_ACCEL           245 * 600
+#define EV3_MED_DECEL           245 * 600
 
 //TUNING FOR LEGO NXT LARGE SERVO MOTOR
-#define SPEED_PID_KP_NXT_LARGE	5
-#define SPEED_PID_KI_NXT_LARGE	0.125
-#define SPEED_PID_KD_NXT_LARGE	0
-#define POS_PID_KP_NXT_LARGE	8
-#define POS_PID_KI_NXT_LARGE	0
-#define POS_PID_KD_NXT_LARGE	16
+#define KP_NXT_LARGE	        0.35
+#define KI_NXT_LARGE	        0
+#define KD_MAX_NXT_LARGE	    2.45
 #define NXT_LARGE_MAX_RPM		155
-#define NXT_LARGE_ACCEL         1550
-#define NXT_LARGE_DECEL         1550
+#define NXT_LARGE_ACCEL         155 * 600
+#define NXT_LARGE_DECEL         155 * 600
+
+//TUNING FOR EVN MOTOR CLASS
+#define USER_RUN_DEGREES_MIN_LOOP_COUNT 1
+#define USER_RUN_DEGREES_MIN_ERROR_DEG  0.5
+
+//TUNING FOR EVN DRIVEBASE CLASS
+#define USER_DRIVE_POS_MIN_LOOP_COUNT   1
+#define USER_DRIVE_POS_MIN_ERROR_DEG    0.5
+#define USER_DRIVE_POS_MIN_ERROR_MM     0.5
+
+#define DRIVEBASE_KP_SPEED              0.01
+#define DRIVEBASE_KI_SPEED              0
+#define DRIVEBASE_KD_SPEED              0
+
+#define DRIVEBASE_KP_TURN_RATE          18
+#define DRIVEBASE_KI_TURN_RATE          0
+#define DRIVEBASE_KD_TURN_RATE          36
+
+#define USER_SPEED_ACCEL                360
+#define USER_SPEED_DECEL                360
+#define USER_TURN_RATE_ACCEL            360
+#define USER_TURN_RATE_DECEL            360

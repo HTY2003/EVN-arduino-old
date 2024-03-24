@@ -6,9 +6,6 @@
 #include "EVNAlpha.h"
 #include "U8g2/src/U8x8lib.h"
 
-#define DISPLAY_0DEG false
-#define DISPLAY_180DEG true
-
 class EVNDisplay
 {
 private:
@@ -19,7 +16,7 @@ private:
   static const uint16_t MAX_CHAR = (SCREEN_WIDTH / 8);
 
 public:
-  EVNDisplay(uint8_t port, bool rotate = DISPLAY_0DEG);
+  EVNDisplay(uint8_t port, bool flip_180deg = false);
   bool begin();
   void splashEVN();
   void rotate();
@@ -29,66 +26,72 @@ public:
   template <typename T>
   void writeData(uint8_t row, T data)
   {
-    uint8_t prev_port = EVNAlpha::sharedPorts().getPort();
-    EVNAlpha::sharedPorts().setPort(_port);
-    uint8_t rowc = constrain(row, 0, NO_OF_ROWS - 1);
-
-    //convert to String, so that it can be used with u8x8.print()
-    String datas = String(data);
-
-    //trim the string if it's too long
-    if (datas.length() > (MAX_CHAR - _rownamelen[rowc]))
+    if (_sensor_started)
     {
-      datas = datas.substring(0, (MAX_CHAR - _rownamelen[rowc]));
+      uint8_t prev_port = EVNAlpha::sharedPorts().getPort();
+      EVNAlpha::sharedPorts().setPort(_port);
+      uint8_t rowc = constrain(row - 1, 0, NO_OF_ROWS - 1);
+
+      //convert to String, so that it can be used with u8x8.print()
+      String datas = String(data);
+
+      //trim the string if it's too long
+      if (datas.length() > (MAX_CHAR - _rownamelen[rowc]))
+      {
+        datas = datas.substring(0, (MAX_CHAR - _rownamelen[rowc]));
+      }
+
+      //pad the pixels after data with ' '
+      for (int i = _rownamelen[rowc] + datas.length(); i < MAX_CHAR; i++)
+      {
+        _display8x8->drawGlyph(i, rowc, ' ');
+      }
+
+      //start writing only from after the row name (saves time)
+      _display8x8->setCursor(_rownamelen[rowc], rowc);
+      _display8x8->print(datas);
+
+      EVNAlpha::sharedPorts().setPort(prev_port);
     }
-
-    //pad the pixels after data with ' '
-    for (int i = _rownamelen[rowc] + datas.length(); i < MAX_CHAR; i++)
-    {
-      _display8x8->drawGlyph(i, rowc, ' ');
-    }
-
-    //start writing only from after the row name (saves time)
-    _display8x8->setCursor(_rownamelen[rowc], rowc);
-    _display8x8->print(datas);
-
-    EVNAlpha::sharedPorts().setPort(prev_port);
   };
 
   template <typename T>
   void writeLabel(uint8_t row, T label)
   {
-    uint8_t prev_port = EVNAlpha::sharedPorts().getPort();
-    EVNAlpha::sharedPorts().setPort(_port);
-    uint8_t rowc = constrain(row, 0, NO_OF_ROWS - 1);
-
-    //convert to String, so that it can be used with u8x8.print()
-    String labels = String(label);
-
-    //trim the string if it's too long
-    if (labels.length() > MAX_CHAR)
+    if (_sensor_started)
     {
-      labels = labels.substring(0, MAX_CHAR);
-    }
+      uint8_t prev_port = EVNAlpha::sharedPorts().getPort();
+      EVNAlpha::sharedPorts().setPort(_port);
+      uint8_t rowc = constrain(row - 1, 0, NO_OF_ROWS - 1);
 
-    // if new name is shorter than old name, wipe out pixels from old name
-    uint8_t namelen = labels.length();
-    if (namelen < _rownamelen[rowc])
-    {
-      for (int i = namelen; i < _rownamelen[rowc]; i++)
+      //convert to String, so that it can be used with u8x8.print()
+      String labels = String(label);
+
+      //trim the string if it's too long
+      if (labels.length() > MAX_CHAR)
       {
-        _display8x8->drawGlyph(i, rowc, ' ');
+        labels = labels.substring(0, MAX_CHAR);
       }
+
+      // if new name is shorter than old name, wipe out pixels from old name
+      uint8_t namelen = labels.length();
+      if (namelen < _rownamelen[rowc])
+      {
+        for (int i = namelen; i < _rownamelen[rowc]; i++)
+        {
+          _display8x8->drawGlyph(i, rowc, ' ');
+        }
+      }
+
+      //set new row name length
+      _rownamelen[rowc] = namelen;
+
+      //print new row name to display
+      _display8x8->setCursor(0, rowc);
+      _display8x8->print(labels);
+
+      EVNAlpha::sharedPorts().setPort(prev_port);
     }
-
-    //set new row name length
-    _rownamelen[rowc] = namelen;
-
-    //print new row name to display
-    _display8x8->setCursor(0, rowc);
-    _display8x8->print(labels);
-
-    EVNAlpha::sharedPorts().setPort(prev_port);
   };
 
   //alias for writeLabel
@@ -113,8 +116,9 @@ public:
   };
 
 private:
+  bool _sensor_started;
   uint8_t _port;
-  bool _rotate;
+  bool _flip_180deg;
   U8X8* _display8x8;
   uint8_t _rownamelen[NO_OF_ROWS] = { 0 };
 };
