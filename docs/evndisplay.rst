@@ -13,6 +13,20 @@ This library is focused on displaying text, so if you'd like to tinker with anim
 
 .. note:: This class does I2C port selection and de-selection automatically, so users do not need to call ``setPort()`` using their EVNAlpha objects.
 
+Wiring (I2C)
+------------
+
+====  ==========  ===========
+Host  Peripheral  Description
+====  ==========  ===========
+GND   GND         Ground (0V)
+3V3   VCC         3.3V Power
+SCL   SCL         I2C Serial Clock
+SDA   SDA         I2C Serial Data
+====  ==========  ===========
+
+Constructor
+-----------
 .. class:: EVNDisplay(uint8_t port, bool flip_180deg = false)
 
     :param port: I2C port the sensor is connected to (1-16)

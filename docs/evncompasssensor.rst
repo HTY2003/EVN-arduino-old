@@ -17,6 +17,22 @@ This class provides the following features and functionalities for our Compass S
 
 .. note:: This library is still a heavy work-in-progress! Expect many new functions and features until official release.
 
+Wiring (I2C)
+------------
+
+====  ==========  ===========
+Host  Peripheral  Description
+====  ==========  ===========
+3V3   VCC         3.3V Power
+GND   GND         Ground (0V)
+SCL   SCL         I2C Serial Clock
+SDA   SDA         I2C Serial Data
+--    DRDY        Not Connected
+====  ==========  ===========
+
+Constructor
+-----------
+
 .. class:: EVNCompassSensor(uint8_t port)
   
     :param port: I2C port the sensor is connected to (1-16)

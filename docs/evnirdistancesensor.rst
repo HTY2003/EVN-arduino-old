@@ -13,11 +13,27 @@ This class provides the following features and functionalities for our IR Distan
 
 .. note:: This class does I2C port selection and de-selection automatically, so users do not need to call ``setPort()`` using their EVNAlpha objects.
 
+Wiring (I2C)
+------------
+
+====  ==========  ===========
+Host  Peripheral  Description
+====  ==========  ===========
+3V3   VIN         3.3V Power
+GND   GND         Ground (0V)
+SCL   SCL         I2C Serial Clock
+SDA   SDA         I2C Serial Data
+====  ==========  ===========
+
+Constructor
+-----------
+
 .. class:: EVNIRDistanceSensor(uint8_t port, uint8_t timing_budget_ms = 33)
   
     :param port: I2C port the sensor is connected to (1-16)
 
     :param timing_budget_ms: Timing budget allocated for each reading (in ms). Decreasing can lead to lower latency, at the cost of range. Defaults to 33ms
+
 
 Functions
 ---------

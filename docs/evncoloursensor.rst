@@ -10,6 +10,24 @@ This class provides the following features and functionalities for our Colour Se
 
 .. note:: This class does I2C port selection and de-selection automatically, so users do not need to call ``setPort()`` using their EVNAlpha objects.
 
+Wiring (I2C)
+------------
+
+====  ==========  ===========
+Host  Peripheral  Description
+====  ==========  ===========
+ --   VIN         Not Soldered
+GND   GND         Ground (0V)
+3V3   3V3         3.3V Power
+SCL   SCL         I2C Serial Clock
+SDA   SDA         I2C Serial Data
+ --   INT         Not Connected
+ --   LED         Not Soldered
+====  ==========  ===========
+
+Constructor
+-----------
+
 .. class:: EVNColourSensor(uint8_t port, uint8_t integration_cycles = 1, uint8_t gain = GAIN_16X)
 
     :param port: I2C port the sensor is connected to (1-16)
