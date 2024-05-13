@@ -171,7 +171,7 @@ Before reading calibrated values, you need to call the ``setXXrange()`` function
 
 After calling these functions, you can use the ``readXXCal()`` functions.
 
-.. function:: double readClearCal(bool blocking = true)
+.. function:: float readClearCal(bool blocking = true)
 
     Returns calibrated clear reading from sensor.
 
@@ -184,7 +184,7 @@ After calling these functions, you can use the ``readXXCal()`` functions.
         * if ``setClearRange()`` has been called, calibrated clear reading from 0 to 1
         * -1 otherwise
 
-.. function:: double readRedCal(bool blocking = true)
+.. function:: float readRedCal(bool blocking = true)
     
     Returns calibrated red reading from sensor.
 
@@ -197,7 +197,7 @@ After calling these functions, you can use the ``readXXCal()`` functions.
         * if ``setRedRange()`` has been called, calibrated red reading from 0 to 1
         * -1 otherwise
 
-.. function:: double readGreenCal(bool blocking = true)
+.. function:: float readGreenCal(bool blocking = true)
     
     Returns calibrated green reading from sensor.
 
@@ -210,7 +210,7 @@ After calling these functions, you can use the ``readXXCal()`` functions.
         * if ``setGreenRange()`` has been called, calibrated green reading from 0 to 1
         * -1 otherwise
 
-.. function:: double readBlueCal()
+.. function:: float readBlueCal()
     
     Returns calibrated blue reading from sensor.
 
@@ -226,19 +226,19 @@ After calling these functions, you can use the ``readXXCal()`` functions.
 Reading HSV Values
 """""""""""""""""""
 
-.. function:: double readHue()
+.. function:: float readHue()
 
     Returns the Hue component of the RGB readings when converted to the HSV colour space.
 
     :returns: Hue component of HSV reading (0-360deg)
 
-.. function:: double readSaturation()
+.. function:: float readSaturation()
 
     Returns the Saturation component of the RGB readings when converted to the HSV colour space.
 
     :returns: Saturation component of HSV reading (0-1)
 
-.. function:: double readValue()
+.. function:: float readValue()
     
     Returns the Value component of the RGB readings when converted to the HSV colour space.
 

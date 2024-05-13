@@ -36,17 +36,17 @@ class EVNMotor
 		volatile bool encb_state;
 		volatile int8_t dir;
 		volatile uint8_t state;
-		volatile double ppr;
-		volatile double position;
-		volatile double position_offset;
+		volatile float ppr;
+		volatile float position;
+		volatile float position_offset;
 
 		//DPS MEASUREMENT (TIME BETWEEN PULSES)
 		volatile uint8_t last_edge_index;
 		volatile uint64_t edge_times[NO_OF_EDGES_STORED];
 		volatile bool dps_calculated;
 		volatile bool obtained_one_pulse;
-		volatile double avg_dps;
-		volatile double avg_pulse_width;
+		volatile float avg_dps;
+		volatile float avg_pulse_width;
 	};
 
 	struct pid_control_t
@@ -55,9 +55,9 @@ class EVNMotor
 		volatile uint8_t motor_type;
 		uint8_t motora;
 		uint8_t motorb;
-		volatile double max_rpm;
-		volatile double accel;
-		volatile double decel;
+		volatile float max_rpm;
+		volatile float accel;
+		volatile float decel;
 
 		//CONTROLLER
 		PIDController* pos_pid;
@@ -66,9 +66,9 @@ class EVNMotor
 		volatile bool run_pwm;
 		volatile bool run_speed;
 		volatile bool run_dir;
-		volatile double target_dps;
+		volatile float target_dps;
 		volatile bool run_pos;
-		volatile double target_pos;
+		volatile float target_pos;
 		volatile bool run_time;
 		volatile uint64_t run_time_ms;
 		volatile bool hold;
@@ -76,11 +76,11 @@ class EVNMotor
 
 		//LOOP VARIABLES
 		volatile uint64_t last_update;
-		volatile double target_dps_end_decel;
-		volatile double target_dps_constrained;
-		volatile double x;
-		volatile double error;
-		volatile double output;
+		volatile float target_dps_end_decel;
+		volatile float target_dps_constrained;
+		volatile float x;
+		volatile float error;
+		volatile float output;
 
 		volatile uint8_t counter;
 		volatile uint64_t start_time_us;
@@ -100,27 +100,27 @@ public:
 
 	EVNMotor(uint8_t port, uint8_t motortype = EV3_LARGE, uint8_t motor_dir = DIRECT, uint8_t enc_dir = DIRECT);
 	void begin();
-	double getPosition();
-	double getHeading();
+	float getPosition();
+	float getHeading();
 	void resetPosition();
-	double getDPS();
-	double getSpeed() { return this->getDPS(); };
+	float getDPS();
+	float getSpeed() { return this->getDPS(); };
 
-	void setPID(double p, double i, double d);
-	void setAccel(double accel_dps_sq);
-	void setDecel(double decel_dps_sq);
-	void setMaxRPM(double max_rpm);
+	void setPID(float p, float i, float d);
+	void setAccel(float accel_dps_sq);
+	void setDecel(float decel_dps_sq);
+	void setMaxRPM(float max_rpm);
 	void setPPR(uint32_t ppr);
 
-	void runPWM(double duty_cycle);
-	void runSpeed(double dps) { this->runDPS(dps); };
-	void runDPS(double dps);
+	void runPWM(float duty_cycle);
+	void runSpeed(float dps) { this->runDPS(dps); };
+	void runDPS(float dps);
 
-	void runPosition(double dps, double position, uint8_t stop_action = STOP_BRAKE, bool wait = true);
-	void runAngle(double dps, double degrees, uint8_t stop_action = STOP_BRAKE, bool wait = true);
-	void runHeading(double dps, double heading, uint8_t stop_action = STOP_BRAKE, bool wait = true);
+	void runPosition(float dps, float position, uint8_t stop_action = STOP_BRAKE, bool wait = true);
+	void runAngle(float dps, float degrees, uint8_t stop_action = STOP_BRAKE, bool wait = true);
+	void runHeading(float dps, float heading, uint8_t stop_action = STOP_BRAKE, bool wait = true);
 
-	void runTime(double dps, uint32_t time_ms, uint8_t stop_action = STOP_BRAKE, bool wait = true);
+	void runTime(float dps, uint32_t time_ms, uint8_t stop_action = STOP_BRAKE, bool wait = true);
 
 	//heading -> 0 - 360
 	//angle / degrees -> relative
@@ -137,11 +137,11 @@ public:
 
 protected:
 public:
-	double clean_input_dps(double dps);
-	uint8_t clean_input_dir(double dps);
+	float clean_input_dps(float dps);
+	uint8_t clean_input_dir(float dps);
 	uint8_t clean_input_stop_action(uint8_t stop_action);
 
-	double _position_offset = 0;
+	float _position_offset = 0;
 	pid_control_t _pid_control;
 	encoder_state_t _encoder;
 
@@ -220,10 +220,10 @@ public:
 		}
 	}
 
-	static void runPWM_static(pid_control_t* pidArg, double speed)
+	static void runPWM_static(pid_control_t* pidArg, float speed)
 	{
 
-		double speedc = constrain(speed, -1, 1);
+		float speedc = constrain(speed, -1, 1);
 
 		// if button is set to enable motors / button is unlinked from motors
 		if (motors_enabled()) {
@@ -255,7 +255,7 @@ public:
 		}
 	}
 
-	static void stopAction_static(pid_control_t* pidArg, encoder_state_t* encoderArg, uint64_t now, double pos, double dps)
+	static void stopAction_static(pid_control_t* pidArg, encoder_state_t* encoderArg, uint64_t now, float pos, float dps)
 	{
 		//reset PID controller, stop loop control
 		pidArg->pos_pid->reset();
@@ -300,24 +300,24 @@ public:
 		}
 	}
 
-	static double getPosition_static(encoder_state_t* arg)
+	static float getPosition_static(encoder_state_t* arg)
 	{
 		// resolution of encoder readout is in CPR (4 * PPR)
-		return (double)arg->position * 360 / (4 * arg->ppr) - arg->position_offset;
+		return (float)arg->position * 360 / (4 * arg->ppr) - arg->position_offset;
 	}
 
-	static double getDPS_static(encoder_state_t* arg)
+	static float getDPS_static(encoder_state_t* arg)
 	{
 		uint64_t now = micros();
-		double last_pulse_width = now - arg->edge_times[arg->last_edge_index];
+		float last_pulse_width = now - arg->edge_times[arg->last_edge_index];
 
 		if (!arg->obtained_one_pulse) return 0;
 
 		if (!arg->dps_calculated)
 		{
-			double sum_dps = 0;
-			double sum_pulse_width = 0;
-			double number_of_pulses = 0;
+			float sum_dps = 0;
+			float sum_pulse_width = 0;
+			float number_of_pulses = 0;
 
 			for (uint8_t i = 0; i < (NO_OF_EDGES_STORED - 1); i++)
 			{
@@ -326,8 +326,8 @@ public:
 				uint64_t end = arg->edge_times[end_index];
 				uint64_t start = arg->edge_times[start_index];
 
-				double pulse_width = end - start;
-				double pulse_dps = 0;
+				float pulse_width = end - start;
+				float pulse_dps = 0;
 				if (pulse_width > 0)
 				{
 					pulse_dps = 360000000 / pulse_width / arg->ppr;
@@ -350,7 +350,7 @@ public:
 		// this occurs when the motor is slowing down (pulses get longer and longer)
 		else if (last_pulse_width > arg->avg_pulse_width)
 		{
-			double final_dps = (1000000 / last_pulse_width) / arg->ppr * 360;
+			float final_dps = (1000000 / last_pulse_width) / arg->ppr * 360;
 			return final_dps * arg->dir;
 		}
 
@@ -361,14 +361,14 @@ public:
 	static void pid_update(pid_control_t* pidArg, encoder_state_t* encoderArg)
 	{
 		uint64_t now = micros();
-		double pos = getPosition_static(encoderArg);
-		double dps = getDPS_static(encoderArg);
-		double time_since_last_loop = ((double)now - (double)pidArg->last_update) / 1000000;
+		float pos = getPosition_static(encoderArg);
+		float dps = getDPS_static(encoderArg);
+		float time_since_last_loop = ((float)now - (float)pidArg->last_update) / 1000000;
 		pidArg->last_update = now;
 
 		if (motors_enabled() && loop_control_enabled(pidArg))
 		{
-			double decel_dps = pidArg->target_dps;
+			float decel_dps = pidArg->target_dps;
 
 			if (position_control_enabled(pidArg))
 			{
@@ -388,8 +388,8 @@ public:
 
 				pidArg->run_dir = (pidArg->target_pos - pos > 0) ? DIRECT : REVERSE;
 
-				double error = fabs(pidArg->target_pos - pos);
-				double max_error_before_decel = pow(pidArg->target_dps, 2) / pidArg->decel / 2;
+				float error = fabs(pidArg->target_pos - pos);
+				float max_error_before_decel = pow(pidArg->target_dps, 2) / pidArg->decel / 2;
 
 				if (error < max_error_before_decel)
 					decel_dps = sqrt(error / max_error_before_decel) * pidArg->target_dps;
@@ -403,14 +403,14 @@ public:
 					return;
 				}
 
-				if ((pidArg->target_dps / pidArg->decel) * 1000000 > ((double)pidArg->run_time_ms * 1000 + pidArg->start_time_us - now))
-					decel_dps = pidArg->decel * ((double)pidArg->run_time_ms * 1000 + (double)pidArg->start_time_us - (double)now) / 1000000;
+				if ((pidArg->target_dps / pidArg->decel) * 1000000 > ((float)pidArg->run_time_ms * 1000 + pidArg->start_time_us - now))
+					decel_dps = pidArg->decel * ((float)pidArg->run_time_ms * 1000 + (float)pidArg->start_time_us - (float)now) / 1000000;
 			}
 
 			pidArg->target_dps_end_decel = decel_dps;
-			double signed_target_dps_end_decel = pidArg->target_dps_end_decel * ((pidArg->run_dir == REVERSE) ? -1 : 1);
+			float signed_target_dps_end_decel = pidArg->target_dps_end_decel * ((pidArg->run_dir == REVERSE) ? -1 : 1);
 
-			double old_x = pidArg->x;
+			float old_x = pidArg->x;
 
 			if (fabs(pidArg->x - pos) < 1 / pidArg->pos_pid->getKp()) //anti-windup
 			{
@@ -454,9 +454,9 @@ public:
 
 			pidArg->error = pidArg->x - pos;
 
-			double kp = pidArg->pos_pid->getKp();
-			double ki = pidArg->pos_pid->getKi();
-			double kd = pidArg->pos_pid->getKd();
+			float kp = pidArg->pos_pid->getKp();
+			float ki = pidArg->pos_pid->getKi();
+			float kd = pidArg->pos_pid->getKd();
 
 			pidArg->pos_pid->setKd((1 - fabs(pidArg->target_dps) / pidArg->max_rpm / 6) * kd);
 
@@ -554,19 +554,19 @@ typedef struct
 	//DRIVEBASE CHARACTERISTICS
 	volatile uint8_t motor_type;
 
-	volatile double max_rpm;
-	volatile double max_dps;
-	volatile double max_turn_rate;
-	volatile double max_speed;
-	volatile double wheel_dia;
-	volatile double axle_track;
+	volatile float max_rpm;
+	volatile float max_dps;
+	volatile float max_turn_rate;
+	volatile float max_speed;
+	volatile float wheel_dia;
+	volatile float axle_track;
 	EVNMotor* motor_left;
 	EVNMotor* motor_right;
 
-	volatile double speed_accel;
-	volatile double speed_decel;
-	volatile double turn_rate_accel;
-	volatile double turn_rate_decel;
+	volatile float speed_accel;
+	volatile float speed_decel;
+	volatile float turn_rate_accel;
+	volatile float turn_rate_decel;
 
 	//CONTROLLERS
 	PIDController* turn_rate_pid;
@@ -577,51 +577,51 @@ typedef struct
 	volatile uint8_t stop_action;
 
 	//USER-SET
-	volatile double target_speed;
-	volatile double target_turn_rate;
+	volatile float target_speed;
+	volatile float target_turn_rate;
 
-	volatile double target_speed_constrained;
-	volatile double target_turn_rate_constrained;
+	volatile float target_speed_constrained;
+	volatile float target_turn_rate_constrained;
 
 	volatile bool drive;
 	volatile bool drive_position;
 
 	//DRIVE
-	volatile double target_angle;
-	volatile double target_distance;
-	// volatile double target_position_x;
-	// volatile double target_position_y;
+	volatile float target_angle;
+	volatile float target_distance;
+	// volatile float target_position_x;
+	// volatile float target_position_y;
 
-	volatile double angle_to_target;
-	volatile double angle_error;
-	volatile double angle_output;
+	volatile float angle_to_target;
+	volatile float angle_error;
+	volatile float angle_output;
 
-	volatile double speed_error;
-	volatile double speed_output;
+	volatile float speed_error;
+	volatile float speed_output;
 
-	volatile double target_motor_left_dps;
-	volatile double target_motor_right_dps;
+	volatile float target_motor_left_dps;
+	volatile float target_motor_right_dps;
 
 	//DRIVE POSITION
-	// volatile double start_position_x;
-	// volatile double start_position_y;
-	// volatile double start_angle;
-	// volatile double start_distance;
-	// volatile double end_position_x;
-	// volatile double end_position_y;
-	volatile double end_angle;
-	volatile double end_distance;
+	// volatile float start_position_x;
+	// volatile float start_position_y;
+	// volatile float start_angle;
+	// volatile float start_distance;
+	// volatile float end_position_x;
+	// volatile float end_position_y;
+	volatile float end_angle;
+	volatile float end_distance;
 
 	//ODOMETRY
-	volatile double current_distance;
-	volatile double prev_distance;
-	volatile double current_angle;
-	volatile double position_x;
-	volatile double position_y;
-	// volatile double motor_left_x;
-	// volatile double motor_left_y;
-	// volatile double motor_right_x;
-	// volatile double motor_right_y;
+	volatile float current_distance;
+	volatile float prev_distance;
+	volatile float current_angle;
+	volatile float position_x;
+	volatile float position_y;
+	// volatile float motor_left_x;
+	// volatile float motor_left_y;
+	// volatile float motor_right_x;
+	// volatile float motor_right_y;
 	volatile uint8_t counter;
 }	drivebase_state_t;
 
@@ -632,35 +632,35 @@ private:
 	static const uint16_t PID_TIMER_INTERVAL_US = 1000;
 
 public:
-	EVNDrivebase(double wheel_dia, double axle_track, EVNMotor* motor_left, EVNMotor* motor_right);
+	EVNDrivebase(float wheel_dia, float axle_track, EVNMotor* motor_left, EVNMotor* motor_right);
 	void begin();
 
-	void setSpeedPID(double kp, double ki, double kd);
-	void setTurnRatePID(double kp, double ki, double kd);
-	void setSpeedAccel(double speed_accel);
-	void setSpeedDecel(double speed_decel);
-	void setTurnRateAccel(double turn_rate_accel);
-	void setTurnRateDecel(double turn_rate_decel);
+	void setSpeedPID(float kp, float ki, float kd);
+	void setTurnRatePID(float kp, float ki, float kd);
+	void setSpeedAccel(float speed_accel);
+	void setSpeedDecel(float speed_decel);
+	void setTurnRateAccel(float turn_rate_accel);
+	void setTurnRateDecel(float turn_rate_decel);
 
-	double getDistance();
-	double getAngle();
-	double getHeading();
-	double getX();
-	double getY();
+	float getDistance();
+	float getAngle();
+	float getHeading();
+	float getX();
+	float getY();
 	void resetXY();
-	double getDistanceToPoint(double x, double y);
+	float getDistanceToPoint(float x, float y);
 
-	void drive(double speed, double turn_rate);
-	void driveTurnRate(double speed, double turn_rate);
-	void driveRadius(double speed, double radius);
-	void straight(double speed, double distance, uint8_t stop_action = STOP_BRAKE, bool wait = true);
-	void curve(double speed, double radius, double angle, uint8_t stop_action = STOP_BRAKE, bool wait = true);
-	void curveRadius(double speed, double radius, double angle, uint8_t stop_action = STOP_BRAKE, bool wait = true);
-	void curveTurnRate(double speed, double turn_rate, double angle, uint8_t stop_action = STOP_BRAKE, bool wait = true);
-	void turn(double turn_rate, double degrees, uint8_t stop_action = STOP_BRAKE, bool wait = true);
-	void turnDegrees(double turn_rate, double degrees, uint8_t stop_action = STOP_BRAKE, bool wait = true);
-	void turnHeading(double turn_rate, double heading, uint8_t stop_action = STOP_BRAKE, bool wait = true);
-	void driveToXY(double speed, double turn_rate, double x, double y, uint8_t stop_action = STOP_BRAKE, bool restore_initial_heading = true);
+	void drive(float speed, float turn_rate);
+	void driveTurnRate(float speed, float turn_rate);
+	void driveRadius(float speed, float radius);
+	void straight(float speed, float distance, uint8_t stop_action = STOP_BRAKE, bool wait = true);
+	void curve(float speed, float radius, float angle, uint8_t stop_action = STOP_BRAKE, bool wait = true);
+	void curveRadius(float speed, float radius, float angle, uint8_t stop_action = STOP_BRAKE, bool wait = true);
+	void curveTurnRate(float speed, float turn_rate, float angle, uint8_t stop_action = STOP_BRAKE, bool wait = true);
+	void turn(float turn_rate, float degrees, uint8_t stop_action = STOP_BRAKE, bool wait = true);
+	void turnDegrees(float turn_rate, float degrees, uint8_t stop_action = STOP_BRAKE, bool wait = true);
+	void turnHeading(float turn_rate, float heading, uint8_t stop_action = STOP_BRAKE, bool wait = true);
+	void driveToXY(float speed, float turn_rate, float x, float y, uint8_t stop_action = STOP_BRAKE, bool restore_initial_heading = true);
 
 	void stop();
 	void brake();
@@ -672,11 +672,11 @@ public:
 	//TODO: add end function
 
 private:
-	double clean_input_turn_rate(double turn_rate);
-	double clean_input_speed(double speed, double turn_rate);
+	float clean_input_turn_rate(float turn_rate);
+	float clean_input_speed(float speed, float turn_rate);
 	uint8_t clean_input_stop_action(uint8_t stop_action);
-	double scaling_factor_for_maintaining_radius(double speed, double turn_rate);
-	double radius_to_turn_rate(double speed, double radius);
+	float scaling_factor_for_maintaining_radius(float speed, float turn_rate);
+	float radius_to_turn_rate(float speed, float radius);
 	void enable_drive_position(uint8_t stop_action, bool wait);
 
 	drivebase_state_t db;
@@ -745,12 +745,12 @@ private:
 		arg->drive_position = false;
 	}
 
-	static double getDistance_static(drivebase_state_t* arg)
+	static float getDistance_static(drivebase_state_t* arg)
 	{
 		return (arg->motor_right->getPosition() + arg->motor_left->getPosition()) * arg->wheel_dia / 2 / 360 * M_PI;
 	}
 
-	static double getAngle_static(drivebase_state_t* arg)
+	static float getAngle_static(drivebase_state_t* arg)
 	{
 		return (arg->motor_right->getPosition() - arg->motor_left->getPosition()) * arg->wheel_dia / (2 * arg->axle_track);
 	}
@@ -763,12 +763,12 @@ private:
 	static void pid_update(drivebase_state_t* arg)
 	{
 		uint64_t now = micros();
-		double time_since_last_loop = ((double)now - (double)arg->last_update) / 1000000;
+		float time_since_last_loop = ((float)now - (float)arg->last_update) / 1000000;
 		arg->last_update = now;
 
 		arg->current_angle = getAngle_static(arg);
 		arg->current_distance = getDistance_static(arg);
-		double distance_travelled_in_last_loop = arg->current_distance - arg->prev_distance;
+		float distance_travelled_in_last_loop = arg->current_distance - arg->prev_distance;
 		arg->prev_distance = arg->current_distance;
 
 		arg->position_x += distance_travelled_in_last_loop * cos(arg->current_angle / 180 * M_PI);
@@ -780,16 +780,16 @@ private:
 
 		if (motors_enabled() && arg->drive)
 		{
-			double target_speed_after_decel = arg->target_speed;
-			double target_turn_rate_after_decel = arg->target_turn_rate;
+			float target_speed_after_decel = arg->target_speed;
+			float target_turn_rate_after_decel = arg->target_turn_rate;
 
 			//calculation of speed & turn rate when motor is coming to a pause
 			if (arg->drive_position)
 			{
-				double stop_speed_decel = arg->speed_decel;
-				double stop_turn_rate_decel = arg->turn_rate_decel;
-				double stop_time_to_decel_speed = fabs(arg->target_speed) / arg->speed_decel;
-				double stop_time_to_decel_turn_rate = fabs(arg->target_turn_rate) / arg->turn_rate_decel;
+				float stop_speed_decel = arg->speed_decel;
+				float stop_turn_rate_decel = arg->turn_rate_decel;
+				float stop_time_to_decel_speed = fabs(arg->target_speed) / arg->speed_decel;
+				float stop_time_to_decel_turn_rate = fabs(arg->target_turn_rate) / arg->turn_rate_decel;
 
 				//stretch either decel to match the slower one
 				if (stop_time_to_decel_speed != 0 && stop_time_to_decel_turn_rate != 0)
@@ -801,10 +801,10 @@ private:
 				}
 
 				//calculate what the current speed & turn rate should be, based on respective error
-				double error_to_start_decel_speed = fabs(pow(arg->target_speed, 2) / 2 / stop_speed_decel);
-				double error_to_start_decel_turn_rate = fabs(pow(arg->target_turn_rate, 2) / 2 / stop_turn_rate_decel);
-				double current_distance_error = fabs(arg->end_distance - arg->current_distance);
-				double current_angle_error = fabs(arg->end_angle - arg->current_angle);
+				float error_to_start_decel_speed = fabs(pow(arg->target_speed, 2) / 2 / stop_speed_decel);
+				float error_to_start_decel_turn_rate = fabs(pow(arg->target_turn_rate, 2) / 2 / stop_turn_rate_decel);
+				float current_distance_error = fabs(arg->end_distance - arg->current_distance);
+				float current_angle_error = fabs(arg->end_angle - arg->current_angle);
 
 				if (current_distance_error < error_to_start_decel_speed)
 					target_speed_after_decel = arg->target_speed * fabs(sqrt(current_distance_error / error_to_start_decel_speed));
@@ -817,16 +817,16 @@ private:
 			// arg->angle_to_target = arg->angle_to_target / M_PI * 180;
 			// if (arg->angle_to_target < 0)
 			// 	arg->angle_to_target += 360;
-			// double error_att_to_cur = arg->angle_to_target - fmod(fmod(arg->current_angle, 360) + 360, 360);
+			// float error_att_to_cur = arg->angle_to_target - fmod(fmod(arg->current_angle, 360) + 360, 360);
 			// if (error_att_to_cur > 180)
 			//  error_att_to_cur -= 360;
 			// if (error_att_to_cur < -180)
 			//  error_att_to_cur += 360;
 			// error_att_to_cur /= 180;
 			// angle error->difference between angle to target and current angle(-1 to 1)
-			// double cx = arg->target_position_x + cos(arg->target_angle / 180 * M_PI);
-			// double cy = arg->target_position_y + sin(arg->target_angle / 180 * M_PI);
-			// double perpendicular_distance = fabs((cx - arg->target_position_x) * (arg->position_y - arg->target_position_y) - (cy - arg->target_position_y) * (arg->position_x - arg->target_position_x));
+			// float cx = arg->target_position_x + cos(arg->target_angle / 180 * M_PI);
+			// float cy = arg->target_position_y + sin(arg->target_angle / 180 * M_PI);
+			// float perpendicular_distance = fabs((cx - arg->target_position_x) * (arg->position_y - arg->target_position_y) - (cy - arg->target_position_y) * (arg->position_x - arg->target_position_x));
 
 			//angle error = the difference between the robot's current angle and the angle it should travel at
 			arg->angle_error = arg->target_angle - arg->current_angle;
@@ -851,7 +851,7 @@ private:
 			arg->target_motor_right_dps = constrain(arg->speed_output + arg->angle_output, -arg->max_dps, arg->max_dps);
 
 			//maintain ratio between speeds when either speed exceeds motor limits
-			double ratio = arg->target_motor_left_dps / arg->target_motor_right_dps;
+			float ratio = arg->target_motor_left_dps / arg->target_motor_right_dps;
 			if (fabs(arg->target_motor_left_dps) > arg->max_dps)
 			{
 				if (arg->target_motor_left_dps > 0)
@@ -875,7 +875,7 @@ private:
 			arg->motor_right->runSpeed(arg->target_motor_right_dps);
 
 			//stored to later check if target angle & dist is going beyond the end angle & dist
-			double target_dist_from_end, target_angle_from_end;
+			float target_dist_from_end, target_angle_from_end;
 			if (arg->drive_position)
 			{
 				target_dist_from_end = fabs(arg->target_distance - arg->end_distance);
@@ -888,20 +888,20 @@ private:
 				&& !arg->motor_left->stalled() && !arg->motor_right->stalled())
 			{
 				//calculating time taken to decel/accel to target speed & turn rate
-				double new_speed_accel = arg->speed_accel;
-				double new_speed_decel = arg->speed_decel;
-				double new_turn_rate_accel = arg->turn_rate_accel;
-				double new_turn_rate_decel = arg->turn_rate_decel;
-				double time_to_decel_speed = 0;
-				double time_to_accel_speed = 0;
+				float new_speed_accel = arg->speed_accel;
+				float new_speed_decel = arg->speed_decel;
+				float new_turn_rate_accel = arg->turn_rate_accel;
+				float new_turn_rate_decel = arg->turn_rate_decel;
+				float time_to_decel_speed = 0;
+				float time_to_accel_speed = 0;
 				bool stretch_speed_accel = true;
-				double time_to_decel_turn_rate = 0;
-				double time_to_accel_turn_rate = 0;
+				float time_to_decel_turn_rate = 0;
+				float time_to_accel_turn_rate = 0;
 				bool stretch_turn_rate_accel = true;
 
 				if (target_speed_after_decel >= 0 && arg->target_speed_constrained >= 0)
 				{
-					double difference = target_speed_after_decel - arg->target_speed_constrained;
+					float difference = target_speed_after_decel - arg->target_speed_constrained;
 					if (difference > 0)
 						time_to_accel_speed = fabs(difference) / arg->speed_accel;
 					else
@@ -912,7 +912,7 @@ private:
 				}
 				else if (target_speed_after_decel <= 0 && arg->target_speed_constrained <= 0)
 				{
-					double difference = target_speed_after_decel - arg->target_speed_constrained;
+					float difference = target_speed_after_decel - arg->target_speed_constrained;
 					if (difference < 0)
 						time_to_accel_speed = fabs(difference) / arg->speed_accel;
 					else
@@ -929,7 +929,7 @@ private:
 
 				if (target_turn_rate_after_decel >= 0 && arg->target_turn_rate_constrained >= 0)
 				{
-					double difference = target_turn_rate_after_decel - arg->target_turn_rate_constrained;
+					float difference = target_turn_rate_after_decel - arg->target_turn_rate_constrained;
 					if (difference > 0)
 						time_to_accel_turn_rate = fabs(difference) / arg->turn_rate_accel;
 					else
@@ -940,7 +940,7 @@ private:
 				}
 				else if (target_turn_rate_after_decel < 0 && arg->target_turn_rate_constrained < 0)
 				{
-					double difference = target_turn_rate_after_decel - arg->target_turn_rate_constrained;
+					float difference = target_turn_rate_after_decel - arg->target_turn_rate_constrained;
 					if (difference < 0)
 						time_to_accel_turn_rate = fabs(difference) / arg->turn_rate_accel;
 					else
@@ -956,7 +956,7 @@ private:
 				}
 
 				//stretch the accel/decel trajectories for turn rate and speed to match each other
-				double new_time;
+				float new_time;
 
 				if (time_to_accel_speed + time_to_decel_speed != 0 && time_to_decel_turn_rate + time_to_accel_turn_rate != 0)
 				{
@@ -1049,8 +1049,8 @@ private:
 
 			if (arg->drive_position)
 			{
-				double new_target_dist_from_end = fabs(arg->target_distance - arg->end_distance);
-				double new_target_angle_from_end = fabs(arg->target_angle - arg->end_angle);
+				float new_target_dist_from_end = fabs(arg->target_distance - arg->end_distance);
+				float new_target_angle_from_end = fabs(arg->target_angle - arg->end_angle);
 
 				if (new_target_dist_from_end > target_dist_from_end ||
 					new_target_angle_from_end > target_angle_from_end)
@@ -1093,11 +1093,11 @@ public:
 		_max_rpm = min(min(_fl->_pid_control.max_rpm, _fr->_pid_control.max_rpm), min(_bl->_pid_control.max_rpm, _br->_pid_control.max_rpm));
 	};
 
-	void steer(double speed, double angle, double turn_rate)
+	void steer(float speed, float angle, float turn_rate)
 	{
-		double speedc, anglec, rotatec;
-		double anglec_rad, speedc_x, speedc_y;
-		double speedc_x_left, speedc_y_left, speedc_x_right, speedc_y_right;
+		float speedc, anglec, rotatec;
+		float anglec_rad, speedc_x, speedc_y;
+		float speedc_x_left, speedc_y_left, speedc_x_right, speedc_y_right;
 
 		speedc = constrain(speed, -_max_rpm * 6, _max_rpm * 6);
 		anglec = constrain(angle, 0, 360);
@@ -1196,7 +1196,7 @@ private:
 	EVNMotor* _fr;
 	EVNMotor* _bl;
 	EVNMotor* _br;
-	double _max_rpm;
+	float _max_rpm;
 };
 
 #endif

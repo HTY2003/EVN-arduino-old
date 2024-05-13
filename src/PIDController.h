@@ -9,21 +9,21 @@
 class PIDController
 {
 public:
-	PIDController(double kp, double ki, double kd, uint8_t dir);
-	void setKp(double kp);
-	double getKp();
-	void setKi(double ki);
-	double getKi();
-	void setKd(double kd);
-	double getKd();
-	double compute(double error, bool constrain_integral = false, bool constrain_input = false, bool constrain_output = false);
-	void constrainIntegral(double low, double high);
+	PIDController(float kp, float ki, float kd, uint8_t dir);
+	void setKp(float kp);
+	float getKp();
+	void setKi(float ki);
+	float getKi();
+	void setKd(float kd);
+	float getKd();
+	float compute(float error, bool constrain_integral = false, bool constrain_input = false, bool constrain_output = false);
+	void constrainIntegral(float low, float high);
 	void resetIntegral();
 	void reset();
 
 private:
-	double _kp, _ki, _kd, _dir;
-	double _error, _summederror, _preverror, _output;
+	float _kp, _ki, _kd, _dir;
+	float _error, _summederror, _preverror, _output;
 };
 
 #endif

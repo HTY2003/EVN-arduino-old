@@ -116,10 +116,10 @@ public:
     };
 
     EVNCompassSensor(uint8_t port,
-        double hard_x = 0, double hard_y = 0, double hard_z = 0,
-        double soft_x_0 = 1, double soft_x_1 = 0, double soft_x_2 = 0,
-        double soft_y_0 = 0, double soft_y_1 = 1, double soft_y_2 = 0,
-        double soft_z_0 = 0, double soft_z_1 = 0, double soft_z_2 = 1) : EVNSensor(port)
+        float hard_x = 0, float hard_y = 0, float hard_z = 0,
+        float soft_x_0 = 1, float soft_x_1 = 0, float soft_x_2 = 0,
+        float soft_y_0 = 0, float soft_y_1 = 1, float soft_y_2 = 0,
+        float soft_z_0 = 0, float soft_z_1 = 0, float soft_z_2 = 1) : EVNSensor(port)
     {
         _x_hard_cal = hard_x / 100;
         _y_hard_cal = hard_y / 100;
@@ -193,10 +193,10 @@ public:
         return !_is_qmc;
     };
 
-    void setCalibration(double hard_x = 0, double hard_y = 0, double hard_z = 0,
-        double soft_x_0 = 1, double soft_x_1 = 0, double soft_x_2 = 0,
-        double soft_y_0 = 0, double soft_y_1 = 1, double soft_y_2 = 0,
-        double soft_z_0 = 0, double soft_z_1 = 0, double soft_z_2 = 1)
+    void setCalibration(float hard_x = 0, float hard_y = 0, float hard_z = 0,
+        float soft_x_0 = 1, float soft_x_1 = 0, float soft_x_2 = 0,
+        float soft_y_0 = 0, float soft_y_1 = 1, float soft_y_2 = 0,
+        float soft_z_0 = 0, float soft_z_1 = 0, float soft_z_2 = 1)
     {
         _x_hard_cal = hard_x / 100;
         _y_hard_cal = hard_y / 100;
@@ -390,46 +390,46 @@ public:
         return  _calibrated;
     };
 
-    double readRawX(bool blocking = true)
+    float readRawX(bool blocking = true)
     {
         this->update(blocking);
-        return (double)_x / _gain;
+        return (float)_x / _gain;
     };
 
-    double readRawY(bool blocking = true)
+    float readRawY(bool blocking = true)
     {
         this->update(blocking);
-        return (double)_y / _gain;
+        return (float)_y / _gain;
     };
 
-    double readRawZ(bool blocking = true)
+    float readRawZ(bool blocking = true)
     {
         this->update(blocking);
-        return (double)_z / _gain;
+        return (float)_z / _gain;
     };
 
-    double readCalX(bool blocking = true)
-    {
-        this->update(blocking);
-        this->calibrateReadings();
-        return (double)_xcal;
-    };
-
-    double readCalY(bool blocking = true)
+    float readCalX(bool blocking = true)
     {
         this->update(blocking);
         this->calibrateReadings();
-        return (double)_ycal;
+        return (float)_xcal;
     };
 
-    double readCalZ(bool blocking = true)
+    float readCalY(bool blocking = true)
     {
         this->update(blocking);
         this->calibrateReadings();
-        return (double)_zcal;
+        return (float)_ycal;
     };
 
-    double read(bool blocking = true)
+    float readCalZ(bool blocking = true)
+    {
+        this->update(blocking);
+        this->calibrateReadings();
+        return (float)_zcal;
+    };
+
+    float read(bool blocking = true)
     {
         if (_sensor_started)
         {
@@ -441,9 +441,9 @@ public:
             }
             else
             {
-                _xcal = (double)_x / _gain;
-                _ycal = (double)_y / _gain;
-                _zcal = (double)_z / _gain;
+                _xcal = (float)_x / _gain;
+                _ycal = (float)_y / _gain;
+                _zcal = (float)_z / _gain;
             }
 
             _yaw = (atan2(_ycal, _xcal) / M_PI * 180) + 180;
@@ -491,10 +491,10 @@ private:
     {
         if (_sensor_started)
         {
-            double x0, y0, z0;
-            x0 = (double)_x / _gain - _x_hard_cal;
-            y0 = (double)_y / _gain - _y_hard_cal;
-            z0 = (double)_z / _gain - _z_hard_cal;
+            float x0, y0, z0;
+            x0 = (float)_x / _gain - _x_hard_cal;
+            y0 = (float)_y / _gain - _y_hard_cal;
+            z0 = (float)_z / _gain - _z_hard_cal;
             _xcal = x0 * _x_soft_cal[0] + y0 * _x_soft_cal[1] + z0 * _x_soft_cal[2];
             _ycal = x0 * _y_soft_cal[0] + y0 * _y_soft_cal[1] + z0 * _y_soft_cal[2];
             _zcal = x0 * _z_soft_cal[0] + y0 * _z_soft_cal[1] + z0 * _z_soft_cal[2];
@@ -502,15 +502,15 @@ private:
     };
 
     int16_t _x = 0, _y = 0, _z = 0;
-    double _xcal = 0, _ycal = 0, _zcal = 0;
-    double _yaw_offset = 0;
-    double _yaw;
+    float _xcal = 0, _ycal = 0, _zcal = 0;
+    float _yaw_offset = 0;
+    float _yaw;
 
-    double _x_hard_cal, _x_soft_cal[3];
-    double _y_hard_cal, _y_soft_cal[3];
-    double _z_hard_cal, _z_soft_cal[3];
+    float _x_hard_cal, _x_soft_cal[3];
+    float _y_hard_cal, _y_soft_cal[3];
+    float _z_hard_cal, _z_soft_cal[3];
 
-    double _freq, _gain;
+    float _freq, _gain;
     uint32_t _last_reading_us = 0;
     bool _calibrated = true, _is_qmc = false;
 

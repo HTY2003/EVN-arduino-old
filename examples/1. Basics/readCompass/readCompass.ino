@@ -19,6 +19,6 @@ void setup()
 
 void loop()
 {
-    double yaw = compass.read();
+    float yaw = compass.read();
     Serial.println(yaw);
 }

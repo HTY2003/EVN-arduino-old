@@ -33,7 +33,7 @@ GND   GND (Brown)    Ground (0V)
 Constructor
 -----------
 
-.. class:: EVNServo(uint8_t port, bool servo_dir = DIRECT, uint16_t range = 270, double start_angle = 135, uint16_t min_pulse_us = 600, uint16_t max_pulse_us = 2400, double max_dps = 500)
+.. class:: EVNServo(uint8_t port, bool servo_dir = DIRECT, uint16_t range = 270, float start_angle = 135, uint16_t min_pulse_us = 600, uint16_t max_pulse_us = 2400, float max_dps = 500)
     
     :param port: Port the servo is connected to (1 - 4)
     :param servo_dir: Direction of rotation of motor shaft. On Geekservo, ``DIRECT`` is clockwise. Defaults to ``DIRECT``
@@ -79,7 +79,7 @@ Example Program:
 Using Fixed Servos
 """"""""""""""""""
 
-.. function:: double getMaxDPS()
+.. function:: float getMaxDPS()
 
     :returns: Maximum angular rotation of servo shaft (in degrees per second).
 
@@ -87,8 +87,8 @@ Using Fixed Servos
 
     :returns: Angular range of servo (in degrees).
 
-.. function::   void write(double angle, double wait_time_ms, double dps)
-                void writeAngle(double angle, double wait_time_ms, double dps)
+.. function::   void write(float angle, float wait_time_ms, float dps)
+                void writeAngle(float angle, float wait_time_ms, float dps)
 
     Rotate motor shaft to given angle.
 
@@ -97,7 +97,7 @@ Using Fixed Servos
     :param dps: Speed to run servo at (in degrees per second), from 0 to **max_range**. When dps is 0, servo runs at max speed. Defaults to 0.
 
 
-.. function:: void writeMicroseconds(double pulse_us, double wait_time_ms)
+.. function:: void writeMicroseconds(float pulse_us, float wait_time_ms)
 
     Sends pulse of given length to servo.
 
@@ -107,7 +107,7 @@ Using Fixed Servos
 Using Continuous Servos
 -----------------------
 
-.. function:: void writeDutyCycle(double duty_cycle)
+.. function:: void writeDutyCycle(float duty_cycle)
 
     Writes duty cycle or no-load speed (0-100%) to servo.
 

@@ -42,7 +42,7 @@ public:
         return true;
     };
 
-    void setSignalRateLimit(double limit)
+    void setSignalRateLimit(float limit)
     {
         if (_sensor_started)
         {

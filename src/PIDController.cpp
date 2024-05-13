@@ -1,6 +1,6 @@
 #include "PIDController.h"
 
-PIDController::PIDController(double kp, double ki, double kd, uint8_t dir)
+PIDController::PIDController(float kp, float ki, float kd, uint8_t dir)
 {
 	_kp = kp;
 	_ki = ki;
@@ -8,16 +8,16 @@ PIDController::PIDController(double kp, double ki, double kd, uint8_t dir)
 	_dir = dir;
 }
 
-void PIDController::setKp(double kp) { _kp = kp; }
-double PIDController::getKp() { return _kp; }
-void PIDController::setKi(double ki) { _ki = ki; }
-double PIDController::getKi() { return _ki; }
-void PIDController::setKd(double kd) { _kd = kd; }
-double PIDController::getKd() { return _kd; }
+void PIDController::setKp(float kp) { _kp = kp; }
+float PIDController::getKp() { return _kp; }
+void PIDController::setKi(float ki) { _ki = ki; }
+float PIDController::getKi() { return _ki; }
+void PIDController::setKd(float kd) { _kd = kd; }
+float PIDController::getKd() { return _kd; }
 
-double PIDController::compute(double error, bool constrain_integral, bool constrain_input, bool constrain_output)
+float PIDController::compute(float error, bool constrain_integral, bool constrain_input, bool constrain_output)
 {
-	double errorc = error;
+	float errorc = error;
 	if (constrain_input)
 		errorc = constrain(errorc, -1, 1);
 
@@ -48,7 +48,7 @@ void PIDController::reset()
 	_summederror = 0;
 }
 
-void PIDController::constrainIntegral(double low, double high)
+void PIDController::constrainIntegral(float low, float high)
 {
 	_summederror = constrain(_summederror, low, high);
 }
