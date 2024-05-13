@@ -2,11 +2,11 @@
 #define EVNMotor_h
 
 #include <Arduino.h>
-#include "EVNAlpha.h"
-#include "EVNISRTimer.h"
-#include "PIDController.h"
-#include "evn_alpha_pins.h"
-#include "evn_motor_defs.h"
+#include "../EVNAlpha.h"
+#include "../helper/EVNISRTimer.h"
+#include "../helper/PIDController.h"
+#include "../evn_alpha_pins.h"
+#include "../evn_motor_defs.h"
 #include <cfloat>
 
 //INPUT PARAMETER MACROS

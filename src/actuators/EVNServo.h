@@ -2,10 +2,10 @@
 #define EVNServo_h
 
 #include <Arduino.h>
-#include <EVNAlpha.h>
-#include <EVNISRTimer.h>
 #include <Servo.h>
-#include "evn_alpha_pins.h"
+#include "../EVNAlpha.h"
+#include "../helper/EVNISRTimer.h"
+#include "../evn_alpha_pins.h"
 
 #define DIRECT	1
 #define REVERSE	0

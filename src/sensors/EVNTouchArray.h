@@ -3,8 +3,8 @@
 
 #include <Arduino.h>
 #include <Wire.h>
-#include "EVNAlpha.h"
-#include "EVNSensor.h"
+#include "../EVNAlpha.h"
+#include "../helper/EVNI2CDevice.h"
 
 struct evn_touch
 {
@@ -23,7 +23,7 @@ struct evn_touch
     bool ch12;
 };
 
-class EVNTouchArray : private EVNSensor {
+class EVNTouchArray : private EVNI2CDevice {
 public:
     static const uint8_t I2C_ADDR = 0x5A;
     static const uint8_t DEFAULT_CONFIG = 0x24;
@@ -58,7 +58,7 @@ public:
         STOP = 0b00000000
     };
 
-    EVNTouchArray(uint8_t port, uint8_t touch_threshold = 12, uint8_t release_threshold = 6) : EVNSensor(port)
+    EVNTouchArray(uint8_t port, uint8_t touch_threshold = 12, uint8_t release_threshold = 6) : EVNI2CDevice(port)
     {
         _addr = I2C_ADDR;
         _touch_threshold = touch_threshold;

@@ -3,9 +3,8 @@
 
 #include <Arduino.h>
 #include <Wire.h>
-#include "EVNAlpha.h"
-#include "EVNSensor.h"
-#include "vl53l0x-arduino/VL53L0X.h"
+#include "../EVNAlpha.h"
+#include "../vl53l0x-arduino/VL53L0X.h"
 
 class EVNDistanceSensor {
 public:

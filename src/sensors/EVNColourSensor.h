@@ -3,8 +3,8 @@
 
 #include <Arduino.h>
 #include <Wire.h>
-#include "EVNAlpha.h"
-#include "EVNSensor.h"
+#include "../EVNAlpha.h"
+#include "../helper/EVNI2CDevice.h"
 
 struct evn_col
 {
@@ -28,7 +28,7 @@ struct evn_col
     float value;
 };
 
-class EVNColourSensor : private EVNSensor {
+class EVNColourSensor : private EVNI2CDevice {
 public:
     static const uint8_t I2C_ADDR = 0x29;
     static const uint8_t ID_REG_PART_NUMBER = 0x44;
@@ -78,7 +78,7 @@ public:
         X64 = 0x03
     };
 
-    EVNColourSensor(uint8_t port, uint8_t integration_cycles = 1, gain gain = gain::X16) : EVNSensor(port)
+    EVNColourSensor(uint8_t port, uint8_t integration_cycles = 1, gain gain = gain::X16) : EVNI2CDevice(port)
     {
         _addr = I2C_ADDR;
         _gain = gain;

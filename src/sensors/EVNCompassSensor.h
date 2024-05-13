@@ -3,10 +3,10 @@
 
 #include <Arduino.h>
 #include <Wire.h>
-#include "EVNAlpha.h"
-#include "EVNSensor.h"
+#include "../EVNAlpha.h"
+#include "../helper/EVNI2CDevice.h"
 
-class EVNCompassSensor : private EVNSensor {
+class EVNCompassSensor : private EVNI2CDevice {
 public:
 
     static const uint8_t HMC_I2C_ADDR = 0x1E;
@@ -119,7 +119,7 @@ public:
         float hard_x = 0, float hard_y = 0, float hard_z = 0,
         float soft_x_0 = 1, float soft_x_1 = 0, float soft_x_2 = 0,
         float soft_y_0 = 0, float soft_y_1 = 1, float soft_y_2 = 0,
-        float soft_z_0 = 0, float soft_z_1 = 0, float soft_z_2 = 1) : EVNSensor(port)
+        float soft_z_0 = 0, float soft_z_1 = 0, float soft_z_2 = 1) : EVNI2CDevice(port)
     {
         _x_hard_cal = hard_x / 100;
         _y_hard_cal = hard_y / 100;

@@ -6,8 +6,8 @@
 #include <hardware/pio.h>
 #include "PIOProgram.h"
 
-#include "ws2812/ws2812.pio.h"
-#include "evn_alpha_pins.h"
+#include "../ws2812/ws2812.pio.h"
+#include "../evn_alpha_pins.h"
 
 static PIOProgram _rgbLedPgm(&ws2812_program);
 

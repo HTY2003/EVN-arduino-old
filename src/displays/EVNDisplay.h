@@ -3,8 +3,8 @@
 
 #include <Arduino.h>
 #include <Wire.h>
-#include "EVNAlpha.h"
-#include "U8g2/src/U8x8lib.h"
+#include "../EVNAlpha.h"
+#include "../U8g2/src/U8x8lib.h"
 
 class EVNDisplay
 {
