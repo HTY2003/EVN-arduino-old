@@ -20,9 +20,9 @@ void setup()
 void loop()
 {
     int clear = cs.readClear();
-    int red = cs.readRed();
-    int green = cs.readGreen();
-    int blue = cs.readBlue();
+    int red = cs.readRed(false);
+    int green = cs.readGreen(false);
+    int blue = cs.readBlue(false);
 
     Serial.print("C ");
     Serial.print(clear);

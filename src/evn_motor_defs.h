@@ -12,6 +12,8 @@
 #define LEGO_PPR				180
 
 //TODO: add scale factor for kp during motor hold
+//TODO: add Ki gain for better runAngle performance
+
 //TUNING FOR LEGO EV3 LARGE SERVO MOTOR
 #define KP_EV3_LARGE            0.35
 #define KI_EV3_LARGE	        0
@@ -45,13 +47,13 @@
 #define USER_DRIVE_POS_MIN_ERROR_DEG    0.5
 #define USER_DRIVE_POS_MIN_ERROR_MM     0.5
 
-#define DRIVEBASE_KP_SPEED              0.01
+#define DRIVEBASE_KP_SPEED              12.5
 #define DRIVEBASE_KI_SPEED              0
 #define DRIVEBASE_KD_SPEED              0
 
-#define DRIVEBASE_KP_TURN_RATE          18
+#define DRIVEBASE_KP_TURN_RATE          6000
 #define DRIVEBASE_KI_TURN_RATE          0
-#define DRIVEBASE_KD_TURN_RATE          36
+#define DRIVEBASE_KD_TURN_RATE          12000
 
 #define USER_SPEED_ACCEL                360
 #define USER_SPEED_DECEL                360

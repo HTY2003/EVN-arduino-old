@@ -31,6 +31,12 @@
 #define SERIAL2_RX      9
 #define SERIAL2_TX      8
 
+#define SERVO_PORT_1      2
+#define SERVO_PORT_2      3
+#define SERVO_PORT_3      10
+#define SERVO_PORT_4      11
+
+
 #define LOW_BATTERY_THRESHOLD_MV        6700
 
 #define BQ25887_IC_I2C_PORT             16

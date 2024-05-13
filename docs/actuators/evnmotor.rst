@@ -1,10 +1,11 @@
-``EVNMotor`` -- Motors with encoder feedback
-============================================
+``EVNMotor``
+============
 
 Some Technical Details
 ----------------------
 
-EVNMotor uses timer-generated interrupts to achieve consistent speed and position control. Using these functions, we have replicated most of the motor functions EV3 users will be familiar with. We have provided motor profiles for NXT Large Motors, EV3 Medium Motors and EV3 Large Motors, but the user may edit them if they wish to.
+EVNMotor uses timer-generated interrupts to achieve consistent speed and position control. Using these functions, we have replicated most of the motor functions EV3 users will be familiar with.
+We have provided motor profiles for NXT Large Motors, EV3 Medium Motors and EV3 Large Motors, but the user may edit them if they wish to.
 
 .. note::
 
@@ -18,6 +19,8 @@ EVNMotor uses timer-generated interrupts to achieve consistent speed and positio
 
     A gearmotor and a LEGO motor should not be simultaneously plugged into the same motor port, as the 6-pin headers are wired in parallel with the LEGO ports.
 
+Constructor
+-----------
 
 .. class:: EVNMotor(uint8_t port, uint8_t motortype = EV3_LARGE, uint8_t motor_dir = DIRECT, uint8_t enc_dir = DIRECT)
     
@@ -29,7 +32,6 @@ EVNMotor uses timer-generated interrupts to achieve consistent speed and positio
         * ``EV3_MED`` -- EV3 Medium Servo Motor
         * ``NXT_LARGE`` -- NXT Large Servo Motor
         * ``CUSTOM_MOTOR`` -- Custom Gearmotor
-
     
     :param motor_dir: Swaps motor **and** encoder pins, flipping the direction of the motor. Defaults to ``DIRECT``
 
@@ -239,14 +241,30 @@ Example Usage:
 Control Settings
 """"""""""""""""
 
-Docs to be added soon!
-
 .. function:: void setPID(double p, double i, double d)
+
+    Sets PID gain values for the speed controller (controls rotational/angular velocity of motor shaft).
+
+    The error for the controller is the difference between the robot's target amount of rotations (which increases over time) and the angle the robot has currently rotated by.
+
+    :param kp: Proportional gain
+    :param ki: Integral gain
+    :param kd: Derivative gain
+
+.. note:: Tuning motor PIDs is a bit tricky (you won't have to do it for LEGO motors), but we will try to create a guide for it soon!
 
 .. function:: void setAccel(double accel_dps_sq)
 
+    Set acceleration value of motor (in deg/s^2)
+
 .. function:: void setDecel(double decel_dps_sq)
+
+    Set acceleration value of motor (in deg/s^2)
 
 .. function:: void setMaxRPM(double max_rpm)
 
+    Set max RPM of motor (in rotations per minute)
+
 .. function:: void setPPR(uint32_t ppr)
+
+    Set pulses per revolution of motor shaft

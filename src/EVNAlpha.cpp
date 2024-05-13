@@ -40,7 +40,6 @@ void EVNAlpha::begin()
 
 bool EVNAlpha::beginBatteryADC()
 {
-    uint8_t prev_port = this->sharedPorts().getPort();
     this->sharedPorts().setPort(BQ25887_IC_I2C_PORT);
 
     //check for BQ25887 ID
@@ -67,7 +66,6 @@ bool EVNAlpha::beginBatteryADC()
 
     if (id != BQ25887_ID)
     {
-        this->sharedPorts().setPort(prev_port);
         return false;
     }
 
@@ -86,7 +84,6 @@ bool EVNAlpha::beginBatteryADC()
         Wire.write(BQ25887_CMD_ADC_CONTROL_ENABLE);
         Wire.endTransmission();
     }
-    this->sharedPorts().setPort(prev_port);
 
     return true;
 }
@@ -95,7 +92,6 @@ int16_t EVNAlpha::getBatteryVoltage()
 {
     if (_battery_adc_started)
     {
-        uint8_t prev_port = this->sharedPorts().getPort();
         this->sharedPorts().setPort(BQ25887_IC_I2C_PORT);
 
         uint16_t vnom = 0;
@@ -116,8 +112,6 @@ int16_t EVNAlpha::getBatteryVoltage()
             vnom = Wire.read() << 8 | Wire.read();
         }
 
-        this->sharedPorts().setPort(prev_port);
-
         button.sharedState()->flash = (vnom < LOW_BATTERY_THRESHOLD_MV);
 
         return vnom;
@@ -129,7 +123,6 @@ int16_t EVNAlpha::getCell1Voltage()
 {
     if (_battery_adc_started)
     {
-        uint8_t prev_port = this->sharedPorts().getPort();
         this->sharedPorts().setPort(BQ25887_IC_I2C_PORT);
 
         uint16_t vcell1 = 0;
@@ -150,7 +143,6 @@ int16_t EVNAlpha::getCell1Voltage()
             vcell1 = Wire.read() << 8 | Wire.read();
         }
 
-        this->sharedPorts().setPort(prev_port);
         return vcell1;
     }
     return 0;

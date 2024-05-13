@@ -28,7 +28,6 @@ public:
   {
     if (_sensor_started)
     {
-      uint8_t prev_port = EVNAlpha::sharedPorts().getPort();
       EVNAlpha::sharedPorts().setPort(_port);
       uint8_t rowc = constrain(row - 1, 0, NO_OF_ROWS - 1);
 
@@ -50,8 +49,6 @@ public:
       //start writing only from after the row name (saves time)
       _display8x8->setCursor(_rownamelen[rowc], rowc);
       _display8x8->print(datas);
-
-      EVNAlpha::sharedPorts().setPort(prev_port);
     }
   };
 
@@ -60,7 +57,6 @@ public:
   {
     if (_sensor_started)
     {
-      uint8_t prev_port = EVNAlpha::sharedPorts().getPort();
       EVNAlpha::sharedPorts().setPort(_port);
       uint8_t rowc = constrain(row - 1, 0, NO_OF_ROWS - 1);
 
@@ -89,8 +85,6 @@ public:
       //print new row name to display
       _display8x8->setCursor(0, rowc);
       _display8x8->print(labels);
-
-      EVNAlpha::sharedPorts().setPort(prev_port);
     }
   };
 

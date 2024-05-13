@@ -1,5 +1,5 @@
-``EVNIRDistanceSensor`` - Distance measurements using IR light
-===============================================================
+``EVNDistanceSensor``
+=====================
 
 This class provides the following features and functionalities for our IR Distance Sensor Standard Peripheral (VL53L0X IC):
 
@@ -11,13 +11,29 @@ This class provides the following features and functionalities for our IR Distan
     * Configurable Timing Budget for Readings
     * Built-in I2C Port Selection and De-selection
 
-.. note:: This class does I2C port selection and de-selection automatically, so users do not need to call ``setPort()`` using their EVNAlpha objects.
+.. note:: This class does I2C port selection automatically, so users do not need to call ``setPort()`` using their EVNAlpha objects.
 
-.. class:: EVNIRDistanceSensor(uint8_t port, uint8_t timing_budget_ms = 33)
+Wiring (I2C)
+------------
+
+====  ==========  ===========
+Host  Peripheral  Description
+====  ==========  ===========
+3V3   VIN         3.3V Power
+GND   GND         Ground (0V)
+SCL   SCL         I2C Serial Clock
+SDA   SDA         I2C Serial Data
+====  ==========  ===========
+
+Constructor
+-----------
+
+.. class:: EVNDistanceSensor(uint8_t port, uint8_t timing_budget_ms = 33)
   
     :param port: I2C port the sensor is connected to (1-16)
 
     :param timing_budget_ms: Timing budget allocated for each reading (in ms). Decreasing can lead to lower latency, at the cost of range. Defaults to 33ms
+
 
 Functions
 ---------
@@ -52,3 +68,10 @@ Reading Distance
 
     :returns: Distance reading (in mm)
 
+Advanced Sensor Settings
+""""""""""""""""""""""""
+More info coming soon!
+
+.. function:: void setSignalRateLimit(double limit)
+.. function:: void setPulsePeriodPreRange(uint8_t period)
+.. function:: void setPulsePeriodFinalRange(uint8_t period)

@@ -18,12 +18,13 @@ void EVNPortSelector::begin()
 	Wire1.write(1 << 0);
 	Wire1.endTransmission();
 	_wire1_port = 9;
+	_wire1_time_ms = millis();
 
 	Wire.beginTransmission(I2C_ADDR);
 	Wire.write(1 << 0);
 	Wire.endTransmission();
 	_wire0_port = 1;
-	_port = 1;
+	_wire0_time_ms = millis();
 }
 
 void EVNPortSelector::printPorts()
@@ -75,29 +76,27 @@ void EVNPortSelector::setPort(uint8_t port)
 {
 	uint8_t portc = constrain(port, 1, 16);
 
-	if (portc != _port)
+	if (portc <= 8 && _wire0_port != portc)
 	{
-		if (portc <= 8 && _wire0_port != portc)
-		{
-			Wire.beginTransmission(I2C_ADDR);
-			Wire.write(1 << (portc - 1));
-			Wire.endTransmission();
-			_wire0_port = portc;
-		}
-		else if (portc > 8 && _wire1_port != portc)
-		{
-			Wire1.beginTransmission(I2C_ADDR);
-			Wire1.write(1 << (portc - 9));
-			Wire1.endTransmission();
-			_wire1_port = portc;
-		}
-		_port = portc;
+		Wire.beginTransmission(I2C_ADDR);
+		Wire.write(1 << (portc - 1));
+		Wire.endTransmission();
+		_wire0_port = portc;
+		_wire0_time_ms = millis();
+	}
+	else if (portc > 8 && _wire1_port != portc)
+	{
+		Wire1.beginTransmission(I2C_ADDR);
+		Wire1.write(1 << (portc - 9));
+		Wire1.endTransmission();
+		_wire1_port = portc;
+		_wire1_time_ms = millis();
 	}
 }
 
 uint8_t EVNPortSelector::getPort()
 {
-	return _port;
+	return (_wire0_time_ms >= _wire1_time_ms) ? _wire0_port : _wire1_port;
 }
 
 uint8_t EVNPortSelector::getWire0Port()

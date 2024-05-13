@@ -1,4 +1,4 @@
-Welcome to EVN's documentation!
+Welcome to EVN!
 ===================================
 
 **EVN** is a Robotics System built around a Technic-compatible controller with 26 ports for I2C, UART, Servos, EV3 and NXT Motors, etc.
@@ -7,22 +7,26 @@ Welcome to EVN's documentation!
 
    This project is under active development.
 
-Contents
---------
-
 .. toctree::
-   :titlesonly:
+   :maxdepth: 1
+   :caption: Guides
 
-   Home <self>
    getting-started
    hardware-overview
    installation
-   uploading
+   programming
    troubleshooting
+
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Classes
+
    evnalpha
-   evnmotor
-   evndrivebase
-   evncoloursensor
-   evnirdistancesensor
-   evncompasssensor
-   evndisplay
+.. toctree::
+   :maxdepth: 2
+
+   actuators/index
+   sensors/index
+   displays/index
+   others/index

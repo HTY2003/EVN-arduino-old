@@ -1,7 +1,7 @@
 #include "EVNMotor.h"
 
-encoder_state_t* EVNMotor::encoderArgs[];
-pid_control_t* EVNMotor::pidArgs[];
+EVNMotor::encoder_state_t* EVNMotor::encoderArgs[];
+EVNMotor::pid_control_t* EVNMotor::pidArgs[];
 bool EVNMotor::ports_started[] = { false, false, false, false };
 
 EVNMotor::EVNMotor(uint8_t port, uint8_t motortype, uint8_t motor_dir, uint8_t enc_dir)
@@ -61,6 +61,9 @@ EVNMotor::EVNMotor(uint8_t port, uint8_t motortype, uint8_t motor_dir, uint8_t e
 	}
 
 	// configure settings according to motor type
+
+	_pid_control.motor_type = motortypec;
+
 	switch (motortypec)
 	{
 	case EV3_LARGE:
@@ -101,6 +104,8 @@ EVNMotor::EVNMotor(uint8_t port, uint8_t motortype, uint8_t motor_dir, uint8_t e
 	_pid_control.run_pos = false;
 	_encoder.position = 0;
 	_encoder.position_offset = 0;
+	_encoder.dps_calculated = false;
+	_encoder.obtained_one_pulse = false;
 }
 
 void EVNMotor::begin()
@@ -257,19 +262,19 @@ void EVNMotor::runTime(double dps, uint32_t time_ms, uint8_t stop_action, bool w
 void EVNMotor::brake()
 {
 	_pid_control.stop_action = STOP_BRAKE;
-	stopAction_static(&_pid_control, &_encoder, micros());
+	stopAction_static(&_pid_control, &_encoder, micros(), getPosition(), getDPS());
 }
 
 void EVNMotor::coast()
 {
 	_pid_control.stop_action = STOP_COAST;
-	stopAction_static(&_pid_control, &_encoder, micros());
+	stopAction_static(&_pid_control, &_encoder, micros(), getPosition(), getDPS());
 }
 
 void EVNMotor::hold()
 {
 	_pid_control.stop_action = STOP_HOLD;
-	stopAction_static(&_pid_control, &_encoder, micros());
+	stopAction_static(&_pid_control, &_encoder, micros(), getPosition(), getDPS());
 }
 
 bool EVNMotor::completed()
@@ -287,6 +292,11 @@ bool EVNDrivebase::dbs_enabled[] = { false, false };
 
 EVNDrivebase::EVNDrivebase(double wheel_dia, double axle_track, EVNMotor* motor_left, EVNMotor* motor_right)
 {
+	if (motor_left->_pid_control.motor_type == motor_right->_pid_control.motor_type)
+		db.motor_type = motor_left->_pid_control.motor_type;
+	else
+		db.motor_type = CUSTOM_MOTOR;
+
 	db.motor_left = motor_left;
 	db.motor_right = motor_right;
 	db.max_rpm = min(motor_left->_pid_control.max_rpm, motor_right->_pid_control.max_rpm);
