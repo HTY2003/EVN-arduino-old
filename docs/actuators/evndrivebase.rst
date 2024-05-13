@@ -1,6 +1,8 @@
-``EVNDrivebase`` -- Drivebase with odometry
-========================================================
+``EVNDrivebase``
+================
 
+Constructor
+-----------
 
 .. class:: EVNDrivebase(double wheel_dia, double axle_track, EVNMotor* motor_left, EVNMotor* motor_right);
 
@@ -236,11 +238,47 @@ Stopping
 
 Control Settings
 """"""""""""""""
-Docs to be added soon!
+
+To view the default PID and accel/decel values, look at ``src\evn_motor_defs.h`` in the Github repository.
 
 .. function:: void setSpeedPID(double kp, double ki, double kd);
+
+    Sets PID gain values for the speed controller (controls average drivebase speed).
+
+    The error for the controller is the difference between the robot's target distance travelled (which increases over time) and the robot's current distance travelled.
+
+    If your robot fails to consistently hit its desired speed, consider increasing kp. However, increasing it too much may cause the drivebase to jitter instead of moving smoothly.
+
+    :param kp: Proportional gain
+    :param ki: Integral gain
+    :param kd: Derivative gain
+
 .. function:: void setTurnRatePID(double kp, double ki, double kd);
+
+    Sets PID gain values for the turn rate controller (controls rate of turning of drivebase).
+
+    The error for the controller is the difference between the robot's target angle (which shifts over time if travelling in a curve) and the robot's current angle.
+
+    This controller serves 2 purposes: to ensure the robot turns at the correct rate during movements, and to stop either motor if the other is stalled, essentially syncing their movement.
+
+    If your robot jitters, consider lowering kp and kd. However, lowering kp and kd will mean that the motor sync will have a greater delay, making it less responsive.
+
+    :param kp: Proportional gain
+    :param ki: Integral gain
+    :param kd: Derivative gain
+
 .. function:: void setSpeedAccel(double speed_accel);
+
+    Sets speed acceleration value for drivebase (in mm/s^2).
+
 .. function:: void setSpeedDecel(double speed_decel);
+
+    Sets speed acceleration value for drivebase (in mm/s^2).
+
 .. function:: void setTurnRateAccel(double turn_rate_accel);
+
+    Sets turn rate deceleration value for drivebase (in deg/s^2).
+
 .. function:: void setTurnRateDecel(double turn_rate_decel);
+
+    Sets turn rate deceleration value for drivebase (in deg/s^2).

@@ -11,6 +11,21 @@ Back Side:
 
 .. image:: images/v1_4_pt2.svg
 
+.. note::
+    For pre-production versions of EVN (V1.3 and below), there are changes to the pin layout:
+
+        * V1.3 & below
+            * Servo ports have their layout flipped, such that the ground pin is closer to the edge of the board
+            * Servo port numbers (1-4) are not printed on PCB, only the GPIO pins used
+
+        * V1.2 & below 
+            * Position of Servo and Serial Ports are swapped
+            * Serial ports have their layout flipped, such that RX is closest to the edge of the board
+
+Dimensions
+----------
+
+.. image:: images/v1_4_dimension.svg
 
 Hardware Details
 ----------------
@@ -18,7 +33,7 @@ Hardware Details
 I2C
 """
 The I2C pins on the RP2040 are not directly exposed. Instead, to achieve a total of 16 individually addressable I2C ports, an 8-channel TCA9548A I2C Multiplexer (I2C address 0x70)
-on both of the RP2040's I2C buses, and each channel is exposed as an I2C "port". Hence, the I2C ports are not GPIO-capable, but they are 5V-tolerant. The multiplexers can be controlled using raw I2C commands, or the interface provided by the ``EVNAlpha`` class.
+on both of the RP2040's I2C buses, and each channel is exposed as an I2C "port". Hence, the I2C ports are not GPIO-capable, but they are 5V-tolerant. The multiplexers can be controlled using I2C commands with ``Wire`` and ``Wire1``, or the interface provided by the ``EVNAlpha`` class.
 
 Motor Drivers
 """""""""""""
@@ -70,8 +85,9 @@ On each side of the serial and servo ports, there are 3 pins for unregulated bat
 
 Charging Chip
 """""""""""""
+For charging, we use TI's BQ25887 battery charge management IC, which charges the battery at 1.5A current.
 
-The BQ25887 charging chip on EVN Alpha (I2C address 0x6B) is connected to I2C port 16, to provide battery voltage information.
+This chip (I2C address 0x6B) is connected to I2C port 16, to provide battery voltage information.
 
 If you need to remove this I2C connection, cut the 2 exposed traces left of the user button, labelled **cut**.
 
@@ -79,6 +95,12 @@ If you wish to enable charging while in on mode, cut the exposed trace right of 
 
     * Keep in mind that you will have to ensure your USB port can supply 5V 3A during upload, and motors may behave slightly differently when the batteries are charging.
 
-Battery
-"""""""
-When the battery voltage dips below 6.2V, On Mode is disabled. Pressing the On/Off will do nothing until the board is charged above 6.3V.
+Battery Voltage Cutoff
+""""""""""""""""""""""
+
+When the battery voltage dips below 6.2V, On Mode is disabled. Pressing the On/Off button will do nothing until the battery is charged above 6.3V.
+
+Disassembly
+"""""""""""
+
+The PCB can be separated from the top and bottom shells by unscrewing the 4 M3 bolts at each corner with a 2.0mm hex screwdriver.

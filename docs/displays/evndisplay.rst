@@ -1,5 +1,5 @@
-``EVNDisplay`` -- OLED text display
-===================================
+``EVNDisplay``
+==============
 
 This class provides the following features and functionalities for our OLED Display Standard Peripheral (SSD1315/SSD1306 IC):
 
@@ -11,7 +11,7 @@ This library is focused on displaying text, so if you'd like to tinker with anim
 
 .. _u8g2: https://github.com/olikraus/u8g2
 
-.. note:: This class does I2C port selection and de-selection automatically, so users do not need to call ``setPort()`` using their EVNAlpha objects.
+.. note:: This class does I2C port selection automatically, so users do not need to call ``setPort()`` using their EVNAlpha objects.
 
 Wiring (I2C)
 ------------

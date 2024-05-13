@@ -1,5 +1,5 @@
-``EVNColourSensor`` -- Light & colour measurements
-==================================================
+``EVNColourSensor``
+===================
 
 This class provides the following features and functionalities for our Colour Sensor Standard Peripheral (TCS34725 IC):
 
@@ -8,7 +8,7 @@ This class provides the following features and functionalities for our Colour Se
     * Configurable Gain and Integration Times
     * Built-in I2C Port Selection and De-selection
 
-.. note:: This class does I2C port selection and de-selection automatically, so users do not need to call ``setPort()`` using their EVNAlpha objects.
+.. note:: This class does I2C port selection automatically, so users do not need to call ``setPort()`` using their EVNAlpha objects.
 
 Wiring (I2C)
 ------------
@@ -28,16 +28,13 @@ SDA   SDA         I2C Serial Data
 Constructor
 -----------
 
-.. class:: EVNColourSensor(uint8_t port, uint8_t integration_cycles = 1, uint8_t gain = GAIN_16X)
+.. class:: EVNColourSensor(uint8_t port, uint8_t integration_cycles = 1, gain gain = gain::X16)
+
+    The listed default settings for the sensor are listed here. Refer to ``setGain()`` & ``setIntegrationTime()`` for more information.
 
     :param port: I2C port the sensor is connected to (1-16)
-    :param integration_cycles: Number of 2.4ms integration cycle for one reading
-    :param gain: Gain applied to readings
-
-        * ``GAIN_1X`` -- 1x gain
-        * ``GAIN_4X`` -- 4x gain
-        * ``GAIN_16X`` -- 16x gain
-        * ``GAIN_60X`` -- 60x gain
+    :param integration_cycles: Number of 2.4ms integration cycle for one reading. Defaults to 1
+    :param gain: Gain applied to readings. Defaults to ``EVNColourSensor::gain::X16``
 
 Functions
 ---------
@@ -51,17 +48,16 @@ Functions
 .. note::
     If ``begin()`` returns ``false``, try checking your connections and I2C port number!
 
-.. function:: void setGain(uint8_t gain)
+.. function:: void setGain(gain gain)
 
-    Sets internal sensor gain applied to reading. Increasing gain widens the numeric range of readings at the cost of noise.
+    Sets internal sensor gain applied to reading. Increasing gain widens the numerical range of readings at the cost of noise.
 
     :param gain: Gain applied to readings
 
-        * ``GAIN_1X`` -- 1x gain
-        * ``GAIN_4X`` -- 4x gain
-        * ``GAIN_16X`` -- 16x gain
-        * ``GAIN_60X`` -- 60x gain
-
+        * ``EVNColourSensor::gain::X1`` -- 1x gain
+        * ``EVNColourSensor::gain::X4`` -- 4x gain
+        * ``EVNColourSensor::gain::X16`` -- 16x gain
+        * ``EVNColourSensor::gain::X60`` -- 60x gain
 
 .. function:: void setIntegrationCycles(uint8_t integration_cycles)
 
@@ -69,7 +65,21 @@ Functions
 
     integration time = 2.4ms * integration cycles
 
+    :param integration_cycles: Number of 2.4ms integration cycles for 1 reading (1-255)
+
+
+.. function:: void writeSettings(uint8_t integration_cycles, gain gain)
+
+    Sets the number of 2.4ms integration cycles used for 1 reading and internal sensor gain.
+
     :param integration_cycles: Number of 2.4ms integration cycles for 1 reading
+
+    :param gain: Gain applied to readings
+
+        * ``EVNColourSensor::gain::X1`` -- 1x gain
+        * ``EVNColourSensor::gain::X4`` -- 4x gain
+        * ``EVNColourSensor::gain::X16`` -- 16x gain
+        * ``EVNColourSensor::gain::X60`` -- 60x gain
 
 Reading Raw RGBC Values
 """""""""""""""""""""""
@@ -215,4 +225,21 @@ After calling these functions, you can use the ``readXXCal()`` functions.
 
 Reading HSV Values
 """""""""""""""""""
-Coming Soon!
+
+.. function:: double readHue()
+
+    Returns the Hue component of the RGB readings when converted to the HSV colour space.
+
+    :returns: Hue component of HSV reading (0-360deg)
+
+.. function:: double readSaturation()
+
+    Returns the Saturation component of the RGB readings when converted to the HSV colour space.
+
+    :returns: Saturation component of HSV reading (0-1)
+
+.. function:: double readValue()
+    
+    Returns the Value component of the RGB readings when converted to the HSV colour space.
+
+    :returns: Value component of HSV reading (0-1)
