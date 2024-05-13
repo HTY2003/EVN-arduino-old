@@ -1,53 +1,44 @@
-#ifndef EVNUSDistanceSensor_h
-#define EVNUSDistanceSensor_h
+#ifndef EVN_RCWL1601_h
+#define EVN_RCWL1601_h
 
 #include <Arduino.h>
 #include <Wire.h>
-#include "EVNAlpha.h"
-#include "EVNSensor.h"
+#include "../EVNAlpha.h"
+#include "../EVNSensor.h"
 
-class EVNUSDistanceSensor : private EVNSensor {
+class EVN_RCWL1601 : private EVNSensor {
 public:
     static const uint8_t I2C_ADDR = 0x57;
     static const uint32_t SENSOR_TIMEOUT_US = 105000;
     static const uint32_t SENSOR_TIMEOUT_READING_UM = 7958040;
-    static const uint32_t SENSOR_TIMEOUT_READING_UM = 7958040;
 
-    EVNUSDistanceSensor(uint8_t port) : EVNSensor(port)
+    EVN_RCWL1601(uint8_t port) : EVNSensor(port)
     {
         _timeout_reading = SENSOR_TIMEOUT_READING_UM;
         _trigger_sent = false;
-        _sensor_started = false;
         _distance_um = 0;
     };
 
     bool begin()
     {
-        if (!_sensor_started)
+        EVNAlpha::sharedPorts().begin();
+
+        EVNAlpha::sharedPorts().setPort(_port);
+
+        _sensor_started = true;
+        delayMicroseconds(SENSOR_TIMEOUT_US);
+
+        if (this->trigger())
         {
-            EVNAlpha::sharedPorts().begin();
-
-            uint8_t prev_port = EVNAlpha::sharedPorts().getPort();
-            EVNAlpha::sharedPorts().setPort(_port);
-
-            _sensor_started = true;
-            delayMicroseconds(SENSOR_TIMEOUT_US);
-
-            if (this->trigger())
-            {
-                delay(1);
-                _distance_um = this->readRaw();
-            }
-            else
-            {
-                _sensor_started = false;
-            }
-
-            EVNAlpha::sharedPorts().setPort(prev_port);
-
-            return _sensor_started;
+            delay(1);
+            _distance_um = this->readRaw();
         }
-        return true;
+        else
+        {
+            _sensor_started = false;
+        }
+
+        return _sensor_started;
     };
 
     void setTimeoutReading(uint32_t timeout_reading)
@@ -64,7 +55,6 @@ public:
     {
         if (_sensor_started)
         {
-            uint8_t prev_port = EVNAlpha::sharedPorts().getPort();
             EVNAlpha::sharedPorts().setPort(_port);
 
             _wire->beginTransmission(I2C_ADDR);
@@ -76,21 +66,22 @@ public:
                 _last_trigger_time_us = micros();
                 _trigger_sent = true;
             }
-
-            EVNAlpha::sharedPorts().setPort(prev_port);
             return success;
         }
         return false;
     };
 
-    uint32_t read(bool blocking = true)
+    uint32_t read(bool blocking = true, bool trigger_sent = false)
     {
         if (_sensor_started)
         {
             if (blocking)
             {
-                bool trigger_success = trigger();
-                delay(1);
+                if (!trigger_sent)
+                {
+                    bool trigger_success = trigger();
+                    delay(1);
+                }
                 uint32_t reading = this->readRaw();
 
                 if (reading == SENSOR_TIMEOUT_READING_UM)
@@ -129,7 +120,6 @@ private:
         uint32_t reading = 0;
         if (_trigger_sent)
         {
-            uint8_t prev_port = EVNAlpha::sharedPorts().getPort();
             EVNAlpha::sharedPorts().setPort(_port);
 
             //requestFrom() is blocking until a reading is available
@@ -143,8 +133,6 @@ private:
                     _trigger_sent = false;
             }
             //if wire is not available, sensor is mid-trigger
-
-            EVNAlpha::sharedPorts().setPort(prev_port);
         }
         return reading;
     };
