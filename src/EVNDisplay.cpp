@@ -16,14 +16,11 @@ EVNDisplay::EVNDisplay(uint8_t port, bool flip_180deg)
 bool EVNDisplay::begin()
 {
     EVNAlpha::sharedPorts().begin();
-
-    uint8_t prev_port = EVNAlpha::sharedPorts().getPort();
     EVNAlpha::sharedPorts().setPort(_port);
 
     //init, set font, wipe prev display
     if (!_display8x8->begin())
     {
-        EVNAlpha::sharedPorts().setPort(prev_port);
         return _sensor_started;
     }
 
@@ -38,7 +35,6 @@ bool EVNDisplay::begin()
         _display8x8->setFlipMode(_flip_180deg);
     }
 
-    EVNAlpha::sharedPorts().setPort(prev_port);
     return _sensor_started;
 }
 
@@ -46,7 +42,6 @@ void EVNDisplay::clear()
 {
     if (_sensor_started)
     {
-        uint8_t prev_port = EVNAlpha::sharedPorts().getPort();
         EVNAlpha::sharedPorts().setPort(_port);
 
         //wipe display
@@ -56,8 +51,6 @@ void EVNDisplay::clear()
             _rownamelen[i] = 0;
 
         _display8x8->setFlipMode(_flip_180deg);
-
-        EVNAlpha::sharedPorts().setPort(prev_port);
     }
 }
 
@@ -65,7 +58,6 @@ void EVNDisplay::clearLine(uint8_t row)
 {
     if (_sensor_started)
     {
-        uint8_t prev_port = EVNAlpha::sharedPorts().getPort();
         EVNAlpha::sharedPorts().setPort(_port);
         uint8_t rowc = constrain(row - 1, 0, NO_OF_ROWS - 1);
 
@@ -74,8 +66,6 @@ void EVNDisplay::clearLine(uint8_t row)
 
         //erase stored row name
         _rownamelen[rowc] = 0;
-
-        EVNAlpha::sharedPorts().setPort(prev_port);
     }
 }
 
@@ -83,7 +73,6 @@ void EVNDisplay::rotate()
 {
     if (_sensor_started)
     {
-        uint8_t prev_port = EVNAlpha::sharedPorts().getPort();
         EVNAlpha::sharedPorts().setPort(_port);
 
         //flip the rotation the display is set to
@@ -91,8 +80,6 @@ void EVNDisplay::rotate()
 
         //and write it to the display
         _display8x8->setFlipMode(_flip_180deg);
-
-        EVNAlpha::sharedPorts().setPort(prev_port);
     }
 }
 
@@ -100,7 +87,6 @@ void EVNDisplay::splashEVN()
 {
     if (_sensor_started)
     {
-        uint8_t prev_port = EVNAlpha::sharedPorts().getPort();
         EVNAlpha::sharedPorts().setPort(_port);
 
         //clear display
@@ -126,7 +112,5 @@ void EVNDisplay::splashEVN()
             //     tile[i] = logo[y * SCREEN_WIDTH + i];
             // _display8x8->drawTile(0, y, MAX_CHAR, tile);
         }
-
-        EVNAlpha::sharedPorts().setPort(prev_port);
     }
 }
