@@ -45,7 +45,7 @@ bool EVNBluetooth::begin(bool exit_program_mode)
             _at_mode = true;
             this->setBaudRate(_baud_rate);
             this->setName(_name);
-            if (_mode == BT_HOST_MODE && _addr != NULL)
+            if (_mode == BT_HOST && _addr != NULL)
                 this->setHostMode(_addr);
             else
                 this->setRemoteMode();
@@ -80,8 +80,10 @@ bool EVNBluetooth::exitProgramMode()
             _serial->begin(_baud_rate);
             return true;
         }
+        else
+            return false;
     }
-    return false;
+    return true;
 }
 
 bool EVNBluetooth::factoryReset()
@@ -237,9 +239,9 @@ void EVNBluetooth::getMode(char* array)
 
         if (strcmp(response2, "OK\r") == 0)
         {
-            if (mode == BT_REMOTE_MODE)
+            if (mode == BT_REMOTE)
                 strcpy(array, (char*)"Remote");
-            else if (mode == BT_HOST_MODE)
+            else if (mode == BT_HOST)
                 strcpy(array, (char*)"Host");
             return;
         }
@@ -362,9 +364,9 @@ void EVNBluetooth::printMode()
 
         if (strcmp(response2, "OK\r") == 0)
         {
-            if (mode == BT_REMOTE_MODE)
+            if (mode == BT_REMOTE)
                 Serial.println("Mode: Remote");
-            else if (mode == BT_HOST_MODE)
+            else if (mode == BT_HOST)
                 Serial.println("Mode: Host");
             return;
         }
@@ -520,7 +522,7 @@ void EVNBluetooth::printName()
     Serial.println("Name: Unknown (Not in Program Mode)");
 }
 
-void EVNBluetooth::printAll()
+void EVNBluetooth::printAllInfo()
 {
     this->printName();
     this->printVersion();
