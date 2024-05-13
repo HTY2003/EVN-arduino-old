@@ -6,14 +6,30 @@
 #include "EVNAlpha.h"
 #include "EVNSensor.h"
 
-#define GAIN_1X     0
-#define GAIN_4X     1
-#define GAIN_16X    2
-#define GAIN_60X    3
+struct evn_col
+{
+    uint16_t red;
+    uint16_t green;
+    uint16_t blue;
+    uint16_t clear;
+
+    double red_pct;
+    double green_pct;
+    double blue_pct;
+    double clear_pct;
+
+    double red_norm;
+    double green_norm;
+    double blue_norm;
+    double clear_norm;
+
+    double hue;
+    double saturation;
+    double value;
+};
 
 class EVNColourSensor : private EVNSensor {
 public:
-
     static const uint8_t I2C_ADDR = 0x29;
     static const uint8_t ID_REG_PART_NUMBER = 0x44;
     static const uint8_t ALT_ID_REG_PART_NUMBER = 0x4D;
@@ -33,6 +49,7 @@ public:
         CONTROL = 0x0F,
         ID = 0x12,
         STATUS = 0x13,
+
         CDATAL = 0x14,
         CDATAH = 0x15,
         RDATAL = 0x16,
@@ -40,7 +57,7 @@ public:
         GDATAL = 0x18,
         GDATAH = 0x19,
         BDATAL = 0x1A,
-        BDATAH = 0x1B,
+        BDATAH = 0x1B
     };
 
     enum class mask : uint8_t
@@ -53,9 +70,18 @@ public:
         STATUS_AVALID = 0x01
     };
 
-    EVNColourSensor(uint8_t port, uint8_t integration_cycles = 1, uint8_t gain = GAIN_16X) : EVNSensor(port)
+    enum class gain : uint8_t
     {
-        _gain = constrain(gain, 0, 3);
+        X1 = 0x00,
+        X4 = 0x01,
+        X16 = 0x02,
+        X64 = 0x03
+    };
+
+    EVNColourSensor(uint8_t port, uint8_t integration_cycles = 1, gain gain = gain::X16) : EVNSensor(port)
+    {
+        _addr = I2C_ADDR;
+        _gain = gain;
         _int_cycles = constrain(integration_cycles, 1, 255);
     };
 
@@ -63,18 +89,18 @@ public:
     {
         EVNAlpha::sharedPorts().begin();
 
-        uint8_t id = read8(I2C_ADDR, TCS34725_COMMAND_BIT | (uint8_t)reg::ID);
+        uint8_t id = read8(TCS34725_COMMAND_BIT | (uint8_t)reg::ID);
 
         if (id != ID_REG_PART_NUMBER && id != ALT_ID_REG_PART_NUMBER)
         {
             return _sensor_started;
-        }
+        };
 
         _sensor_started = true;
 
-        write8(I2C_ADDR, TCS34725_COMMAND_BIT | (uint8_t)reg::ENABLE, (uint8_t)mask::ENABLE_PON);
+        write8(TCS34725_COMMAND_BIT | (uint8_t)reg::ENABLE, (uint8_t)mask::ENABLE_PON);
         delay(3);
-        write8(I2C_ADDR, TCS34725_COMMAND_BIT | (uint8_t)reg::ENABLE, (uint8_t)mask::ENABLE_PON | (uint8_t)mask::ENABLE_AEN);
+        write8(TCS34725_COMMAND_BIT | (uint8_t)reg::ENABLE, (uint8_t)mask::ENABLE_PON | (uint8_t)mask::ENABLE_AEN);
 
         this->setIntegrationCycles(_int_cycles);
         this->setGain(_gain);
@@ -82,12 +108,12 @@ public:
         return _sensor_started;
     };
 
-    void setGain(uint8_t gain)
+    void setGain(gain gain)
     {
         if (_sensor_started)
         {
-            _gain = constrain(gain, 0, 3);
-            write8(I2C_ADDR, TCS34725_COMMAND_BIT | (uint8_t)reg::CONTROL, _gain);
+            _gain = gain;
+            write8(TCS34725_COMMAND_BIT | (uint8_t)reg::CONTROL, (uint8_t)_gain);
         }
     };
 
@@ -96,37 +122,67 @@ public:
         if (_sensor_started)
         {
             _int_cycles = constrain(integration_cycles, 1, 255);
-            write8(I2C_ADDR, TCS34725_COMMAND_BIT | (uint8_t)reg::ATIME, (uint8_t)(255 - (_int_cycles - 1)));
-            _int_time_ms = (double)_int_cycles * 2.4;
+            _max_count = _int_cycles * 1024;
+            write8(TCS34725_COMMAND_BIT | (uint8_t)reg::ATIME, (uint8_t)(255 - (_int_cycles - 1)));
+            _int_time_us = _int_cycles * 2400;
         }
     };
 
     void setRedRange(uint16_t low, uint16_t high)
     {
-        _r_cal = true;
+        _r_norm = true;
         _r_low = low;
         _r_high = max(low + 1, high);
     };
 
     void setGreenRange(uint16_t low, uint16_t high)
     {
-        _g_cal = true;
+        _g_norm = true;
         _g_low = low;
         _g_high = max(low + 1, high);
     };
 
     void setBlueRange(uint16_t low, uint16_t high)
     {
-        _b_cal = true;
+        _b_norm = true;
         _b_low = low;
         _b_high = max(low + 1, high);
     };
 
     void setClearRange(uint16_t low, uint16_t high)
     {
-        _c_cal = true;
+        _c_norm = true;
         _c_low = low;
         _c_high = max(low + 1, high);
+    };
+
+    evn_col readAll(bool blocking = true)
+    {
+        this->update(blocking);
+        convertToPCT();
+
+        evn_col reading;
+
+        reading.red = _r;
+        reading.green = _g;
+        reading.blue = _b;
+        reading.clear = _c;
+
+        reading.red_pct = _r_pct;
+        reading.green_pct = _g_pct;
+        reading.blue_pct = _b_pct;
+        reading.clear_pct = _c_pct;
+
+        reading.red_norm = readRedNorm(false);
+        reading.green_norm = readGreenNorm(false);
+        reading.blue_norm = readBlueNorm(false);
+        reading.clear_norm = readClearNorm(false);
+
+        reading.hue = readHueHSV(false);
+        reading.saturation = readSaturationHSV(false);
+        reading.value = readValueHSV(false);
+
+        return reading;
     };
 
     uint16_t read(bool blocking = true)
@@ -138,14 +194,7 @@ public:
     {
         if (_sensor_started)
         {
-            if (blocking)
-                while ((micros() - _r_time_us) < _int_time_ms * 1000);
-
-            if ((micros() - _r_time_us) >= _int_time_ms * 1000)
-            {
-                _r = read16(I2C_ADDR, TCS34725_COMMAND_BIT | (uint8_t)reg::RDATAL);
-                _r_time_us = micros();
-            }
+            this->update(blocking);
             return _r;
         }
         return 0;
@@ -155,14 +204,7 @@ public:
     {
         if (_sensor_started)
         {
-            if (blocking)
-                while ((micros() - _g_time_us) < _int_time_ms * 1000);
-
-            if ((micros() - _g_time_us) >= _int_time_ms * 1000)
-            {
-                _g = read16(I2C_ADDR, TCS34725_COMMAND_BIT | (uint8_t)reg::GDATAL);
-                _g_time_us = micros();
-            }
+            this->update(blocking);
             return _g;
         }
         return 0;
@@ -171,88 +213,194 @@ public:
     {
         if (_sensor_started)
         {
-            if (blocking)
-                while ((micros() - _b_time_us) < _int_time_ms * 1000);
-
-            if ((micros() - _b_time_us) >= _int_time_ms * 1000)
-            {
-                _b = read16(I2C_ADDR, TCS34725_COMMAND_BIT | (uint8_t)reg::BDATAL);
-                _b_time_us = micros();
-            }
+            this->update(blocking);
             return _b;
         }
         return 0;
     };
+
     uint16_t readClear(bool blocking = true)
     {
         if (_sensor_started)
         {
-            if (blocking)
-                while ((micros() - _c_time_us) < _int_time_ms * 1000);
-
-            if ((micros() - _c_time_us) >= _int_time_ms * 1000)
-            {
-                _c = read16(I2C_ADDR, TCS34725_COMMAND_BIT | (uint8_t)reg::CDATAL);
-                _c_time_us = micros();
-            }
+            this->update(blocking);
             return _c;
         }
         return 0;
     };
 
-    double readRedCal(bool blocking = true)
+    double readRedNorm(bool blocking = true)
     {
         if (_sensor_started)
         {
-            if (_r_cal)
-                return constrain(((double)this->readRed(blocking) - (double)_r_low) / ((double)_r_high - (double)_r_low), 0, 1);
-            else
-                return -1;
-        }
-        return 0;
-    };
-    double readGreenCal(bool blocking = true)
-    {
-        if (_sensor_started)
-        {
-            if (_g_cal)
-                return constrain(((double)this->readGreen(blocking) - (double)_g_low) / ((double)_g_high - (double)_g_low), 0, 1);
-            else
-                return -1;
-        }
-        return 0;
-    };
-    double readBlueCal(bool blocking = true)
-    {
-        if (_sensor_started)
-        {
-            if (_b_cal)
-                return constrain(((double)this->readBlue(blocking) - (double)_b_low) / ((double)_b_high - (double)_b_low), 0, 1);
-            else
-                return -1;
-        }
-        return 0;
-    };
-    double readClearCal(bool blocking = true)
-    {
-        if (_sensor_started)
-        {
-            if (_c_cal)
-                return constrain(((double)this->readClear(blocking) - (double)_c_low) / ((double)_c_high - (double)_c_low), 0, 1);
-            else
-                return -1;
+            if (_r_norm)
+                return normalise(this->readRed(blocking), _r_low, _r_high);
         }
         return 0;
     };
 
+    double readGreenNorm(bool blocking = true)
+    {
+        if (_sensor_started)
+        {
+            if (_g_norm)
+                return normalise(this->readGreen(blocking), _g_low, _g_high);
+        }
+        return 0;
+    };
+
+    double readBlueNorm(bool blocking = true)
+    {
+        if (_sensor_started)
+        {
+            if (_b_norm)
+                return normalise(this->readBlue(blocking), _b_low, _b_high);
+        }
+        return 0;
+    };
+
+    double readClearNorm(bool blocking = true)
+    {
+        if (_sensor_started)
+        {
+            if (_c_norm)
+                return normalise(this->readClear(blocking), _c_low, _c_high);
+        }
+        return 0;
+    };
+
+    double readClearPCT(bool blocking = true)
+    {
+        this->update(blocking);
+        convertToPCT();
+        return _c_pct;
+    };
+
+    double readRedPCT(bool blocking = true)
+    {
+        this->update(blocking);
+        convertToPCT();
+        return _r_pct;
+    };
+
+    double readGreenPCT(bool blocking = true)
+    {
+        this->update(blocking);
+        convertToPCT();
+        return _g_pct;
+    };
+
+    double readBluePCT(bool blocking = true)
+    {
+        this->update(blocking);
+        convertToPCT();
+        return _b_pct;
+    };
+
+    double readHueHSV(bool blocking = true)
+    {
+        this->update(blocking);
+        convertToPCT();
+
+        double cmax = max(_r_pct, max(_g_pct, _b_pct));
+        double cmin = min(_r_pct, min(_g_pct, _b_pct));
+        double cdiff = cmax - cmin;
+
+        double hue = 0;
+        if (cdiff == 0)
+            return 0;
+
+        else if (cmax == _r_pct)
+            hue = 60 * fmod((_g_pct - _b_pct) / cdiff, 6);
+
+        else if (cmax == _g_pct)
+            hue = 60 * ((_b_pct - _r_pct) / cdiff + 2);
+
+        else if (cmax == _b_pct)
+            hue = 60 * ((_r_pct - _g_pct) / cdiff + 4);
+
+        return hue;
+    };
+
+    double readSaturationHSV(bool blocking = true)
+    {
+        this->update(blocking);
+        convertToPCT();
+
+        double cmax = max(_r_pct, max(_g_pct, _b_pct));
+        double cmin = min(_r_pct, min(_g_pct, _b_pct));
+        double cdiff = cmax - cmin;
+
+        if (cmax == 0)
+            return 0;
+        else
+            return cdiff / cmax;
+    };
+
+    double readValueHSV(bool blocking = true)
+    {
+        this->update(blocking);
+        convertToPCT();
+
+        return max(_r_pct, max(_g_pct, _b_pct));
+    };
+
 private:
-    bool _r_cal = false, _g_cal = false, _b_cal = false, _c_cal = false;
-    uint8_t _gain, _int_cycles;
-    double _int_time_ms;
-    uint16_t _r, _g, _b, _c;
+
+    double normalise(uint16_t reading, uint16_t low, uint16_t high)
+    {
+        return constrain(((double)(reading - low)) / ((double)(high - low)), 0, 1);
+    };
+
+    void convertToPCT()
+    {
+        if (!_converted_to_pct)
+        {
+            _c_pct = (double)_c / (double)_max_count;
+            _r_pct = (double)_r / (double)_max_count;
+            _g_pct = (double)_g / (double)_max_count;
+            _b_pct = (double)_b / (double)_max_count;
+            _converted_to_pct = true;
+        }
+    };
+
+    void update(bool blocking = false)
+    {
+        if (_sensor_started)
+        {
+            if (blocking)
+                while ((micros() - _last_reading_us) < _int_time_us);
+
+            if ((micros() - _last_reading_us) >= _int_time_us);
+            {
+                _last_reading_us = micros();
+
+                readBuffer(TCS34725_COMMAND_BIT | (uint8_t)reg::CDATAL, 8, _buffer);
+
+                _c = _buffer[0] | (_buffer[1] << 8);
+                _r = _buffer[2] | (_buffer[3] << 8);
+                _g = _buffer[4] | (_buffer[5] << 8);
+                _b = _buffer[6] | (_buffer[7] << 8);
+
+                _converted_to_pct = false;
+            }
+        }
+    };
+
+    uint8_t _buffer[8] = { 0 };
+
+    uint32_t _last_reading_us;
+    uint8_t _int_cycles;
+    uint64_t _int_time_us;
+    uint16_t _max_count;
+    gain _gain;
+
+    uint16_t _r = 0, _g = 0, _b = 0, _c = 0;
+    bool _converted_to_pct = false;
+    double _r_pct = 0, _g_pct = 0, _b_pct = 0, _c_pct = 0;
+    bool _r_norm = false, _g_norm = false, _b_norm = false, _c_norm = false;
     uint16_t _r_low, _g_low, _b_low, _c_low;
     uint16_t _r_high, _g_high, _b_high, _c_high;
-    uint32_t _r_time_us, _g_time_us, _b_time_us, _c_time_us;
 };
 
 #endif

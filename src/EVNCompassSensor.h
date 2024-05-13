@@ -6,365 +6,388 @@
 #include "EVNAlpha.h"
 #include "EVNSensor.h"
 
-// TODO: make settings viable without supplying register values
-
 class EVNCompassSensor : private EVNSensor {
 public:
 
     static const uint8_t HMC_I2C_ADDR = 0x1E;
     static const uint8_t HMC_CHIP_ID = 0x48 ^ 0x34 ^ 0x33;
+
     static const uint8_t QMC_I2C_ADDR = 0x0D;
     static const uint8_t QMC_CHIP_ID = 0xFF;
 
     enum hmc_reg
     {
-        REG_CONFIG_A = 0x00,
-        REG_CONFIG_B = 0x01,
-        REG_MODE = 0x02,
-        REG_OUT_X_M = 0x03,
-        REG_OUT_X_L = 0x04,
-        REG_OUT_Z_M = 0x05,
-        REG_OUT_Z_L = 0x06,
-        REG_OUT_Y_M = 0x07,
-        REG_OUT_Y_L = 0x08,
-        REG_STATUS = 0x09,
-        REG_IDEN_A = 0x0A,
-        REG_IDEN_B = 0x0B,
-        REG_IDEN_C = 0x0C,
+        CONFIG_A = 0x00,
+        CONFIG_B = 0x01,
+        MODE = 0x02,
+        OUT_X_M = 0x03,
+        OUT_X_L = 0x04,
+        OUT_Z_M = 0x05,
+        OUT_Z_L = 0x06,
+        OUT_Y_M = 0x07,
+        OUT_Y_L = 0x08,
+        STATUS = 0x09,
+        IDEN_A = 0x0A,
+        IDEN_B = 0x0B,
+        IDEN_C = 0x0C,
     };
 
     enum class hmc_mode : uint8_t
     {
-        MODE_CONTINUOUS = 0x00,
-        MODE_SINGLE = 0x01,
-        MODE_IDLE = 0x02,
+        CONTINUOUS = 0x00,
+        // MODE_SINGLE = 0x01,
+        STANDBY = 0x02,
     };
 
-    enum class hmc_datarate : uint8_t
+    enum class hmc_data_rate : uint8_t
     {
-        DATARATE_75HZ = 0x06,
-        DATARATE_30HZ = 0x05,
-        DATARATE_15HZ = 0x04,
-        DATARATE_7_5HZ = 0x03,
-        DATARATE_3HZ = 0x02,
-        DATARATE_1_5HZ = 0x01,
-        DATARATE_0_75HZ = 0x00,
+        HZ_75 = 0x06,
+        HZ_30 = 0x05,
+        HZ_15 = 0x04,
+        HZ_7_5 = 0x03,
+        HZ_3 = 0x02,
+        HZ_1_5 = 0x01,
+        HZ_0_75 = 0x00,
     };
 
     enum class hmc_range : uint8_t
     {
-        RANGE_8_1GA = 0x07,
-        RANGE_5_6GA = 0x06,
-        RANGE_4_7GA = 0x05,
-        RANGE_4GA = 0x04,
-        RANGE_2_5GA = 0x03,
-        RANGE_1_9GA = 0x02,
-        RANGE_1_3GA = 0x01,
-        RANGE_0_88GA = 0x00,
+        GA_8_1 = 0x07,
+        GA_5_6 = 0x06,
+        GA_4_7 = 0x05,
+        GA_4 = 0x04,
+        GA_2_5 = 0x03,
+        GA_1_9 = 0x02,
+        GA_1_3 = 0x01,
+        GA_0_88 = 0x00,
     };
 
-    enum class hmc_samples : uint8_t {
-        SAMPLES_1 = 0x00,
-        SAMPLES_2 = 0x01,
-        SAMPLES_4 = 0x02,
-        SAMPLES_8 = 0x03,
+    enum class hmc_samples : uint8_t
+    {
+        X1 = 0x00,
+        X2 = 0x01,
+        X4 = 0x02,
+        X8 = 0x03,
     };
 
     enum qmc_reg
     {
-        REG_X_L = 0x00,
-        REG_X_M = 0x01,
-        REG_Y_L = 0x02,
-        REG_Y_M = 0x03,
-        REG_Z_L = 0x04,
-        REG_Z_M = 0x05,
-        REG_QMC_STATUS = 0x06,
-        REG_TEMP_M = 0x07,
-        REG_TEMP_L = 0x08,
-        REG_CONFIG = 0x09,
-        REG_CONFIG2 = 0x0A,
-        REG_RESET = 0x0B,
-        REG_RESERVED = 0x0C,
-        REG_CHIP_ID = 0x0D,
+        X_L = 0x00,
+        X_M = 0x01,
+        Y_L = 0x02,
+        Y_M = 0x03,
+        Z_L = 0x04,
+        Z_M = 0x05,
+        QMC_STATUS = 0x06,
+        TEMP_M = 0x07,
+        TEMP_L = 0x08,
+        CONFIG = 0x09,
+        CONFIG2 = 0x0A,
+        RESET = 0x0B,
+        RESERVED = 0x0C,
+        CHIP_ID = 0x0D,
     };
 
     enum class qmc_mode : uint8_t
     {
-        MODE_CONTINUOUS = 0x01,
-        MODE_STANDBY = 0x00,
+        STANDBY = 0x00,
+        CONTINUOUS = 0x01,
     };
 
-    enum class qmc_datarate : uint8_t
+    enum class qmc_data_rate : uint8_t
     {
-        DATARATE_200HZ = 0x03,
-        DATARATE_100HZ = 0x02,
-        DATARATE_50HZ = 0x01,
-        DATARATE_10HZ = 0x00,
+        HZ_10 = 0x00,
+        HZ_50 = 0x01,
+        HZ_100 = 0x02,
+        HZ_200 = 0x03,
     };
 
     enum class qmc_range : uint8_t
     {
-        RANGE_8GA = 0x01,
-        RANGE_2GA = 0x00,
+        GA_8 = 0x01,
+        GA_2 = 0x00,
     };
 
     enum class qmc_samples : uint8_t {
-        SAMPLES_64 = 0x03,
-        SAMPLES_128 = 0x02,
-        SAMPLES_256 = 0x01,
-        SAMPLES_512 = 0x00,
+        X64 = 0x03,
+        X128 = 0x02,
+        X256 = 0x01,
+        X512 = 0x00,
     };
 
-    EVNCompassSensor(uint8_t port) : EVNSensor(port)
+    EVNCompassSensor(uint8_t port,
+        double hard_x = 0, double hard_y = 0, double hard_z = 0,
+        double soft_x_0 = 1, double soft_x_1 = 0, double soft_x_2 = 0,
+        double soft_y_0 = 0, double soft_y_1 = 1, double soft_y_2 = 0,
+        double soft_z_0 = 0, double soft_z_1 = 0, double soft_z_2 = 1) : EVNSensor(port)
     {
-        _x = 0;
-        _y = 0;
-        _z = 0;
-        _xcal = 0;
-        _ycal = 0;
-        _zcal = 0;
+        _x_hard_cal = hard_x / 100;
+        _y_hard_cal = hard_y / 100;
+        _z_hard_cal = hard_z / 100;
+
+        _x_soft_cal[0] = soft_x_0;
+        _x_soft_cal[1] = soft_x_1;
+        _x_soft_cal[2] = soft_x_2;
+        _y_soft_cal[0] = soft_y_0;
+        _y_soft_cal[1] = soft_y_1;
+        _y_soft_cal[2] = soft_y_2;
+        _z_soft_cal[0] = soft_z_0;
+        _z_soft_cal[1] = soft_z_1;
+        _z_soft_cal[2] = soft_z_2;
+
+        if (hard_x != 0 || hard_y != 0 || hard_z != 0)
+            _calibrated = true;
     };
 
     bool begin()
     {
         EVNAlpha::sharedPorts().begin();
 
+        _addr = HMC_I2C_ADDR;
+
         uint8_t id =
-            read8(HMC_I2C_ADDR, (uint8_t)hmc_reg::REG_IDEN_A) ^
-            read8(HMC_I2C_ADDR, (uint8_t)hmc_reg::REG_IDEN_B) ^
-            read8(HMC_I2C_ADDR, (uint8_t)hmc_reg::REG_IDEN_C);
+            read8((uint8_t)hmc_reg::IDEN_A) ^
+            read8((uint8_t)hmc_reg::IDEN_B) ^
+            read8((uint8_t)hmc_reg::IDEN_C);
 
         if (id != HMC_CHIP_ID)
         {
-            id = read8(QMC_I2C_ADDR, (uint8_t)qmc_reg::REG_CHIP_ID);
+            _addr = QMC_I2C_ADDR;
+            id = read8((uint8_t)qmc_reg::CHIP_ID);
             if (id == QMC_CHIP_ID)
-                _isqmc = true;
+                _is_qmc = true;
             else
                 return _sensor_started;
         }
 
         _sensor_started = true;
 
-        if (_isqmc)
+        if (_is_qmc)
         {
-            setMeasurementMode((uint8_t)qmc_mode::MODE_CONTINUOUS);
-            setDataRate((uint8_t)qmc_datarate::DATARATE_50HZ);
-            setRange((uint8_t)qmc_range::RANGE_8GA);
-            setSamples((uint8_t)qmc_samples::SAMPLES_256);
+            _addr = QMC_I2C_ADDR;
+            write8((uint8_t)qmc_reg::RESET, 0x01);
+            delay(10);
+            setModeQMC(qmc_mode::CONTINUOUS);
+            setDataRateQMC(qmc_data_rate::HZ_200);
+            setRangeQMC(qmc_range::GA_2);
+            setSamplesQMC(qmc_samples::X512);
         }
         else
         {
-            setMeasurementMode((uint8_t)hmc_mode::MODE_CONTINUOUS);
-            setDataRate((uint8_t)hmc_datarate::DATARATE_75HZ);
-            setRange((uint8_t)hmc_range::RANGE_4GA);
-            setSamples((uint8_t)hmc_samples::SAMPLES_1);
+            _addr = HMC_I2C_ADDR;
+            setModeHMC(hmc_mode::CONTINUOUS);
+            setDataRateHMC(hmc_data_rate::HZ_75);
+            setRangeHMC(hmc_range::GA_4);
+            setSamplesHMC(hmc_samples::X1);
         }
         return _sensor_started;
     };
 
     bool isQMC()
     {
-        return _isqmc;
+        return _is_qmc;
     };
 
     bool isHMC()
     {
-        return !_isqmc;
+        return !_is_qmc;
     };
 
-    void setMeasurementMode(uint8_t mode)
+    void setCalibration(double hard_x = 0, double hard_y = 0, double hard_z = 0,
+        double soft_x_0 = 1, double soft_x_1 = 0, double soft_x_2 = 0,
+        double soft_y_0 = 0, double soft_y_1 = 1, double soft_y_2 = 0,
+        double soft_z_0 = 0, double soft_z_1 = 0, double soft_z_2 = 1)
     {
-        if (_sensor_started)
+        _x_hard_cal = hard_x / 100;
+        _y_hard_cal = hard_y / 100;
+        _z_hard_cal = hard_z / 100;
+
+        _x_soft_cal[0] = soft_x_0;
+        _x_soft_cal[1] = soft_x_1;
+        _x_soft_cal[2] = soft_x_2;
+        _y_soft_cal[0] = soft_y_0;
+        _y_soft_cal[1] = soft_y_1;
+        _y_soft_cal[2] = soft_y_2;
+        _z_soft_cal[0] = soft_z_0;
+        _z_soft_cal[1] = soft_z_1;
+        _z_soft_cal[2] = soft_z_2;
+
+        if (hard_x != 0 || hard_y != 0 || hard_z != 0)
+            _calibrated = true;
+    };
+
+    void setModeHMC(hmc_mode mode)
+    {
+        if (_sensor_started && !_is_qmc)
         {
-            if (_isqmc)
-            {
-                uint8_t value;
-                value = read8(QMC_I2C_ADDR, qmc_reg::REG_CONFIG);
-                value &= 0b11111100;
-                value |= mode;
-                write8(QMC_I2C_ADDR, qmc_reg::REG_CONFIG, value);
-            }
-            else {
-                uint8_t value;
-                value = read8(HMC_I2C_ADDR, hmc_reg::REG_MODE);
-                value &= 0b11111100;
-                value |= mode;
-                write8(HMC_I2C_ADDR, hmc_reg::REG_MODE, value);
-            }
+            uint8_t value;
+            value = read8(hmc_reg::MODE);
+            value &= 0b11111100;
+            value |= (uint8_t)mode;
+            write8(hmc_reg::MODE, value);
         }
     };
 
-    void setDataRate(uint8_t dataRate)
+    void setModeQMC(qmc_mode mode)
     {
-        if (_sensor_started)
+        if (_sensor_started && _is_qmc)
         {
-            if (_isqmc)
-            {
-                switch ((qmc_datarate)dataRate)
-                {
-                case qmc_datarate::DATARATE_10HZ:
-                    _freq = 10;
-                    break;
-
-                case qmc_datarate::DATARATE_50HZ:
-                    _freq = 50;
-                    break;
-
-                case qmc_datarate::DATARATE_100HZ:
-                    _freq = 100;
-                    break;
-
-                case qmc_datarate::DATARATE_200HZ:
-                    _freq = 200;
-                    break;
-                }
-                uint8_t value;
-                value = read8(QMC_I2C_ADDR, qmc_reg::REG_CONFIG);
-                value &= 0b11110011;
-                value |= (dataRate << 2);
-                write8(QMC_I2C_ADDR, qmc_reg::REG_CONFIG, value);
-            }
-            else {
-                switch ((hmc_datarate)dataRate)
-                {
-                case hmc_datarate::DATARATE_0_75HZ:
-                    _freq = 0.75;
-                    break;
-                case hmc_datarate::DATARATE_1_5HZ:
-                    _freq = 1.5;
-                    break;
-                case hmc_datarate::DATARATE_3HZ:
-                    _freq = 3;
-                    break;
-                case hmc_datarate::DATARATE_7_5HZ:
-                    _freq = 7.5;
-                    break;
-                case hmc_datarate::DATARATE_15HZ:
-                    _freq = 15;
-                    break;
-                case hmc_datarate::DATARATE_30HZ:
-                    _freq = 30;
-                    break;
-                case hmc_datarate::DATARATE_75HZ:
-                    _freq = 75;
-                    break;
-                }
-
-                uint8_t value;
-                value = read8(HMC_I2C_ADDR, hmc_reg::REG_CONFIG_A);
-                value &= 0b11100011;
-                value |= (dataRate << 2);
-                write8(HMC_I2C_ADDR, hmc_reg::REG_CONFIG_A, value);
-            }
+            uint8_t value;
+            value = read8(qmc_reg::CONFIG);
+            value &= 0b11111100;
+            value |= (uint8_t)mode;
+            write8(qmc_reg::CONFIG, value);
         }
     };
 
-    void setRange(uint8_t range_value)
+    void setDataRateHMC(hmc_data_rate data_rate)
     {
-        if (_sensor_started)
+        if (_sensor_started && !_is_qmc)
         {
-            if (_isqmc)
+            switch (data_rate)
             {
-                switch ((qmc_range)range_value)
-                {
-                case qmc_range::RANGE_2GA:
-                    _gain = 12000;
-                    break;
+            case hmc_data_rate::HZ_0_75:
+                _freq = 0.75;
+                break;
+            case hmc_data_rate::HZ_1_5:
+                _freq = 1.5;
+                break;
+            case hmc_data_rate::HZ_3:
+                _freq = 3;
+                break;
+            case hmc_data_rate::HZ_7_5:
+                _freq = 7.5;
+                break;
+            case hmc_data_rate::HZ_15:
+                _freq = 15;
+                break;
+            case hmc_data_rate::HZ_30:
+                _freq = 30;
+                break;
+            case hmc_data_rate::HZ_75:
+                _freq = 75;
+                break;
+            }
 
-                case qmc_range::RANGE_8GA:
-                    _gain = 3000;
-                    break;
-                }
-                uint8_t value;
-                value = read8(QMC_I2C_ADDR, qmc_reg::REG_CONFIG);
-                value &= 0b11001111;
-                value |= (range_value << 4);
-                write8(QMC_I2C_ADDR, qmc_reg::REG_CONFIG, value);
-            }
-            else {
-                switch ((hmc_range)range_value)
-                {
-                case hmc_range::RANGE_0_88GA:
-                    _gain = 1370;
-                    break;
-                case hmc_range::RANGE_1_3GA:
-                    _gain = 1090;
-                    break;
-                case hmc_range::RANGE_1_9GA:
-                    _gain = 820;
-                    break;
-                case hmc_range::RANGE_2_5GA:
-                    _gain = 660;
-                    break;
-                case hmc_range::RANGE_4GA:
-                    _gain = 440;
-                    break;
-                case hmc_range::RANGE_4_7GA:
-                    _gain = 390;
-                    break;
-                case hmc_range::RANGE_5_6GA:
-                    _gain = 330;
-                    break;
-                case hmc_range::RANGE_8_1GA:
-                    _gain = 230;
-                    break;
-                }
-                write8(HMC_I2C_ADDR, hmc_reg::REG_CONFIG_B, range_value << 5);
-            }
+            uint8_t value;
+            value = read8(hmc_reg::CONFIG_A);
+            value &= 0b11100011;
+            value |= ((uint8_t)data_rate << 2);
+            write8(hmc_reg::CONFIG_A, value);
         }
     };
 
-    void setSamples(uint8_t samples)
+    void setDataRateQMC(qmc_data_rate data_rate)
     {
-        if (_sensor_started)
+        if (_sensor_started && _is_qmc)
         {
-            if (_isqmc)
+            switch (data_rate)
             {
-                uint8_t value;
-                value = read8(QMC_I2C_ADDR, qmc_reg::REG_CONFIG);
-                value &= 0b00111111;
-                value |= (samples << 6);
-                write8(QMC_I2C_ADDR, qmc_reg::REG_CONFIG, value);
+            case qmc_data_rate::HZ_10:
+                _freq = 10;
+                break;
+            case qmc_data_rate::HZ_50:
+                _freq = 50;
+                break;
+            case qmc_data_rate::HZ_100:
+                _freq = 100;
+                break;
+            case qmc_data_rate::HZ_200:
+                _freq = 200;
+                break;
             }
-            else {
-                uint8_t value;
-                value = read8(HMC_I2C_ADDR, hmc_reg::REG_CONFIG_A);
-                value &= 0b10011111;
-                value |= (samples << 5);
-                write8(HMC_I2C_ADDR, hmc_reg::REG_CONFIG_A, value);
+
+            uint8_t value;
+            value = read8(qmc_reg::CONFIG);
+            value &= 0b11110011;
+            value |= ((uint8_t)data_rate << 2);
+            write8(qmc_reg::CONFIG, value);
+        }
+    };
+
+    void setRangeHMC(hmc_range range)
+    {
+        if (_sensor_started && !_is_qmc)
+        {
+            switch (range)
+            {
+            case hmc_range::GA_0_88:
+                _gain = 1370;
+                break;
+            case hmc_range::GA_1_3:
+                _gain = 1090;
+                break;
+            case hmc_range::GA_1_9:
+                _gain = 820;
+                break;
+            case hmc_range::GA_2_5:
+                _gain = 660;
+                break;
+            case hmc_range::GA_4:
+                _gain = 440;
+                break;
+            case hmc_range::GA_4_7:
+                _gain = 390;
+                break;
+            case hmc_range::GA_5_6:
+                _gain = 330;
+                break;
+            case hmc_range::GA_8_1:
+                _gain = 230;
+                break;
             }
+            write8(hmc_reg::CONFIG_B, (uint8_t)range << 5);
+        }
+    };
+
+    void setRangeQMC(qmc_range range)
+    {
+        if (_sensor_started && _is_qmc)
+        {
+            switch (range)
+            {
+            case qmc_range::GA_2:
+                _gain = 12000;
+                break;
+            case qmc_range::GA_8:
+                _gain = 3000;
+                break;
+            }
+            uint8_t value;
+            value = read8(qmc_reg::CONFIG);
+            value &= 0b11001111;
+            value |= ((uint8_t)range << 4);
+            write8(qmc_reg::CONFIG, value);
+        }
+    };
+
+    void setSamplesHMC(hmc_samples samples)
+    {
+        if (_sensor_started && !_is_qmc)
+        {
+            uint8_t value;
+            value = read8(hmc_reg::CONFIG_A);
+            value &= 0b10011111;
+            value |= ((uint8_t)samples << 5);
+            write8(hmc_reg::CONFIG_A, value);
+        }
+    };
+
+    void setSamplesQMC(qmc_samples samples)
+    {
+        if (_sensor_started && _is_qmc)
+        {
+            uint8_t value;
+            value = read8(qmc_reg::CONFIG);
+            value &= 0b00111111;
+            value |= ((uint8_t)samples << 6);
+            write8(qmc_reg::CONFIG, value);
         }
     };
 
     bool isCalibrated()
     {
         return  _calibrated;
-    };
-
-    void update(bool blocking = true)
-    {
-        if (_sensor_started)
-        {
-            if (blocking)
-                while ((micros() - _last_reading_us) < (1000000 / _freq));
-
-            if ((micros() - _last_reading_us) >= (1000000 / _freq))
-            {
-                if (_isqmc)
-                {
-                    _x = read16(QMC_I2C_ADDR, (uint8_t)qmc_reg::REG_X_L);
-                    _y = read16(QMC_I2C_ADDR, (uint8_t)qmc_reg::REG_Y_L);
-                    _z = read16(QMC_I2C_ADDR, (uint8_t)qmc_reg::REG_Z_L);
-
-                }
-                else {
-                    _x = read16(HMC_I2C_ADDR, (uint8_t)hmc_reg::REG_OUT_X_M, false);
-                    _y = read16(HMC_I2C_ADDR, (uint8_t)hmc_reg::REG_OUT_Y_M, false);
-                    _z = read16(HMC_I2C_ADDR, (uint8_t)hmc_reg::REG_OUT_Z_M, false);
-                }
-                _last_reading_us = micros();
-            }
-        }
     };
 
     double readRawX(bool blocking = true)
@@ -385,7 +408,86 @@ public:
         return (double)_z / _gain;
     };
 
-    void calibrate()
+    double readCalX(bool blocking = true)
+    {
+        this->update(blocking);
+        this->calibrateReadings();
+        return (double)_xcal;
+    };
+
+    double readCalY(bool blocking = true)
+    {
+        this->update(blocking);
+        this->calibrateReadings();
+        return (double)_ycal;
+    };
+
+    double readCalZ(bool blocking = true)
+    {
+        this->update(blocking);
+        this->calibrateReadings();
+        return (double)_zcal;
+    };
+
+    double read(bool blocking = true)
+    {
+        if (_sensor_started)
+        {
+            this->update(blocking);
+
+            if (_calibrated)
+            {
+                this->calibrateReadings();
+            }
+            else
+            {
+                _xcal = (double)_x / _gain;
+                _ycal = (double)_y / _gain;
+                _zcal = (double)_z / _gain;
+            }
+
+            _yaw = (atan2(_ycal, _xcal) / M_PI * 180) + 180;
+            return fmod(_yaw - _yaw_offset + 360, 360);
+        }
+        return 0;
+    };
+
+    void setNorth()
+    {
+        _yaw_offset = _yaw;
+    };
+
+private:
+
+    void update(bool blocking = true)
+    {
+        if (_sensor_started)
+        {
+            if (blocking)
+                while ((micros() - _last_reading_us) < (1000000 / _freq));
+
+            if ((micros() - _last_reading_us) >= (1000000 / _freq))
+            {
+                if (_is_qmc)
+                {
+                    readBuffer((uint8_t)qmc_reg::X_L, 6, _buffer);
+                    _x = _buffer[1] << 8 | _buffer[0];
+                    _y = _buffer[3] << 8 | _buffer[2];
+                    _z = _buffer[5] << 8 | _buffer[4];
+                }
+                else
+                {
+                    readBuffer((uint8_t)hmc_reg::OUT_X_M, 6, _buffer);
+                    _x = _buffer[0] << 8 | _buffer[1];
+                    _z = _buffer[2] << 8 | _buffer[3];
+                    _y = _buffer[4] << 8 | _buffer[5];
+                }
+                _last_reading_us = micros();
+            }
+        }
+    };
+
+    void calibrateReadings()
     {
         if (_sensor_started)
         {
@@ -399,45 +501,20 @@ public:
         }
     };
 
-    double read(bool blocking = true)
-    {
-        if (_sensor_started)
-        {
-            this->update(blocking);
-
-            if (_calibrated)
-            {
-                this->calibrate();
-            }
-            else
-            {
-                _xcal = (double)_x / _gain;
-                _ycal = (double)_y / _gain;
-                _zcal = (double)_z / _gain;
-            }
-
-            _reading = (atan2(_ycal, _xcal) / M_PI * 180) + 180;
-            return fmod(_reading - _yaw_offset + 360, 360);
-        }
-        return 0;
-    };
-
-    void setNorth()
-    {
-        _yaw_offset = fmod(_reading - _yaw_offset + 360, 360);
-    };
-
-private:
-    int16_t _x, _y, _z;
-    double _xcal, _ycal, _zcal;
+    int16_t _x = 0, _y = 0, _z = 0;
+    double _xcal = 0, _ycal = 0, _zcal = 0;
     double _yaw_offset = 0;
-    double _reading;
-    double _x_hard_cal = 0, _x_soft_cal[3] = { 1,0,0 };
-    double _y_hard_cal = 0, _y_soft_cal[3] = { 0,1,0 };
-    double _z_hard_cal = 0, _z_soft_cal[3] = { 0,0,1 };
+    double _yaw;
+
+    double _x_hard_cal, _x_soft_cal[3];
+    double _y_hard_cal, _y_soft_cal[3];
+    double _z_hard_cal, _z_soft_cal[3];
+
     double _freq, _gain;
     uint32_t _last_reading_us = 0;
-    bool _calibrated = false, _isqmc = false;
+    bool _calibrated = true, _is_qmc = false;
+
+    uint8_t _buffer[6] = { 0 };
 };
 
 #endif
