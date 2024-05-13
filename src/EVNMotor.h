@@ -23,66 +23,71 @@
 #define STOP_HOLD		2
 
 //DPS MEASUREMENT (TIME BETWEEN PULSES)
-#define NO_OF_PULSES_TIMED 3
-
-typedef struct
-{
-	//POSITION MEASUREMENT
-	volatile uint8_t enca;
-	volatile uint8_t encb;
-	volatile int8_t dir;
-	volatile uint8_t state;
-	volatile double ppr;
-	volatile double position;
-	volatile double position_offset;
-
-	//DPS MEASUREMENT (TIME BETWEEN PULSES)
-	volatile uint8_t last_pulse_index;
-	volatile uint64_t pulse_times[NO_OF_PULSES_TIMED];
-	volatile int8_t pulse_dirs[NO_OF_PULSES_TIMED];
-	volatile double avg_pulse_timing;
-} encoder_state_t;
-
-typedef struct
-{
-	//MOTOR CHARACTERISTICS
-	uint8_t motora;
-	uint8_t motorb;
-	volatile double max_rpm;
-	volatile double accel;
-	volatile double decel;
-
-	//CONTROLLER
-	PIDController* pos_pid;
-
-	//USER-SET VARIABLES
-	volatile bool run_pwm;
-	volatile bool run_speed;
-	volatile bool run_dir;
-	volatile double target_dps;
-	volatile bool run_pos;
-	volatile double target_pos;
-	volatile bool run_time;
-	volatile uint64_t run_time_ms;
-	volatile bool hold;
-	volatile uint8_t stop_action;
-
-	//LOOP VARIABLES
-	volatile uint64_t last_update;
-	volatile double target_dps_end_decel;
-	volatile double target_dps_constrained;
-	volatile double x;
-	volatile double error;
-	volatile double output;
-
-	volatile uint8_t counter;
-	volatile uint64_t start_time_us;
-
-	volatile bool stalled;
-} pid_control_t;
+#define NO_OF_EDGES_STORED 3
 
 class EVNMotor
 {
+	struct encoder_state_t
+	{
+		//POSITION MEASUREMENT
+		volatile uint8_t enca;
+		volatile uint8_t encb;
+		volatile bool enca_state;
+		volatile bool encb_state;
+		volatile int8_t dir;
+		volatile uint8_t state;
+		volatile double ppr;
+		volatile double position;
+		volatile double position_offset;
+
+		//DPS MEASUREMENT (TIME BETWEEN PULSES)
+		volatile uint8_t last_edge_index;
+		volatile uint64_t edge_times[NO_OF_EDGES_STORED];
+		volatile bool dps_calculated;
+		volatile bool obtained_one_pulse;
+		volatile double avg_dps;
+		volatile double avg_pulse_width;
+	};
+
+	struct pid_control_t
+	{
+		//MOTOR CHARACTERISTICS
+		volatile uint8_t motor_type;
+		uint8_t motora;
+		uint8_t motorb;
+		volatile double max_rpm;
+		volatile double accel;
+		volatile double decel;
+
+		//CONTROLLER
+		PIDController* pos_pid;
+
+		//USER-SET VARIABLES
+		volatile bool run_pwm;
+		volatile bool run_speed;
+		volatile bool run_dir;
+		volatile double target_dps;
+		volatile bool run_pos;
+		volatile double target_pos;
+		volatile bool run_time;
+		volatile uint64_t run_time_ms;
+		volatile bool hold;
+		volatile uint8_t stop_action;
+
+		//LOOP VARIABLES
+		volatile uint64_t last_update;
+		volatile double target_dps_end_decel;
+		volatile double target_dps_constrained;
+		volatile double x;
+		volatile double error;
+		volatile double output;
+
+		volatile uint8_t counter;
+		volatile uint64_t start_time_us;
+
+		volatile bool stalled;
+	};
+
 private:
 	static const uint32_t PWM_FREQ = 20000;
 	static const uint32_t PWM_MAX_VAL = 255;
@@ -91,6 +96,7 @@ private:
 
 public:
 	friend class EVNDrivebase;
+	friend class EVNOmniDrivebaseBasic;
 
 	EVNMotor(uint8_t port, uint8_t motortype = EV3_LARGE, uint8_t motor_dir = DIRECT, uint8_t enc_dir = DIRECT);
 	void begin();
@@ -130,6 +136,7 @@ public:
 	//TODO: add end function
 
 protected:
+public:
 	double clean_input_dps(double dps);
 	uint8_t clean_input_dir(double dps);
 	uint8_t clean_input_stop_action(uint8_t stop_action);
@@ -156,7 +163,7 @@ protected:
 
 	static bool position_control_enabled(pid_control_t* arg)
 	{
-		return arg->run_pos;
+		return arg->run_pos || arg->hold;
 	}
 
 	static bool loop_control_enabled(pid_control_t* arg)
@@ -166,21 +173,29 @@ protected:
 
 	static void velocity_update(encoder_state_t* arg, uint64_t now)
 	{
-		if (gpio_get(arg->enca))
+		if (arg->enca_state)
 		{
-			arg->last_pulse_index++;
-			arg->last_pulse_index %= NO_OF_PULSES_TIMED;
-			arg->pulse_times[arg->last_pulse_index] = now;
-			arg->pulse_dirs[arg->last_pulse_index] = arg->dir;
+			arg->last_edge_index++;
+			arg->last_edge_index %= NO_OF_EDGES_STORED;
+			arg->edge_times[arg->last_edge_index] = now;
+
+			if (!arg->obtained_one_pulse && arg->last_edge_index == 2)
+				arg->obtained_one_pulse = true;
+
+			arg->dps_calculated = false;
 		}
 	}
 
 	static void pos_update(encoder_state_t* arg)
 	{
 		uint8_t state = arg->state & 3;
-		if (gpio_get(arg->enca))
+
+		arg->enca_state = gpio_get(arg->enca);
+		arg->encb_state = gpio_get(arg->encb);
+
+		if (arg->enca_state)
 			state |= 4;
-		if (gpio_get(arg->encb))
+		if (arg->encb_state)
 			state |= 8;
 		arg->state = (state >> 2);
 
@@ -240,10 +255,15 @@ protected:
 		}
 	}
 
-	static void stopAction_static(pid_control_t* pidArg, encoder_state_t* encoderArg, uint64_t now)
+	static void stopAction_static(pid_control_t* pidArg, encoder_state_t* encoderArg, uint64_t now, double pos, double dps)
 	{
 		//reset PID controller, stop loop control
 		pidArg->pos_pid->reset();
+
+		bool set_hold_target_pos = false;
+		if (!pidArg->hold && !pidArg->run_pos)
+			set_hold_target_pos = true;
+
 		pidArg->run_pwm = false;
 		pidArg->run_speed = false;
 		pidArg->run_pos = false;
@@ -260,16 +280,20 @@ protected:
 		case STOP_COAST:
 			digitalWrite(pidArg->motora, LOW);
 			digitalWrite(pidArg->motorb, LOW);
-			pidArg->x = getPosition_static(encoderArg);
-			pidArg->target_dps_constrained = getDPS_static(encoderArg);
+			pidArg->x = pos;
+			pidArg->target_dps_constrained = dps;
 			break;
 		case STOP_BRAKE:
 			digitalWrite(pidArg->motora, HIGH);
 			digitalWrite(pidArg->motorb, HIGH);
-			pidArg->x = getPosition_static(encoderArg);
-			pidArg->target_dps_constrained = getDPS_static(encoderArg);
+			pidArg->x = pos;
+			pidArg->target_dps_constrained = dps;
 			break;
 		case STOP_HOLD:
+			if (set_hold_target_pos)
+			{
+				pidArg->target_pos = pos;
+			}
 			pidArg->target_dps = 0;
 			pidArg->hold = true;
 			break;
@@ -285,37 +309,53 @@ protected:
 	static double getDPS_static(encoder_state_t* arg)
 	{
 		uint64_t now = micros();
-		double last_pulse_timing = now - arg->pulse_times[arg->last_pulse_index];
-		double sum_dps = 0;
-		double sum_pulse_timing = 0;
+		double last_pulse_width = now - arg->edge_times[arg->last_edge_index];
 
-		for (uint8_t i = 0; i < (NO_OF_PULSES_TIMED - 1); i++)
+		if (!arg->obtained_one_pulse) return 0;
+
+		if (!arg->dps_calculated)
 		{
-			uint8_t end_index = (arg->last_pulse_index - i + NO_OF_PULSES_TIMED) % NO_OF_PULSES_TIMED;
-			uint8_t start_index = (end_index - 1 + NO_OF_PULSES_TIMED) % NO_OF_PULSES_TIMED;
-			uint64_t start = arg->pulse_times[start_index];
-			uint64_t end = arg->pulse_times[end_index];
+			double sum_dps = 0;
+			double sum_pulse_width = 0;
+			double number_of_pulses = 0;
 
-			double pulse_timing = end - start;
-			double pulse_dps = (1000000 / pulse_timing) / arg->ppr * 360 * arg->pulse_dirs[end_index];
-			sum_pulse_timing += pulse_timing;
-			sum_dps += pulse_dps;
+			for (uint8_t i = 0; i < (NO_OF_EDGES_STORED - 1); i++)
+			{
+				uint8_t end_index = (arg->last_edge_index - i + NO_OF_EDGES_STORED) % NO_OF_EDGES_STORED;
+				uint8_t start_index = (end_index - 1 + NO_OF_EDGES_STORED) % NO_OF_EDGES_STORED;
+				uint64_t end = arg->edge_times[end_index];
+				uint64_t start = arg->edge_times[start_index];
+
+				double pulse_width = end - start;
+				double pulse_dps = 0;
+				if (pulse_width > 0)
+				{
+					pulse_dps = 360000000 / pulse_width / arg->ppr;
+					number_of_pulses++;
+				}
+
+				sum_pulse_width += pulse_width;
+				sum_dps += pulse_dps;
+			}
+
+			arg->avg_pulse_width = sum_pulse_width / number_of_pulses;
+			arg->avg_dps = sum_dps / number_of_pulses;
+			arg->dps_calculated = true;
 		}
 
 		// if timeout, DPS is 0
-		if (last_pulse_timing > ENCODER_PULSE_TIMEOUT_US) return 0;
+		if (last_pulse_width > ENCODER_PULSE_TIMEOUT_US) return 0;
 
 		// if latest pulse is longer than prior pulses, use latest pulse
 		// this occurs when the motor is slowing down (pulses get longer and longer)
-		else if (last_pulse_timing > (sum_pulse_timing / (NO_OF_PULSES_TIMED - 1)))
+		else if (last_pulse_width > arg->avg_pulse_width)
 		{
-			double final_dps = (1000000 / last_pulse_timing) / arg->ppr * 360;
-			return final_dps * ((sum_dps < 0) ? -1 : 1);
+			double final_dps = (1000000 / last_pulse_width) / arg->ppr * 360;
+			return final_dps * arg->dir;
 		}
 
 		else
-			return sum_dps / (NO_OF_PULSES_TIMED - 1);
-
+			return arg->avg_dps * arg->dir;
 	}
 
 	static void pid_update(pid_control_t* pidArg, encoder_state_t* encoderArg)
@@ -330,7 +370,7 @@ protected:
 		{
 			double decel_dps = pidArg->target_dps;
 
-			if (position_control_enabled(pidArg) || pidArg->hold)
+			if (position_control_enabled(pidArg))
 			{
 				if (!pidArg->hold)
 				{
@@ -341,7 +381,7 @@ protected:
 
 					if (pidArg->counter >= USER_RUN_DEGREES_MIN_LOOP_COUNT)
 					{
-						stopAction_static(pidArg, encoderArg, now);
+						stopAction_static(pidArg, encoderArg, now, pos, dps);
 						return;
 					}
 				}
@@ -359,7 +399,7 @@ protected:
 			{
 				if ((now - pidArg->start_time_us) >= pidArg->run_time_ms * 1000)
 				{
-					stopAction_static(pidArg, encoderArg, now);
+					stopAction_static(pidArg, encoderArg, now, pos, dps);
 					return;
 				}
 
@@ -404,7 +444,7 @@ protected:
 				pidArg->stalled = true;
 			}
 
-			if (position_control_enabled(pidArg) || pidArg->hold)
+			if (position_control_enabled(pidArg))
 			{
 				if (fabs(pidArg->target_pos - old_x) < fabs(pidArg->target_pos - pidArg->x))
 				{
@@ -418,15 +458,10 @@ protected:
 			double ki = pidArg->pos_pid->getKi();
 			double kd = pidArg->pos_pid->getKd();
 
-			if (!position_control_enabled(pidArg))
-				pidArg->pos_pid->setKi(0);
-
 			pidArg->pos_pid->setKd((1 - fabs(pidArg->target_dps) / pidArg->max_rpm / 6) * kd);
 
 			if (pidArg->hold)
-			{
 				pidArg->pos_pid->setKp(kp / 2);
-			}
 
 			pidArg->output = pidArg->pos_pid->compute(pidArg->error, false, false, false);
 			pidArg->pos_pid->setKp(kp);
@@ -435,13 +470,11 @@ protected:
 
 			runPWM_static(pidArg, pidArg->output);
 		}
-		else if (motors_enabled() && pidArg->run_pwm)
-		{
-		}
-		else
+
+		else if (!motors_enabled() || !pidArg->run_pwm)
 		{
 			pidArg->stop_action = STOP_BRAKE;
-			stopAction_static(pidArg, encoderArg, now);
+			stopAction_static(pidArg, encoderArg, now, pos, dps);
 		}
 	}
 
@@ -519,6 +552,8 @@ protected:
 typedef struct
 {
 	//DRIVEBASE CHARACTERISTICS
+	volatile uint8_t motor_type;
+
 	volatile double max_rpm;
 	volatile double max_dps;
 	volatile double max_turn_rate;
@@ -657,17 +692,18 @@ private:
 			{
 				dbArgs[i] = arg;
 				dbs_enabled[i] = true;
+				break;
 			}
 			else
 				timerisr_started = true;
 		}
 
 		if (!timerisr_started)
-			add_repeating_timer_us(-PID_TIMER_INTERVAL_US, timerisr, NULL, &EVNISRTimer::sharedISRTimer(1));
+			alarm_pool_add_repeating_timer_us(EVNISRTimer::sharedAlarmPool(), -PID_TIMER_INTERVAL_US, timerisr, NULL, &EVNISRTimer::sharedISRTimer(1));
 	}
 
-	static bool timerisr(struct repeating_timer* t) {
-
+	static bool timerisr(struct repeating_timer* t)
+	{
 		for (int i = 0; i < MAX_DB_OBJECTS; i++)
 		{
 			if (dbs_enabled[i])
@@ -801,18 +837,18 @@ private:
 			arg->angle_error /= 180;
 
 			arg->angle_error = constrain(arg->angle_error, -1, 1);
-			arg->angle_output = arg->turn_rate_pid->compute(arg->angle_error, true, false, true);
+			arg->angle_output = arg->turn_rate_pid->compute(arg->angle_error, false, false, false);
 
 			//speed error is the euclidean distance between the db position and its target (converted to motor degrees)
 			arg->speed_error = arg->target_distance - arg->current_distance;
 			arg->speed_error = arg->speed_error / M_PI / arg->wheel_dia * 360;
-			arg->speed_output = arg->speed_pid->compute(arg->speed_error, false, false, true);
+			arg->speed_output = arg->speed_pid->compute(arg->speed_error, false, false, false);
 
 			//calculate motor speeds
 			//speed output   -> average speed
 			//heading output -> difference between speeds
-			arg->target_motor_left_dps = (arg->speed_output - arg->angle_output) * arg->max_dps;
-			arg->target_motor_right_dps = (arg->speed_output + arg->angle_output) * arg->max_dps;
+			arg->target_motor_left_dps = constrain(arg->speed_output - arg->angle_output, -arg->max_dps, arg->max_dps);
+			arg->target_motor_right_dps = constrain(arg->speed_output + arg->angle_output, -arg->max_dps, arg->max_dps);
 
 			//maintain ratio between speeds when either speed exceeds motor limits
 			double ratio = arg->target_motor_left_dps / arg->target_motor_right_dps;
@@ -848,7 +884,7 @@ private:
 
 			//increment target angle and XY position
 			//if output of speed or turn rate output is saturated or motors are stalled, stop incrementing (avoid excessive overshoot that PID cannot correct)
-			if (fabs(arg->speed_error) * arg->speed_pid->getKp() < 1 && fabs(arg->angle_error) * arg->turn_rate_pid->getKp() < 1
+			if (fabs(arg->speed_error) * arg->speed_pid->getKp() < arg->max_dps && fabs(arg->angle_error) * arg->turn_rate_pid->getKp() < arg->max_dps
 				&& !arg->motor_left->stalled() && !arg->motor_right->stalled())
 			{
 				//calculating time taken to decel/accel to target speed & turn rate
@@ -1039,6 +1075,128 @@ private:
 			stopAction_static(arg);
 		}
 	}
+};
+
+class EVNOmniDrivebaseBasic
+{
+public:
+	EVNOmniDrivebaseBasic(uint32_t wheel_dia, uint32_t wheel_dist, EVNMotor* fl, EVNMotor* fr, EVNMotor* bl, EVNMotor* br)
+	{
+		_fl = fl;
+		_fr = fr;
+		_bl = bl;
+		_br = br;
+	};
+
+	void begin()
+	{
+		_max_rpm = min(min(_fl->_pid_control.max_rpm, _fr->_pid_control.max_rpm), min(_bl->_pid_control.max_rpm, _br->_pid_control.max_rpm));
+	};
+
+	void steer(double speed, double angle, double turn_rate)
+	{
+		double speedc, anglec, rotatec;
+		double anglec_rad, speedc_x, speedc_y;
+		double speedc_x_left, speedc_y_left, speedc_x_right, speedc_y_right;
+
+		speedc = constrain(speed, -_max_rpm * 6, _max_rpm * 6);
+		anglec = constrain(angle, 0, 360);
+		anglec = fmod(anglec + 45, 360);
+		rotatec = constrain(turn_rate, -1, 1);
+
+		anglec_rad = anglec / 180 * M_PI;
+		speedc_x = sin(anglec_rad) * speedc;
+		speedc_y = cos(anglec_rad) * speedc;
+
+		if (anglec >= 90 && anglec <= 270)
+		{
+			if (rotatec >= 0)
+			{
+				speedc_y_left = speedc_y * (1 - 2 * rotatec);
+				speedc_y_right = speedc_y;
+			}
+			else {
+				speedc_y_right = speedc_y * (1 + 2 * rotatec);
+				speedc_y_left = speedc_y;
+			}
+		}
+		else {
+			if (rotatec >= 0)
+			{
+				speedc_y_right = speedc_y * (1 - 2 * rotatec);
+				speedc_y_left = speedc_y;
+			}
+			else {
+				speedc_y_left = speedc_y * (1 + 2 * rotatec);
+				speedc_y_right = speedc_y;
+			}
+		}
+
+		if (anglec >= 0 && anglec <= 180)
+		{
+			if (rotatec >= 0)
+			{
+				speedc_x_right = speedc_x * (1 - 2 * rotatec);
+				speedc_x_left = speedc_x;
+			}
+			else {
+				speedc_x_left = speedc_x * (1 + 2 * rotatec);
+				speedc_x_right = speedc_x;
+			}
+		}
+		else {
+			if (rotatec >= 0)
+			{
+				speedc_x_left = speedc_x * (1 - 2 * rotatec);
+				speedc_x_right = speedc_x;
+			}
+			else {
+				speedc_x_right = speedc_x * (1 + 2 * rotatec);
+				speedc_x_left = speedc_x;
+			}
+		}
+
+		_fl->runSpeed(speedc_x_left);
+		_br->runSpeed(speedc_x_right);
+		_fr->runSpeed(speedc_y_right);
+		_bl->runSpeed(speedc_y_left);
+	};
+
+	void stop()
+	{
+		this->brake();
+	};
+
+	void brake()
+	{
+		_fl->brake();
+		_fr->brake();
+		_bl->brake();
+		_br->brake();
+	};
+
+	void coast()
+	{
+		_fl->coast();
+		_fr->coast();
+		_bl->coast();
+		_br->coast();
+	};
+
+	void hold()
+	{
+		_fl->hold();
+		_fr->hold();
+		_bl->hold();
+		_br->hold();
+	};
+
+private:
+	EVNMotor* _fl;
+	EVNMotor* _fr;
+	EVNMotor* _bl;
+	EVNMotor* _br;
+	double _max_rpm;
 };
 
 #endif
