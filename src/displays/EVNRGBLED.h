@@ -58,44 +58,62 @@ public:
         return _attached;
     };
 
-    void writeAll(uint8_t r = 0, uint8_t g = 0, uint8_t b = 0, bool show = true)
+    void writeAll(uint8_t r = 0, uint8_t g = 0, uint8_t b = 0, bool show = true, bool blocking = true)
     {
         for (int i = 0; i < _num_leds; i++)
         {
-            _buffer[i][0] = r;
-            _buffer[i][1] = g;
-            _buffer[i][2] = b;
+            if (_buffer[i][0] != r || _buffer[i][1] != g || _buffer[i][2] != b)
+            {
+                _buffer[i][0] = r;
+                _buffer[i][1] = g;
+                _buffer[i][2] = b;
+                _buffer_changed = true;
+            }
         }
 
-        if (show) this->update();
+        if (show) this->update(blocking);
     };
 
-    void write(uint16_t led, uint8_t r = 0, uint8_t g = 0, uint8_t b = 0, bool show = true)
+    void write(uint16_t led, uint8_t r = 0, uint8_t g = 0, uint8_t b = 0, bool show = true, bool blocking = true)
     {
-        _buffer[led][0] = r;
-        _buffer[led][1] = g;
-        _buffer[led][2] = b;
-
-        if (show) this->update();
-    };
-
-    void clear(bool show = true)
-    {
-        for (int i = 0; i < _num_leds; i++)
+        if (_buffer[led][0] != r || _buffer[led][1] != g || _buffer[led][2] != b)
         {
-            _buffer[i][0] = 0;
-            _buffer[i][1] = 0;
-            _buffer[i][2] = 0;
+            _buffer[led][0] = r;
+            _buffer[led][1] = g;
+            _buffer[led][2] = b;
+            _buffer_changed = true;
         }
 
-        if (show) this->update();
+        if (show) this->update(blocking);
     };
 
-    void update()
+    void clear(bool show = true, bool blocking = true)
     {
         for (int i = 0; i < _num_leds; i++)
         {
-            put_pixel(urgb_u32(_buffer[i][0], _buffer[i][1], _buffer[i][2]));
+            if (_buffer[i][0] != 0 || _buffer[i][1] != 0 || _buffer[i][2] != 0)
+            {
+                _buffer[i][0] = 0;
+                _buffer[i][1] = 0;
+                _buffer[i][2] = 0;
+                _buffer_changed = true;
+            }
+        }
+
+        if (show) this->update(blocking);
+    };
+
+    void update(bool blocking = false)
+    {
+        if (_buffer_changed)
+        {
+            if (blocking)
+                ensure_new_frame();
+
+            for (int i = 0; i < _num_leds; i++)
+                put_pixel(urgb_u32(_buffer[i][0], _buffer[i][1], _buffer[i][2]));
+
+            _buffer_changed = false;
         }
     };
 
@@ -111,10 +129,22 @@ private:
         pio_sm_put_blocking(_pio, _sm, pixel_grb << 8u);
     };
 
+    void ensure_new_frame()
+    {
+        // ensure that 50us have elapsed since sending last int32 from the previous frame
+        // TODO: Find ways to make this non-blocking
+
+        while (!pio_sm_is_tx_fifo_empty(_pio, _sm));
+        delayMicroseconds(52);
+    }
+
     PIO _pio;
     int _sm;
     int _offset;
     bool _attached;
+
+    bool _buffer_changed = true;
+    uint64_t _last_transmission_us;
 
     uint16_t _num_leds;
     uint8_t _pin;
