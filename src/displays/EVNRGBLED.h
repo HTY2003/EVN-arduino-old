@@ -76,6 +76,8 @@ public:
 
     void write(uint16_t led, uint8_t r = 0, uint8_t g = 0, uint8_t b = 0, bool show = true, bool blocking = true)
     {
+        if (led > _num_leds - 1) return;
+
         if (_buffer[led][0] != r || _buffer[led][1] != g || _buffer[led][2] != b)
         {
             _buffer[led][0] = r;
@@ -103,7 +105,7 @@ public:
         if (show) this->update(blocking);
     };
 
-    void update(bool blocking = false)
+    void update(bool blocking = true)
     {
         if (_buffer_changed)
         {
@@ -135,7 +137,7 @@ private:
         // TODO: Find ways to make this non-blocking
 
         while (!pio_sm_is_tx_fifo_empty(_pio, _sm));
-        delayMicroseconds(52);
+        delayMicroseconds(100);
     }
 
     PIO _pio;
