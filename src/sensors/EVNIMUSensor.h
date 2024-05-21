@@ -132,7 +132,7 @@ public:
             break;
         }
 
-        uint8_t value = read8((uint8_t)reg::ACCEL_CONFIG);
+        uint8_t value = read8((uint8_t)reg::ACCEL_CONFIG, false);
         value &= 0b11100111;
         value |= ((uint8_t)range << 3);
         write8((uint8_t)reg::ACCEL_CONFIG, value);
@@ -156,7 +156,7 @@ public:
             break;
         }
 
-        uint8_t value = read8((uint8_t)reg::GYRO_CONFIG);
+        uint8_t value = read8((uint8_t)reg::GYRO_CONFIG, false);
         value &= 0b11100111;
         value |= ((uint8_t)range << 3);
         write8((uint8_t)reg::GYRO_CONFIG, value);
@@ -186,16 +186,16 @@ public:
             break;
         }
 
-        uint8_t value = read8((uint8_t)reg::GYRO_CONFIG);
+        uint8_t value = read8((uint8_t)reg::GYRO_CONFIG, false);
         value &= 0b11111100;
         write8((uint8_t)reg::GYRO_CONFIG, value);
 
-        value = read8((uint8_t)reg::CONFIG);
+        value = read8((uint8_t)reg::CONFIG, false);
         value &= 0b11111000;
         value |= (uint8_t)data_rate;
         write8((uint8_t)reg::CONFIG, value);
 
-        value = read8((uint8_t)reg::ACCEL_CONFIG2);
+        value = read8((uint8_t)reg::ACCEL_CONFIG2, false);
         value &= 0b11110000;
         value |= ((uint8_t)data_rate);
         write8((uint8_t)reg::ACCEL_CONFIG2, value);
