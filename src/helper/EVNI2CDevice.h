@@ -29,6 +29,31 @@ public:
         _wire->endTransmission();
     };
 
+    void write16(uint8_t reg, uint8_t value1, uint8_t value2)
+    {
+        EVNAlpha::sharedPorts().setPort(_port);
+
+        _wire->beginTransmission(_addr);
+        _wire->write(reg);
+        _wire->write(value1);
+        _wire->write(value2);
+        _wire->endTransmission();
+    };
+
+    void writeBuffer(uint8_t reg, uint8_t size, uint8_t* buffer)
+    {
+        EVNAlpha::sharedPorts().setPort(_port);
+
+        _wire->beginTransmission(_addr);
+        _wire->write(reg);
+
+        for (int i = 0; i < size; i++)
+        {
+            _wire->write(buffer[i]);
+        }
+        _wire->endTransmission();
+    };
+
     uint8_t read8(uint8_t reg, bool stop_message = true)
     {
         EVNAlpha::sharedPorts().setPort(_port);
