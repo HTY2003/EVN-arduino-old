@@ -371,7 +371,7 @@ public:
 
     void setSeaLevelPressure(float pressure)
     {
-        _sea_level_pressure = max(pressure, FLT_MIN);
+        _sea_level_pressure = max(pressure, 0.001);
     };
 
     float readAltitude(bool blocking = true)

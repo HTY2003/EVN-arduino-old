@@ -1,5 +1,5 @@
-#ifndef EVNSevenSegmentLED_h
-#define EVNSevenSegmentLED_h
+#ifndef EVNSevenSegLED_h
+#define EVNSevenSegLED_h
 
 #include <Arduino.h>
 #include <Wire.h>
@@ -7,7 +7,7 @@
 #include "../helper/EVNI2CDevice.h"
 #include "ht16k33/EVN_HT16K33.h"
 
-class EVNSevenSegmentLED : public EVN_HT16K33
+class EVNSevenSegLED : public EVN_HT16K33
 {
 public:
     enum letter : uint8_t
@@ -45,7 +45,7 @@ public:
         N9 = 0b01101111,
     };
 
-    EVNSevenSegmentLED(uint8_t port) : EVN_HT16K33(port)
+    EVNSevenSegLED(uint8_t port) : EVN_HT16K33(port)
     {
 
     };
