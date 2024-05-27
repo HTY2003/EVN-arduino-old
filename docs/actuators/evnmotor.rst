@@ -1,11 +1,8 @@
 ``EVNMotor``
 ============
 
-Some Technical Details
-----------------------
-
 EVNMotor uses timer-generated interrupts to achieve consistent speed and position control. Using these functions, we have replicated most of the motor functions EV3 users will be familiar with.
-We have provided motor profiles for NXT Large Motors, EV3 Medium Motors and EV3 Large Motors, but the user may edit them if they wish to.
+We have built-in motor profiles for NXT Large Motors, EV3 Medium Motors and EV3 Large Motors, but the user may edit them if they wish to.
 
 .. note::
 
@@ -109,9 +106,9 @@ Run Forever
 
 .. function:: void runPWM(float duty_cycle)
 
-    Runs the motor at the given PWM duty cycle until a new command is called. Motor speed will vary with load torque applied.
+    Runs the motor at the given duty cycle using PWM until a new command is called. Motor speed will vary with load torque applied.
 
-    :param duty_cycle: duty cycle to run the motor at (floating point number from 0 to 1)
+    :param duty_cycle: duty cycle to run the motor at (floating point number from -1 to 1)
 
 .. function::   void runDPS(float dps)
                 void runSpeed(float dps)

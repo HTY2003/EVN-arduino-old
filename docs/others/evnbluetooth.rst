@@ -1,8 +1,6 @@
 ``EVNBluetooth``
 ================
 
-Some Technical Info
--------------------
 The Bluetooth Module Standard Peripheral uses the HC-05 Bluetooth Module. This module stores
 
 The module can be set into 2 modes: Host & Remote.

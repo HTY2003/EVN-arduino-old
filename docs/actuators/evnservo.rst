@@ -1,13 +1,10 @@
 ``EVNServo``
 ============
 
-Some Technical Details
-----------------------
-
 EVNServo is a class for controlling 3-wire hobby (RC) servo motors. 
 However, the servo can be disabled using the user button similar to ``EVNMotor``.
 Additionally, EVNServo uses timer-generated interrupts to write to the servo motor, allowing for smooth sweeping motion at various speeds without the need for ``delay()``. 
-The default settings are for the Servo Standard Peripheral we sell, the Geekservo 270deg Servo, but this library is compatible with any fixed range servo.
+The default settings are for the Fixed Servo Standard Peripherals we sell, the Geekservo 270deg Servo, but this library is compatible with any fixed range servo.
 
 .. note::
 
@@ -103,12 +100,3 @@ Using Fixed Servos
 
     :param pulse_us: Pulse time to transmit to servo (in microseconds) from 200us to 2800us
     :param wait_time_ms: Time to wait before continuing the program (in milliseconds). Same effect as ``delay()``, but terminates when servos are disabled.
-
-Using Continuous Servos
------------------------
-
-.. function:: void writeDutyCycle(float duty_cycle)
-
-    Writes duty cycle or no-load speed (0-100%) to servo.
-
-    :param duty_cycle: Duty cycle to transmit to servo (from 0-1)

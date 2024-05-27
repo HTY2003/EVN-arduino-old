@@ -87,7 +87,7 @@ Charging Chip
 """""""""""""
 For charging, we use TI's BQ25887 battery charge management IC, which charges the battery at 1.5A current.
 
-This chip (I2C address 0x6B) is connected to I2C port 16, to provide battery voltage information.
+This chip (I2C address 0x6A) is connected to I2C port 16, to provide battery voltage information.
 
 If you need to remove this I2C connection, cut the 2 exposed traces left of the user button, labelled **cut**.
 
@@ -104,3 +104,27 @@ Disassembly
 """""""""""
 
 The PCB can be separated from the top and bottom shells by unscrewing the 4 M3 bolts at each corner with a 2.0mm hex screwdriver.
+
+Usage of Hardware Components by EVN Libraries
+"""""""""""""""""""""""""""""""""""""""""""""
+
+The RP2040 has 16 PWM channels (split into 8 pairs called "slices" by Raspberry Pi). These channels have many functions, but the most common one is to generate PWM outputs using ``analogWrite()``.
+
+However, these channels are split between the RP2040's 30 pins, and some are used to control the onboard motor drivers.
+
+The EVNMotor library uses slices PWM2, PWM3, PWM5 and PWM6 for motor ports 1-4 respectively.
+
+Out of the remaining output-capable pins, pins 0-3 and 8-9 are connected to other PWM slices, so they can be used without clashing.
+
+However, pins 10-11 are connected to PWM6, so they cannot be used for ``analogWrite()`` if motor port 4 is also active.
+
+
+The EVNAlpha, EVNMotor and EVNServo libraries use hardware timers 1 and 2 to automatically update control loops for the motors and servos, without any end-user code.
+
+This leaves hardware timers 0 and 3 completely free for the end user. Users may also be able to share timers 1 and 2 with our libraries, as they are not fully utilised.
+
+
+Each EVNServo, EVNContinuousServo or EVNRGBLED object consumes one of the RP2040's 8 PIO state machines.
+
+For more information, refer to the RP2040 Datasheet.
+

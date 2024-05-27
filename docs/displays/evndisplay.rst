@@ -61,7 +61,7 @@ Printing Data to a Row
 
     Prints data at the start of given row.
 
-    :param row: Row to print to (1-8)
+    :param row: Row to print to (0-7)
 
     :param data: Data to be printed. Accepts any data type
 
@@ -74,7 +74,7 @@ Printing Data to a Row
     while the constantly changing data (e.g. colour sensor reading) can be printed using ``writeData()`` in ``void loop()``. 
     This reduces latency compared to rewriting the entire row.
 
-    :param row: Row to print to (1-8)
+    :param row: Row to print to (0-7)
 
     :param data: Data to be printed. Accepts any data type
 
@@ -88,7 +88,7 @@ Clearing Rows
    
     Clears given row on the display
 
-    :param row: Row to print to (1-8)
+    :param row: Row to print to (0-7)
 
 
 

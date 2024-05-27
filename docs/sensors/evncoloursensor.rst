@@ -127,7 +127,7 @@ Before reading calibrated values, you need to call the ``setXXrange()`` function
 
     Calibrated Clear Reading = (Clear Raw - Clear Low) / (Clear High - Clear Low)
 
-    If this function is not called, ``readClearCal()`` returns 0;
+    If this function is not called, ``readClearNorm()`` returns 0;
 
     :param low: lower bound of readings for Clear channel
 
@@ -139,7 +139,7 @@ Before reading calibrated values, you need to call the ``setXXrange()`` function
 
     Calibrated Red Reading = (Red Raw - Red Low) / (Red High - Red Low)
 
-    If this function is not called, ``readRedCal()`` returns 0;
+    If this function is not called, ``readRedNorm()`` returns 0;
 
     :param low: lower bound of readings for Red channel
 
@@ -151,7 +151,7 @@ Before reading calibrated values, you need to call the ``setXXrange()`` function
 
     Calibrated Green Reading = (Green Raw - Green Low) / (Green High - Green Low)
 
-    If this function is not called, ``readGreenCal()`` returns 0;
+    If this function is not called, ``readGreenNorm()`` returns 0;
 
     :param low: lower bound of readings for Green channel
 
@@ -163,13 +163,13 @@ Before reading calibrated values, you need to call the ``setXXrange()`` function
 
     Calibrated Blue Reading = (Blue Raw - Blue Low) / (Blue High - Blue Low)
 
-    If this function is not called, ``readBlueCal()`` returns 0;
+    If this function is not called, ``readBlueNorm()`` returns 0;
 
     :param low: lower bound of readings for Blue channel
 
     :param high: upper bound of readings for Blue channel
 
-After calling these functions, you can use the ``readXXCal()`` functions.
+After calling these functions, you can use the ``readXXNorm()`` functions.
 
 .. function:: float readClearCal(bool blocking = true)
 
@@ -210,7 +210,7 @@ After calling these functions, you can use the ``readXXCal()`` functions.
         * if ``setGreenRange()`` has been called, calibrated green reading from 0 to 1
         * -1 otherwise
 
-.. function:: float readBlueCal()
+.. function:: float readBlueNorm()
     
     Returns calibrated blue reading from sensor.
 
