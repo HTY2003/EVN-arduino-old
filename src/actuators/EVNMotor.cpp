@@ -273,6 +273,8 @@ void EVNMotor::coast()
 
 void EVNMotor::hold()
 {
+	_pid_control.target_pos = getPosition_static(&_encoder);
+	_pid_control.target_dps = _pid_control.max_rpm * 3;
 	_pid_control.stop_action = STOP_HOLD;
 	stopAction_static(&_pid_control, &_encoder, micros(), getPosition(), getDPS());
 }
@@ -448,6 +450,26 @@ void EVNDrivebase::enable_drive_position(uint8_t stop_action, bool wait)
 void EVNDrivebase::drive(float speed, float turn_rate)
 {
 	this->driveTurnRate(speed, turn_rate);
+}
+
+void EVNDrivebase::drivePct(float speed_outer_pct, float turn_rate_pct)
+{
+	float turn_rate_pctc = constrain(turn_rate_pct, -1, 1);
+	float speed_outer_pctc = constrain(speed_outer_pct, -1, 1);
+	float speed_inner_pctc = speed_outer_pctc * (1 - 2 * turn_rate_pctc);
+	float speed = (speed_outer_pctc + speed_inner_pctc) / 2 * db.max_speed;
+
+	if (turn_rate_pctc < 0)
+		speed *= -1;
+
+	if (turn_rate_pctc == 0)
+		this->drive(speed, 0);
+	else if (turn_rate_pctc == 1)
+		this->drive(0, speed_outer_pctc * db.max_turn_rate);
+	else if (turn_rate_pctc >= 0.5)
+		this->driveRadius(speed, db.axle_track * (1 - fabs(turn_rate_pctc)));
+	else
+		this->driveRadius(speed, db.axle_track * 0.25 / fabs(turn_rate_pctc));
 }
 
 void EVNDrivebase::driveTurnRate(float speed, float turn_rate)

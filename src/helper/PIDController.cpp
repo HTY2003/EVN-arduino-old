@@ -48,6 +48,11 @@ void PIDController::reset()
 	_summederror = 0;
 }
 
+float PIDController::getIntegral()
+{
+	return _summederror;
+}
+
 void PIDController::constrainIntegral(float low, float high)
 {
 	_summederror = constrain(_summederror, low, high);

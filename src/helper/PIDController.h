@@ -19,6 +19,7 @@ public:
 	float compute(float error, bool constrain_integral = false, bool constrain_input = false, bool constrain_output = false);
 	void constrainIntegral(float low, float high);
 	void resetIntegral();
+	float getIntegral();
 	void reset();
 
 private:
