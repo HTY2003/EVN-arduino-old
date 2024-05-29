@@ -21,8 +21,8 @@ typedef struct
     volatile uint16_t range;
     volatile uint16_t min_pulse_us;
     volatile uint16_t max_pulse_us;
-    volatile float angle;
-    volatile float end_angle;
+    volatile float position;
+    volatile float end_position;
     volatile float dps;
     volatile float max_dps;
     volatile uint64_t last_loop;
@@ -34,10 +34,10 @@ public:
     friend class EVNContinuousServo;
     static const uint16_t TIMER_INTERVAL_US = 10000;
 
-    EVNServo(uint8_t port, bool servo_dir = DIRECT, uint16_t range = 270, float start_angle = 135, uint16_t min_pulse_us = 600, uint16_t max_pulse_us = 2400, float max_dps = 500);
+    EVNServo(uint8_t port, bool servo_dir = DIRECT, uint16_t range = 270, float start_position = 135, uint16_t min_pulse_us = 600, uint16_t max_pulse_us = 2400, float max_dps = 500);
     void begin();
-    void write(float angle, uint16_t wait_time_ms = 0, float dps = 0);
-    void writeAngle(float angle, uint16_t wait_time_ms = 0, float dps = 0);
+    void write(float position, uint16_t wait_time_ms = 0, float dps = 0);
+    void writePosition(float position, uint16_t wait_time_ms = 0, float dps = 0);
     void writeMicroseconds(uint16_t pulse_us, uint16_t wait_time_ms = 0);
     uint16_t getRange() { return _servo.range; };
     float getMaxDPS() { return _servo.max_dps; };
@@ -84,25 +84,25 @@ protected:
         {
             if (arg->sweep)
             {
-                if (arg->angle == arg->end_angle)
+                if (arg->position == arg->end_position)
                     arg->sweep = false;
 
                 else
                 {
                     float deg_per_loop = arg->dps * time_since_last_loop;
-                    if (arg->angle > arg->end_angle)
+                    if (arg->position > arg->end_position)
                     {
-                        arg->angle -= deg_per_loop;
-                        if (arg->angle < arg->end_angle) arg->angle = arg->end_angle;
+                        arg->position -= deg_per_loop;
+                        if (arg->position < arg->end_position) arg->position = arg->end_position;
                     }
 
-                    if (arg->angle < arg->end_angle)
+                    if (arg->position < arg->end_position)
                     {
-                        arg->angle += deg_per_loop;
-                        if (arg->angle > arg->end_angle) arg->angle = arg->end_angle;
+                        arg->position += deg_per_loop;
+                        if (arg->position > arg->end_position) arg->position = arg->end_position;
                     }
 
-                    float pulse = (float)(arg->angle / arg->range) * (float)(arg->max_pulse_us - arg->min_pulse_us);
+                    float pulse = (float)(arg->position / arg->range) * (float)(arg->max_pulse_us - arg->min_pulse_us);
                     if (arg->servo_dir == DIRECT)
                         pulse = (float)arg->min_pulse_us + pulse;
                     else
@@ -137,6 +137,7 @@ public:
 
     EVNContinuousServo(uint8_t port, bool servo_dir = DIRECT, uint16_t min_pulse_us = 600, uint16_t max_pulse_us = 2400);
     void begin();
+    void write(float duty_cycle);
     void writeDutyCycle(float duty_cycle);
     void writeMicroseconds(uint16_t pulse_us);
 

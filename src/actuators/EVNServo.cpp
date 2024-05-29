@@ -5,7 +5,7 @@ servo_state_t* EVNContinuousServo::cservoArgs[];
 bool EVNServo::servos_enabled[] = { false, false, false, false };
 bool EVNServo::cservos_enabled[] = { false, false, false, false };
 
-EVNServo::EVNServo(uint8_t port, bool servo_dir, uint16_t range, float start_angle, uint16_t min_pulse_us, uint16_t max_pulse_us, float max_dps)
+EVNServo::EVNServo(uint8_t port, bool servo_dir, uint16_t range, float start_position, uint16_t min_pulse_us, uint16_t max_pulse_us, float max_dps)
 {
     _servo.servo = new Servo;
     _servo.servo_dir = servo_dir;
@@ -14,8 +14,8 @@ EVNServo::EVNServo(uint8_t port, bool servo_dir, uint16_t range, float start_ang
     _servo.max_pulse_us = max_pulse_us;
     _servo.dps = 0;
     _servo.max_dps = max(1, max_dps);
-    _servo.angle = constrain(start_angle, 0, range);
-    _servo.end_angle = 0;
+    _servo.position = constrain(start_position, 0, range);
+    _servo.end_position = 0;
     _servo.sweep = false;
 
     uint8_t portc = constrain(port, 1, 4);
@@ -43,7 +43,7 @@ void EVNServo::begin()
     pinMode(_servo.pin, OUTPUT);
     _servo.servo->attach(_servo.pin, 200, 2800);
 
-    float pulse = (float)(_servo.angle / _servo.range) * (float)(_servo.max_pulse_us - _servo.min_pulse_us);
+    float pulse = (float)(_servo.position / _servo.range) * (float)(_servo.max_pulse_us - _servo.min_pulse_us);
     if (_servo.servo_dir == DIRECT)
         pulse = (float)_servo.min_pulse_us + pulse;
     else
@@ -53,17 +53,17 @@ void EVNServo::begin()
     attach_servo_interrupt(&_servo);
 }
 
-void EVNServo::write(float angle, uint16_t wait_time_ms, float dps)
+void EVNServo::write(float position, uint16_t wait_time_ms, float dps)
 {
-    this->writeAngle(angle, wait_time_ms, dps);
+    this->writePosition(position, wait_time_ms, dps);
 }
 
-void EVNServo::writeAngle(float angle, uint16_t wait_time_ms, float dps)
+void EVNServo::writePosition(float position, uint16_t wait_time_ms, float dps)
 {
     if (dps == 0)
     {
-        _servo.angle = constrain(angle, 0, _servo.range);
-        float pulse = (float)(_servo.angle / _servo.range) * (float)(_servo.max_pulse_us - _servo.min_pulse_us);
+        _servo.position = constrain(position, 0, _servo.range);
+        float pulse = (float)(_servo.position / _servo.range) * (float)(_servo.max_pulse_us - _servo.min_pulse_us);
         if (_servo.servo_dir == DIRECT)
             pulse = (float)_servo.min_pulse_us + pulse;
         else
@@ -72,7 +72,7 @@ void EVNServo::writeAngle(float angle, uint16_t wait_time_ms, float dps)
     }
     else
     {
-        _servo.end_angle = constrain(angle, 0, _servo.range);
+        _servo.end_position = constrain(position, 0, _servo.range);
         _servo.dps = min(fabs(dps), _servo.max_dps);
         _servo.sweep = true;
     }
@@ -132,15 +132,20 @@ void EVNContinuousServo::begin()
     attach_servo_interrupt(&_servo);
 }
 
+void EVNContinuousServo::write(float duty_cycle)
+{
+    this->writeDutyCycle(duty_cycle);
+}
+
 void EVNContinuousServo::writeDutyCycle(float duty_cycle)
 {
     float duty_cyclec = constrain(duty_cycle, -1, 1);
-    float pulse = (1 - fabs(duty_cycle)) * 0.5 * (float)(_servo.max_pulse_us - _servo.min_pulse_us);
+    uint16_t pulse = (uint16_t)((1 - fabs(duty_cycle)) * (float)(_servo.max_pulse_us - _servo.min_pulse_us) / 2);
 
-    if ((_servo.servo_dir == DIRECT) == (duty_cyclec < 0))
-        pulse = (float)_servo.min_pulse_us + pulse;
+    if ((_servo.servo_dir == DIRECT) == (duty_cyclec > 0))
+        pulse = _servo.min_pulse_us + pulse;
     else
-        pulse = (float)_servo.max_pulse_us - pulse;
+        pulse = _servo.max_pulse_us - pulse;
 
     this->writeMicroseconds(pulse);
 }
