@@ -96,17 +96,21 @@ If you wish to enable charging while in on mode, cut the exposed trace right of 
     * Keep in mind that you will have to ensure your USB port can supply 5V 3A during upload, and motors may behave slightly differently when the batteries are charging.
 
 Battery Voltage Cutoff
-""""""""""""""""""""""
+----------------------
 
 When the battery voltage dips below 6.2V, On Mode is disabled. Pressing the On/Off button will do nothing until the battery is charged above 6.3V.
 
 Disassembly
-"""""""""""
+-----------
 
 The PCB can be separated from the top and bottom shells by unscrewing the 4 M3 bolts at each corner with a 2.0mm hex screwdriver.
 
-Usage of Hardware Components by EVN Libraries
-"""""""""""""""""""""""""""""""""""""""""""""
+
+RP2040 Hardware Utilised by EVN Libraries
+-----------------------------------------
+
+PWM
+""""
 
 The RP2040 has 16 PWM channels (split into 8 pairs called "slices" by Raspberry Pi). These channels have many functions, but the most common one is to generate PWM outputs using ``analogWrite()``.
 
@@ -118,13 +122,19 @@ Out of the remaining output-capable pins, pins 0-3 and 8-9 are connected to othe
 
 However, pins 10-11 are connected to PWM6, so they cannot be used for ``analogWrite()`` if motor port 4 is also active.
 
+Timers
+""""""
 
 The EVNAlpha, EVNMotor and EVNServo libraries use hardware timers 1 and 2 to automatically update control loops for the motors and servos, without any end-user code.
 
 This leaves hardware timers 0 and 3 completely free for the end user. Users may also be able to share timers 1 and 2 with our libraries, as they are not fully utilised.
 
+PIO
+""""
 
-Each EVNServo, EVNContinuousServo or EVNRGBLED object consumes one of the RP2040's 8 PIO state machines.
+Each EVNServo, EVNContinuousServo or EVNRGBLED object consumes one of the RP2040's 8 Programmable IO (PIO) state machines.
 
-For more information, refer to the RP2040 Datasheet.
+For more information, refer to the `RP2040 Datasheet`_.
+
+.. _RP2040 Datasheet: https://datasheets.raspberrypi.com/rp2040/rp2040-datasheet.pdf
 

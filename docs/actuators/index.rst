@@ -7,3 +7,4 @@ Actuators
    evnmotor
    evndrivebase
    evnservo
+   evncontinuousservo

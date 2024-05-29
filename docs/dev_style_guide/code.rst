@@ -13,7 +13,7 @@ Class names are written similar to camel case, but with the additional restricti
 
 * All EVN-specific classes start with ``EVN``
 * Similar abbreviations with all uppercase letters (e.g. ``LED``) remain uppercase
-* Class names longer than 16 characters should be shortened.
+* Class names longer than 18 characters should be shortened.
 
 All hardware classes should have a ``begin()`` function.
 
