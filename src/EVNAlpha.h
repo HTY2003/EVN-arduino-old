@@ -4,6 +4,7 @@
 #include "helper/EVNButton.h"
 #include "helper/EVNPortSelector.h"
 #include "evn_alpha_pins.h"
+#include "bq25887_defs.h"
 #include <Arduino.h>
 
 class EVNAlpha {

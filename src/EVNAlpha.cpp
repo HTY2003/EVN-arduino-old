@@ -72,9 +72,16 @@ bool EVNAlpha::beginBatteryADC()
     //enable ADCs on BQ25887
     if (BQ25887_IC_I2C_PORT > 8)
     {
+        //enable cell monitoring ADCs
         Wire1.beginTransmission(BQ25887_IC_I2C_ADDRESS);
         Wire1.write(BQ25887_REG_ADC_CONTROL);
         Wire1.write(BQ25887_CMD_ADC_CONTROL_ENABLE);
+        Wire1.endTransmission();
+
+        //disable watchdog, or ADC resets after 40s
+        Wire1.beginTransmission(BQ25887_IC_I2C_ADDRESS);
+        Wire1.write(BQ25887_REG_CHG_CONTROL1);
+        Wire1.write(BQ25887_CMD_WATCHDOG_DISABLE);
         Wire1.endTransmission();
     }
     else
@@ -82,6 +89,11 @@ bool EVNAlpha::beginBatteryADC()
         Wire.beginTransmission(BQ25887_IC_I2C_ADDRESS);
         Wire.write(BQ25887_REG_ADC_CONTROL);
         Wire.write(BQ25887_CMD_ADC_CONTROL_ENABLE);
+        Wire.endTransmission();
+
+        Wire.beginTransmission(BQ25887_IC_I2C_ADDRESS);
+        Wire.write(BQ25887_REG_CHG_CONTROL1);
+        Wire.write(BQ25887_CMD_WATCHDOG_DISABLE);
         Wire.endTransmission();
     }
 
