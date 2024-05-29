@@ -9,7 +9,7 @@
 class EVN_HT16K33 : private EVNI2CDevice {
 
     friend class EVNMatrixLED;
-    friend class EVNSevenSegLED;
+    friend class EVNSevenSegmentLED;
 
 public:
     static const uint8_t I2C_ADDR = 0x71;

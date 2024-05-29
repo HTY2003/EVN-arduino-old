@@ -16,7 +16,7 @@
 
 #include "displays/EVNRGBLED.h"             //WS2812B (SERVO)
 #include "displays/EVNMatrixLED.h"          //HT16K33
-#include "displays/EVNSevenSegLED.h"        //HT16K33
+#include "displays/EVNSevenSegmentLED.h"    //HT16K33
 #include "displays/EVNDisplay.h"            //SSD1306
 
 #include "others/EVNBluetooth.h"            //HC-05 (UART)
