@@ -1,3 +1,20 @@
+0.10.0 (30/05/24)
+
+"Why is every revision a major one?"
+
+-- Features --
+
+- Last few peripherals added: EVNSevenSegmentLED, EVNMatrixLED, EVNAnalogMux & EVNContinuousServo (most have no docs, to be added soon)
+- More more bugfixes
+- There will be more tutorials and better docs in the next 0.10.x revisions
+
+-- Bugfixes --
+
+- EVNRGBLED: Stability of update() improved
+- EVNMotor & EVNDrivebase: Fixed long-running bug where timer interrupts were causing more complex programs to fail
+- EVNDisplay rows are now zero-indexed (and this is permanent)
+- EVNAlpha: fixed bug where cell voltage measurement would fail 40s after begin()
+
 0.9.0 (13/05/24)
 
 - Changelog now has new entries at top, not bottom
@@ -23,7 +40,9 @@
 - Battery voltage monitoring functions added, with a battery alert whenever they are called
 
 0.8.0 (25/03/24)
+
 -- Features --
+
 There are too many changes to keep track of for this revision...so just the highlights!
 
 - Docs have been reformatted for Read the Docs integration
