@@ -1,14 +1,14 @@
-#ifndef EVNSensor_h
-#define EVNSensor_h
+#ifndef EVNI2CDevice_h
+#define EVNI2CDevice_h
 
 #include <Arduino.h>
 #include <Wire.h>
-#include "EVNAlpha.h"
+#include "../EVNAlpha.h"
 
-class EVNSensor {
+class EVNI2CDevice {
 
 public:
-    EVNSensor(uint8_t port)
+    EVNI2CDevice(uint8_t port)
     {
         _port = constrain(port, 1, 16);
         if (_port <= 8)
@@ -26,6 +26,31 @@ public:
         _wire->beginTransmission(_addr);
         _wire->write(reg);
         _wire->write(value);
+        _wire->endTransmission();
+    };
+
+    void write16(uint8_t reg, uint8_t value1, uint8_t value2)
+    {
+        EVNAlpha::sharedPorts().setPort(_port);
+
+        _wire->beginTransmission(_addr);
+        _wire->write(reg);
+        _wire->write(value1);
+        _wire->write(value2);
+        _wire->endTransmission();
+    };
+
+    void writeBuffer(uint8_t reg, uint8_t size, uint8_t* buffer)
+    {
+        EVNAlpha::sharedPorts().setPort(_port);
+
+        _wire->beginTransmission(_addr);
+        _wire->write(reg);
+
+        for (int i = 0; i < size; i++)
+        {
+            _wire->write(buffer[i]);
+        }
         _wire->endTransmission();
     };
 

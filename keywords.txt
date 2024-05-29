@@ -4,10 +4,20 @@
 EVNAlpha	KEYWORD1
 EVNMotor	KEYWORD1
 EVNDrivebase	KEYWORD1
+EVNServo	KEYWORD1
+EVNContinuousServo	KEYWORD1
 EVNDisplay	KEYWORD1
 EVNColourSensor	KEYWORD1
 EVNCompassSensor	KEYWORD1
 EVNDistanceSensor	KEYWORD1
+EVNIMUSensor	KEYWORD1
+EVNGestureSensor	KEYWORD1
+EVNMatrixLED	KEYWORD1
+EVNRGBLED	KEYWORD1
+EVNAnalogMux	KEYWORD1
+EVNSevenSegmentLED	KEYWORD1
+EVNEnvSensor	KEYWORD1
+EVNTouchArray	KEYWORD1
 EVNBluetooth	KEYWORD1
 PIDController	KEYWORD1
 
@@ -93,66 +103,12 @@ getWire0Port	KEYWORD2
 getWire1Port	KEYWORD2
 setPort	KEYWORD2
 printPorts	KEYWORD2
-getBattVoltage	KEYWORD2
+getBatteryVoltage	KEYWORD2
 getCell1Voltage	KEYWORD2
 getCell2Voltage	KEYWORD2
 setMode	KEYWORD2
 setLinkLED	KEYWORD2
 setLinkMotors	KEYWORD2
-
-# PIDController
-compute	KEYWORD2
-setKp	KEYWORD2
-setKi	KEYWORD2
-setKd	KEYWORD2
-
-# EVNColourSensor
-setIntegrationCycles	KEYWORD2
-setGain	KEYWORD2
-setRedRange	KEYWORD2
-setGreenRange	KEYWORD2
-setBlueRange	KEYWORD2
-setClearRange	KEYWORD2
-
-readRed	KEYWORD2
-readGreen	KEYWORD2
-readBlue	KEYWORD2
-readClear	KEYWORD2
-
-readRedCal	KEYWORD2
-readGreenCal	KEYWORD2
-readBlueCal	KEYWORD2
-readClearCal	KEYWORD2
-
-# EVNDistanceSensor
-setTimingBudget	KEYWORD2
-getTimingBudget	KEYWORD2
-
-# EVNCompassSensor
-calibrate KEYWORD2
-
-# EVNBluetooth
-inProgramMode	KEYWORD2
-exitProgramMode	KEYWORD2
-factoryReset	KEYWORD2
-
-setName	KEYWORD2
-setHostMode	KEYWORD2
-setRemoteMode	KEYWORD2
-setBaudRate	KEYWORD2
-
-getBaudRate	KEYWORD2
-getMode	KEYWORD2
-getAddress	KEYWORD2
-getVersion	KEYWORD2
-getName	KEYWORD2
-
-printBaudRate	KEYWORD2
-printMode	KEYWORD2
-printAddress	KEYWORD2
-printVersion	KEYWORD2
-printName	KEYWORD2
-printAll	KEYWORD2
 
 # Constants (LITERAL1)
 DIRECT	LITERAL1

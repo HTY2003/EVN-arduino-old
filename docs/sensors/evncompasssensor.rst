@@ -31,7 +31,7 @@ SDA   SDA         I2C Serial Data
 Constructor
 -----------
 
-.. class:: EVNCompassSensor(uint8_t port, double hard_x = 0, double hard_y = 0, double hard_z = 0, double soft_x_0 = 1, double soft_x_1 = 0, double soft_x_2 = 0, double soft_y_0 = 0, double soft_y_1 = 1, double soft_y_2 = 0, double soft_z_0 = 0, double soft_z_1 = 0, double soft_z_2 = 1)
+.. class:: EVNCompassSensor(uint8_t port, float hard_x = 0, float hard_y = 0, float hard_z = 0, float soft_x_0 = 1, float soft_x_1 = 0, float soft_x_2 = 0, float soft_y_0 = 0, float soft_y_1 = 1, float soft_y_2 = 0, float soft_z_0 = 0, float soft_z_1 = 0, float soft_z_2 = 1)
   
     :param port: I2C port the sensor is connected to (1-16)
     :param hard_x: X-axis hard iron calibration value
@@ -68,7 +68,7 @@ Functions
 
     :returns: ``true`` if the sensor has been supplied with calibration values, ``false`` otherwise
 
-.. function:: void setCalibration(double hard_x = 0, double hard_y = 0, double hard_z = 0, double soft_x_0 = 1, double soft_x_1 = 0, double soft_x_2 = 0, double soft_y_0 = 0, double soft_y_1 = 1, double soft_y_2 = 0, double soft_z_0 = 0, double soft_z_1 = 0, double soft_z_2 = 1)
+.. function:: void setCalibration(float hard_x = 0, float hard_y = 0, float hard_z = 0, float soft_x_0 = 1, float soft_x_1 = 0, float soft_x_2 = 0, float soft_y_0 = 0, float soft_y_1 = 1, float soft_y_2 = 0, float soft_z_0 = 0, float soft_z_1 = 0, float soft_z_2 = 1)
 
     :param hard_x: X-axis hard iron calibration value
     :param hard_y: Y-axis hard iron calibration value
@@ -86,7 +86,7 @@ Functions
 Reading Yaw / Heading
 """"""""""""""""""""""
 
-.. function:: double read(bool blocking = true)
+.. function:: float read(bool blocking = true)
 
     Get yaw measurement (i.e. heading) from sensor
 
@@ -101,31 +101,31 @@ Reading Yaw / Heading
 Reading Magnetometer Values
 """""""""""""""""""""""""""
 
-.. function:: double readRawX()
+.. function:: float readRawX()
 
     :returns: raw X-axis magnetometer measurement (in uT)
 
-.. function:: double readRawY()
+.. function:: float readRawY()
 
     :returns: raw Y-axis magnetometer measurement (in uT)
 
-.. function:: double readRawZ()
+.. function:: float readRawZ()
 
     :returns: raw Z-axis magnetometer measurement (in uT)
 
-.. function:: double readCalX()
+.. function:: float readCalX()
 
     Ensure that the sensor has received calibration values for this function to work properly.
 
     :returns: calibrated X-axis magnetometer measurement (in uT)
 
-.. function:: double readCalY()
+.. function:: float readCalY()
 
     Ensure that the sensor has received calibration values for this function to work properly.
 
     :returns: calibrated Y-axis magnetometer measurement (in uT)
 
-.. function:: double readCalZ()
+.. function:: float readCalZ()
 
     Ensure that the sensor has received calibration values for this function to work properly.
 

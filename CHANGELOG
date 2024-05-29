@@ -1,3 +1,104 @@
+0.10.0 (30/05/24)
+
+"Why is every revision a major one?"
+
+-- Features --
+
+- Last few peripherals added: EVNSevenSegmentLED, EVNMatrixLED, EVNAnalogMux & EVNContinuousServo (most have no docs, to be added soon)
+- More more bugfixes
+- There will be more tutorials and better docs in the next 0.10.x revisions
+
+-- Bugfixes --
+
+- EVNRGBLED: Stability of update() improved
+- EVNMotor & EVNDrivebase: Fixed long-running bug where timer interrupts were causing more complex programs to fail
+- EVNDisplay rows are now zero-indexed (and this is permanent)
+- EVNAlpha: fixed bug where cell voltage measurement would fail 40s after begin()
+
+0.9.0 (13/05/24)
+
+- Changelog now has new entries at top, not bottom
+- Added the following libraries and docs: EVNRGBLED, EVNBluetooth, EVNServo, EVNEnvSensor, EVNTouchArray
+- Added hardware documentation
+- Made PID tuning for EVNDrivebase generally work on both Large and Medium motors
+- Improved reliability and accuracy of EVNMotor DPS measurement
+- More bugfixes and streamlining everywhere
+
+-- Features --
+
+- Docs have been reformatted for Read the Docs integration
+
+- Complete rewrite of EVNMotor: position PD is used instead of speed PI control for greater stability
+- Control units are all in DPS (degrees per second)
+- Stall detection added
+
+- First official addition of EVNDrivebase with motor sync & odometry
+
+- All peripheral classes using I2C are now more strict about the use of begin()
+- If begin() is not called or returns false, any other functions will automatically return 0
+
+- Battery voltage monitoring functions added, with a battery alert whenever they are called
+
+0.8.0 (25/03/24)
+
+-- Features --
+
+There are too many changes to keep track of for this revision...so just the highlights!
+
+- Docs have been reformatted for Read the Docs integration
+
+- Complete rewrite of EVNMotor: position PD is used instead of speed PI control for greater stability
+- Control units are all in DPS (degrees per second)
+- Stall detection added
+
+- First official addition of EVNDrivebase with motor sync & odometry
+
+- All peripheral classes using I2C are now more strict about the use of begin()
+- If begin() is not called or returns false, any other functions will automatically return 0
+
+- Battery voltage monitoring functions added, with a battery alert whenever they are called
+
+0.7.1 (28/02/24)
+This is meant to be a stable release for current pre-release users, until the EVNMotor rewrite and drivebase classes with motor sync are released
+
+-- Features --
+
+- Added a temporary version of EVNDrivebase and EVNOmniDrivebase (no motor sync yet!)
+- Minor doc corrections
+
+-- Bugfixes --
+
+- Fixed many bugs in EVNMotor including a stray debug print
+- Fixed a bug in EVNButton causing non-default settings to fail (stuck on defaults)
+- Higher I2C frequencies now supported by EVN Alpha object! (Tested at 400kHz)
+
+0.7.0 (04/02/24)
+
+- Removed RPi_PICO_TimerInterrupt dependency and replaced with C++ SDK code
+- To be added soon: more docs and examples
+
+-- Features --
+
+- Added libraries for EVNBluetooth and EVNBattery (using BQ25887 IC on V1.4 boards onwards)
+- Added accel and decel settings to EVNMotor, along with functions to edit PPR, max RPM, and PID controls
+
+-- Bugfixes --
+
+- Fixed bug in EVNDisplay::begin() making it fail to start
+- Fixed bug in EVNPortSelector (helper for EVNAlpha) to allow for I2C clock speeds over 100kHz
+
+0.6.1 (17/1/24)
+
+- Put changelog in correct folder
+
+-- Features --
+
+- Modified settings for VL53L0X for greater range (1.8m)
+
+-- Bugfixes --
+
+- Fixed bug to allow for EVNDistanceSensor to work on I2C ports 9-16
+
 0.6.0 (16/1/24)
 
 - First changelog entry!
@@ -15,61 +116,3 @@
 - Dependencies added (will be removed when published on Arduino's Library Manager)
 - Fixed bug with EVNPortSelector, where port 1 should be selected at startup, but no "select port 1" I2C commands were actually sent.
 - Rectified some math in EVNMotor such that any variables labelled PPR (pulse per revolution) actually reflect real-world motor encoder PPR
-
-0.6.1 (17/1/24)
-
-- Put changelog in correct folder
-
--- Features --
-
-- Modified settings for VL53L0X for greater range (1.8m)
-
--- Bugfixes --
-
-- Fixed bug to allow for EVNDistanceSensor to work on I2C ports 9-16
-
-0.7.0 (04/02/24)
-
-- Removed RPi_PICO_TimerInterrupt dependency and replaced with C++ SDK code
-- To be added soon: more docs and examples
-
--- Features --
-
-- Added libraries for EVNBluetooth and EVNBattery (using BQ25887 IC on V1.4 boards onwards)
-- Added accel and decel settings to EVNMotor, along with functions to edit PPR, max RPM, and PID controls
-
--- Bugfixes --
-
-- Fixed bug in EVNDisplay::begin() making it fail to start
-- Fixed bug in EVNPortSelector (helper for EVNAlpha) to allow for I2C clock speeds over 100kHz
-
-0.7.1 (28/02/24)
-This is meant to be a stable release for current pre-release users, until the EVNMotor rewrite and drivebase classes with motor sync are released
-
--- Features --
-
-- Added a temporary version of EVNDrivebase and EVNOmniDrivebase (no motor sync yet!)
-- Minor doc corrections
-
--- Bugfixes --
-
-- Fixed many bugs in EVNMotor including a stray debug print
-- Fixed a bug in EVNButton causing non-default settings to fail (stuck on defaults)
-- Higher I2C frequencies now supported by EVN Alpha object! (Tested at 400kHz)
-
-0.8.0 (25/03/24)
--- Features --
-There are too many changes to keep track of for this revision...so just the highlights!
-
-- Docs have been reformatted for Read the Docs integration
-
-- Complete rewrite of EVNMotor: position PD is used instead of speed PI control for greater stability
-- Control units are all in DPS (degrees per second)
-- Stall detection added
-
-- First official addition of EVNDrivebase with motor sync & odometry
-
-- All peripheral classes using I2C are now more strict about the use of begin()
-- If begin() is not called or returns false, any other functions will automatically return 0
-
-- Battery voltage monitoring functions added, with a battery alert whenever they are called

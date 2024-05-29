@@ -3,7 +3,7 @@
 
 #include <Arduino.h>
 #include <Wire.h>
-#include "EVNAlpha.h"
+#include "../EVNAlpha.h"
 #include "U8g2/src/U8x8lib.h"
 
 class EVNDisplay
@@ -29,7 +29,7 @@ public:
     if (_sensor_started)
     {
       EVNAlpha::sharedPorts().setPort(_port);
-      uint8_t rowc = constrain(row - 1, 0, NO_OF_ROWS - 1);
+      uint8_t rowc = constrain(row, 0, NO_OF_ROWS - 1);
 
       //convert to String, so that it can be used with u8x8.print()
       String datas = String(data);
@@ -58,7 +58,7 @@ public:
     if (_sensor_started)
     {
       EVNAlpha::sharedPorts().setPort(_port);
-      uint8_t rowc = constrain(row - 1, 0, NO_OF_ROWS - 1);
+      uint8_t rowc = constrain(row, 0, NO_OF_ROWS - 1);
 
       //convert to String, so that it can be used with u8x8.print()
       String labels = String(label);

@@ -4,15 +4,15 @@
 #include <Arduino.h>
 #include <Wire.h>
 #include "../EVNAlpha.h"
-#include "../EVNSensor.h"
+#include "../helper/EVNI2CDevice.h"
 
-class EVN_RCWL1601 : private EVNSensor {
+class EVN_RCWL1601 : private EVNI2CDevice {
 public:
     static const uint8_t I2C_ADDR = 0x57;
     static const uint32_t SENSOR_TIMEOUT_US = 105000;
     static const uint32_t SENSOR_TIMEOUT_READING_UM = 7958040;
 
-    EVN_RCWL1601(uint8_t port) : EVNSensor(port)
+    EVN_RCWL1601(uint8_t port) : EVNI2CDevice(port)
     {
         _timeout_reading = SENSOR_TIMEOUT_READING_UM;
         _trigger_sent = false;

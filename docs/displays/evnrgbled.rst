@@ -1,8 +1,6 @@
 ``EVNRGBLED``
 =============
 
-Some Technical Info
--------------------
 These peripherals use WS2812B RGB LEDs, which feature 3 brightness-controlled channels for Red, Green and Blue.
 
 Normally, a microcontroller would need to transmit a signal of carefully timed HIGHs and LOWs to control the LEDs, which would block the rest of the program due to the use of ``delay()``. 

@@ -170,10 +170,18 @@ Example Output (on Serial Monitor):
 
 Settings
 """"""""
-Docs coming soon!
-
 .. function:: void setMode(uint8_t mode)
+
+    :param mode: Determines behaviour of `buttonRead()`
+    
+    * BUTTON_TOGGLE
+    * BUTTON_PUSHBUTTON
+    * BUTTON_DISABLE
 
 .. function:: void setLinkLED(bool link_led)
 
+    :param link_led: Links LED to display `buttonRead()` output
+
 .. function:: void setLinkMotors(bool link_motors)
+
+    :param link_motors: Links motor operation to `buttonRead()` output

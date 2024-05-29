@@ -59,7 +59,7 @@ void EVNDisplay::clearLine(uint8_t row)
     if (_sensor_started)
     {
         EVNAlpha::sharedPorts().setPort(_port);
-        uint8_t rowc = constrain(row - 1, 0, NO_OF_ROWS - 1);
+        uint8_t rowc = constrain(row, 0, NO_OF_ROWS - 1);
 
         //empty line on display
         _display8x8->clearLine(rowc);

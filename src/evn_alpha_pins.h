@@ -35,18 +35,3 @@
 #define SERVO_PORT_2      3
 #define SERVO_PORT_3      10
 #define SERVO_PORT_4      11
-
-
-#define LOW_BATTERY_THRESHOLD_MV        6700
-
-#define BQ25887_IC_I2C_PORT             16
-#define BQ25887_IC_I2C_ADDRESS          0x6A
-
-#define BQ25887_REG_ADC_CONTROL         0x15
-#define BQ25887_REG_VBAT_ADC1           0x1D
-#define BQ25887_REG_VCELLTOP_ADC1       0x1F
-#define BQ25887_REG_PART_INFO           0x25
-
-#define BQ25887_CMD_ADC_CONTROL_ENABLE  0b10110000
-#define BQ25887_MASK_PART_INFO          0b01111000
-#define BQ25887_ID                      0x05

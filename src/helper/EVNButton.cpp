@@ -22,8 +22,10 @@ void EVNButton::begin()
 
 		//led timer interrupt
 		pinMode(LEDPIN, OUTPUT_8MA);
-		alarm_pool_add_repeating_timer_ms(EVNISRTimer::sharedAlarmPool(), LED_MIN_INTERVAL_MS, pidtimer, NULL, &EVNISRTimer::sharedISRTimer(5));
-
+		if (rp2040.cpuid == 0)
+			alarm_pool_add_repeating_timer_ms(EVNISRTimer0::sharedAlarmPool(), LED_MIN_INTERVAL_MS, pidtimer, NULL, &EVNISRTimer0::sharedISRTimer(2));
+		else
+			alarm_pool_add_repeating_timer_ms(EVNISRTimer1::sharedAlarmPool(), LED_MIN_INTERVAL_MS, pidtimer, NULL, &EVNISRTimer1::sharedISRTimer(2));
 		button.started = true;
 	}
 }

@@ -3,8 +3,8 @@
 
 #include <Arduino.h>
 #include <Wire.h>
-#include "EVNAlpha.h"
-#include "EVNSensor.h"
+#include "../EVNAlpha.h"
+#include "../helper/EVNI2CDevice.h"
 
 struct evn_env
 {
@@ -16,7 +16,7 @@ struct evn_env
     float altitude_ft;
 };
 
-class EVNEnvSensor : private EVNSensor {
+class EVNEnvSensor : private EVNI2CDevice {
 public:
     static const uint8_t I2C_ADDR = 0x76;
     static const uint8_t ID = 0x60;
@@ -117,7 +117,7 @@ public:
     //settings are not exposed in this constructor because there are too many
     //use set functions instead
 
-    EVNEnvSensor(uint8_t port) : EVNSensor(port)
+    EVNEnvSensor(uint8_t port) : EVNI2CDevice(port)
     {
         _addr = I2C_ADDR;
     };
@@ -371,7 +371,7 @@ public:
 
     void setSeaLevelPressure(float pressure)
     {
-        _sea_level_pressure = max(pressure, FLT_MIN);
+        _sea_level_pressure = max(pressure, 0.001);
     };
 
     float readAltitude(bool blocking = true)

@@ -1,2 +1,0 @@
-Classes Style Guide
-===================

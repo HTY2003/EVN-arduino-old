@@ -4,7 +4,7 @@
 Constructor
 -----------
 
-.. class:: EVNDrivebase(double wheel_dia, double axle_track, EVNMotor* motor_left, EVNMotor* motor_right);
+.. class:: EVNDrivebase(float wheel_dia, float axle_track, EVNMotor* motor_left, EVNMotor* motor_right);
 
     :param wheel_dia: Diameter of each wheel (in mm)
 
@@ -52,23 +52,23 @@ Example Program:
 Measurements
 """"""""""""
 
-.. function:: double getDistance()
+.. function:: float getDistance()
 
     :returns: Distance travelled by drivebase (in mm)
 
-.. function:: double getAngle()
+.. function:: float getAngle()
 
     :returns: Angle turned by drivebase (in deg)
 
-.. function:: double getHeading()
+.. function:: float getHeading()
 
     :returns: Drivebase heading (ranges from 0 - 360deg)
 
-.. function:: double getX()
+.. function:: float getX()
 
     :returns: X coordinate of drivebase from origin (origin is the drivebase's position on startup)
 
-.. function:: double getY()
+.. function:: float getY()
 
     :returns: Y coordinate of drivebase from origin (origin is the drivebase's position on startup)
 
@@ -76,7 +76,7 @@ Measurements
 
     Sets drivebase's position to be Origin (0, 0).
 
-.. function:: double getDistanceToPoint(double x, double y);
+.. function:: float getDistanceToPoint(float x, float y);
 
     :returns: Euclidean distance between drivebase's XY position and target XY point
 
@@ -84,8 +84,8 @@ Measurements
 Move Forever
 """"""""""""
 
-.. function::   void drive(double speed, double turn_rate);
-                void driveTurnRate(double speed, double turn_rate);
+.. function::   void drive(float speed, float turn_rate);
+                void driveTurnRate(float speed, float turn_rate);
 
     Runs drivebase at the given speed and turn rate until a new command is called
 
@@ -93,7 +93,7 @@ Move Forever
 
     :param turn_rate: turning rate of drivebase (in deg/s)
 
-.. function:: void driveRadius(double speed, double radius);
+.. function:: void driveRadius(float speed, float radius);
 
     Runs drivebase at the given speed and radius of turning until a new command is called
 
@@ -105,7 +105,7 @@ Move Forever
 Move by a Fixed Amount
 """"""""""""""""""""""
 
-.. function:: void straight(double speed, double distance, uint8_t stop_action = STOP_BRAKE, bool wait = true);
+.. function:: void straight(float speed, float distance, uint8_t stop_action = STOP_BRAKE, bool wait = true);
 
     Runs drivebase in a straight line for the specified distance, then performs given stop action
 
@@ -121,8 +121,8 @@ Move by a Fixed Amount
 
     :param wait: Block function from returning until command is finished
 
-.. function::   void curve(double speed, double radius, double angle, uint8_t stop_action = STOP_BRAKE, bool wait = true);
-                void curveRadius(double speed, double radius, double angle, uint8_t stop_action = STOP_BRAKE, bool wait = true);
+.. function::   void curve(float speed, float radius, float angle, uint8_t stop_action = STOP_BRAKE, bool wait = true);
+                void curveRadius(float speed, float radius, float angle, uint8_t stop_action = STOP_BRAKE, bool wait = true);
 
     Runs drivebase in a curve of specified radius until its heading has shifted by the given angle, then performs given stop action
 
@@ -140,7 +140,7 @@ Move by a Fixed Amount
 
     :param wait: Block function from returning until command is finished
 
-.. function:: void curveTurnRate(double speed, double turn_rate, double angle, uint8_t stop_action = STOP_BRAKE, bool wait = true);
+.. function:: void curveTurnRate(float speed, float turn_rate, float angle, uint8_t stop_action = STOP_BRAKE, bool wait = true);
 
     Runs drivebase at given speed and turn rate until its heading has shifted by the given angle, then runs specified stop action
 
@@ -158,8 +158,8 @@ Move by a Fixed Amount
 
     :param wait: Block function from returning until command is finished
 
-.. function::   void turn(double turn_rate, double degrees, uint8_t stop_action = STOP_BRAKE, bool wait = true);
-                void turnDegrees(double turn_rate, double degrees, uint8_t stop_action = STOP_BRAKE, bool wait = true);
+.. function::   void turn(float turn_rate, float degrees, uint8_t stop_action = STOP_BRAKE, bool wait = true);
+                void turnDegrees(float turn_rate, float degrees, uint8_t stop_action = STOP_BRAKE, bool wait = true);
 
     Rotate drivebase on the spot by the given angle, then performs given stop action
     
@@ -175,7 +175,7 @@ Move by a Fixed Amount
 
     :param wait: Block function from returning until command is finished
 
-.. function:: void turnHeading(double turn_rate, double heading, uint8_t stop_action = STOP_BRAKE, bool wait = true);
+.. function:: void turnHeading(float turn_rate, float heading, uint8_t stop_action = STOP_BRAKE, bool wait = true);
 
     Rotate drivebase on the spot to the given heading, then performs given stop action
 
@@ -197,7 +197,7 @@ Move by a Fixed Amount
 
 Move to Point
 """"""""""""""""
-.. function:: void driveToXY(double speed, double turn_rate, double x, double y, uint8_t stop_action = STOP_BRAKE, bool restore_initial_heading = true);
+.. function:: void driveToXY(float speed, float turn_rate, float x, float y, uint8_t stop_action = STOP_BRAKE, bool restore_initial_heading = true);
 
     Rotates drivebase to face target XY position, drives forward to target, and rotates back to original heading
 
@@ -241,7 +241,7 @@ Control Settings
 
 To view the default PID and accel/decel values, look at ``src\evn_motor_defs.h`` in the Github repository.
 
-.. function:: void setSpeedPID(double kp, double ki, double kd);
+.. function:: void setSpeedPID(float kp, float ki, float kd);
 
     Sets PID gain values for the speed controller (controls average drivebase speed).
 
@@ -253,7 +253,7 @@ To view the default PID and accel/decel values, look at ``src\evn_motor_defs.h``
     :param ki: Integral gain
     :param kd: Derivative gain
 
-.. function:: void setTurnRatePID(double kp, double ki, double kd);
+.. function:: void setTurnRatePID(float kp, float ki, float kd);
 
     Sets PID gain values for the turn rate controller (controls rate of turning of drivebase).
 
@@ -267,18 +267,18 @@ To view the default PID and accel/decel values, look at ``src\evn_motor_defs.h``
     :param ki: Integral gain
     :param kd: Derivative gain
 
-.. function:: void setSpeedAccel(double speed_accel);
+.. function:: void setSpeedAccel(float speed_accel);
 
     Sets speed acceleration value for drivebase (in mm/s^2).
 
-.. function:: void setSpeedDecel(double speed_decel);
+.. function:: void setSpeedDecel(float speed_decel);
 
     Sets speed acceleration value for drivebase (in mm/s^2).
 
-.. function:: void setTurnRateAccel(double turn_rate_accel);
+.. function:: void setTurnRateAccel(float turn_rate_accel);
 
     Sets turn rate deceleration value for drivebase (in deg/s^2).
 
-.. function:: void setTurnRateDecel(double turn_rate_decel);
+.. function:: void setTurnRateDecel(float turn_rate_decel);
 
     Sets turn rate deceleration value for drivebase (in deg/s^2).

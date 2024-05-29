@@ -72,6 +72,6 @@ Advanced Sensor Settings
 """"""""""""""""""""""""
 More info coming soon!
 
-.. function:: void setSignalRateLimit(double limit)
+.. function:: void setSignalRateLimit(float limit)
 .. function:: void setPulsePeriodPreRange(uint8_t period)
 .. function:: void setPulsePeriodFinalRange(uint8_t period)

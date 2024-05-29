@@ -3,8 +3,7 @@
 
 #include <Arduino.h>
 #include <Wire.h>
-#include "EVNAlpha.h"
-#include "EVNSensor.h"
+#include "../EVNAlpha.h"
 #include "vl53l0x-arduino/VL53L0X.h"
 
 class EVNDistanceSensor {
@@ -42,7 +41,7 @@ public:
         return true;
     };
 
-    void setSignalRateLimit(double limit)
+    void setSignalRateLimit(float limit)
     {
         if (_sensor_started)
         {

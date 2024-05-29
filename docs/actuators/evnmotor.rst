@@ -1,11 +1,8 @@
 ``EVNMotor``
 ============
 
-Some Technical Details
-----------------------
-
 EVNMotor uses timer-generated interrupts to achieve consistent speed and position control. Using these functions, we have replicated most of the motor functions EV3 users will be familiar with.
-We have provided motor profiles for NXT Large Motors, EV3 Medium Motors and EV3 Large Motors, but the user may edit them if they wish to.
+We have built-in motor profiles for NXT Large Motors, EV3 Medium Motors and EV3 Large Motors, but the user may edit them if they wish to.
 
 .. note::
 
@@ -73,11 +70,11 @@ Example Program:
 Measurements
 """"""""""""
 
-.. function:: double getPosition()
+.. function:: float getPosition()
 
     :returns: Angular displacement of motor from its starting position, in degrees
 
-.. function:: double getHeading()
+.. function:: float getHeading()
 
     :returns: Motor position converted to range from 0-360 degrees
 
@@ -85,8 +82,8 @@ Measurements
 
     Reset starting position to motor's starting position.
 
-.. function::   double getDPS()
-                double getSpeed()
+.. function::   float getDPS()
+                float getSpeed()
 
     :returns: Angular velocity of motor, in DPS (degrees per second)
 
@@ -98,23 +95,23 @@ Example Usage:
 
 .. code-block:: cpp
 
-    double position = motor.getPosition();
-    double heading = motor.getHeading();
-    double speed = motor.getSpeed();
+    float position = motor.getPosition();
+    float heading = motor.getHeading();
+    float speed = motor.getSpeed();
     
     motor.resetPosition();
 
 Run Forever
 """""""""""
 
-.. function:: void runPWM(double duty_cycle)
+.. function:: void runPWM(float duty_cycle)
 
-    Runs the motor at the given PWM duty cycle until a new command is called. Motor speed will vary with load torque applied.
+    Runs the motor at the given duty cycle using PWM until a new command is called. Motor speed will vary with load torque applied.
 
-    :param duty_cycle: duty cycle to run the motor at (floating point number from 0 to 1)
+    :param duty_cycle: duty cycle to run the motor at (floating point number from -1 to 1)
 
-.. function::   void runDPS(double dps)
-                void runSpeed(double dps)
+.. function::   void runDPS(float dps)
+                void runSpeed(float dps)
 
     Runs the motor at the given angular velocity until a new command is called. Motor will attempt to maintain constant speed despite varying load torque.
 
@@ -133,7 +130,7 @@ Example Usage:
 Run by a Fixed Amount
 """""""""""""""""""""
 
-.. function:: void runPosition(double dps, double position, uint8_t stop_action = STOP_BRAKE, bool wait = true)
+.. function:: void runPosition(float dps, float position, uint8_t stop_action = STOP_BRAKE, bool wait = true)
 
     Run motor to the given motor shaft position, then performs the given stop action.
 
@@ -147,7 +144,7 @@ Run by a Fixed Amount
     
     :param wait: Block function from returning until command is finished
 
-.. function:: void runAngle(double dps, double degrees, uint8_t stop_action = STOP_BRAKE, bool wait = true)
+.. function:: void runAngle(float dps, float degrees, uint8_t stop_action = STOP_BRAKE, bool wait = true)
 
     Run motor by the given angle (relative to its starting position), then performs the given stop action.
 
@@ -161,7 +158,7 @@ Run by a Fixed Amount
 
     :param wait: Block function from returning until command is finished
 
-.. function:: void runHeading(double dps, double heading, uint8_t stop_action = STOP_BRAKE, bool wait = true)
+.. function:: void runHeading(float dps, float heading, uint8_t stop_action = STOP_BRAKE, bool wait = true)
 
     Run motor to the specified motor shaft heading, then performs the given stop action.
 
@@ -175,7 +172,7 @@ Run by a Fixed Amount
 
     :param wait: Block function from returning until command is finished
 
-.. function:: void runTime(double dps, uint32_t time_ms, uint8_t stop_action = STOP_BRAKE, bool wait = true)
+.. function:: void runTime(float dps, uint32_t time_ms, uint8_t stop_action = STOP_BRAKE, bool wait = true)
 
     Run motor for the given amount of time, then performs the given stop action.
 
@@ -241,7 +238,7 @@ Example Usage:
 Control Settings
 """"""""""""""""
 
-.. function:: void setPID(double p, double i, double d)
+.. function:: void setPID(float p, float i, float d)
 
     Sets PID gain values for the speed controller (controls rotational/angular velocity of motor shaft).
 
@@ -253,15 +250,15 @@ Control Settings
 
 .. note:: Tuning motor PIDs is a bit tricky (you won't have to do it for LEGO motors), but we will try to create a guide for it soon!
 
-.. function:: void setAccel(double accel_dps_sq)
+.. function:: void setAccel(float accel_dps_sq)
 
     Set acceleration value of motor (in deg/s^2)
 
-.. function:: void setDecel(double decel_dps_sq)
+.. function:: void setDecel(float decel_dps_sq)
 
     Set acceleration value of motor (in deg/s^2)
 
-.. function:: void setMaxRPM(double max_rpm)
+.. function:: void setMaxRPM(float max_rpm)
 
     Set max RPM of motor (in rotations per minute)
 
