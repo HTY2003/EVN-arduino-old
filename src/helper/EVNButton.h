@@ -13,7 +13,8 @@ typedef struct
 {
 	volatile bool started;
 	volatile bool state;
-	volatile uint64_t last_pressed = -10000;
+	volatile bool substate;
+	volatile uint32_t last_change = 0;
 	volatile bool link_led;
 	volatile bool link_motors;
 	volatile uint8_t mode;
@@ -24,7 +25,7 @@ typedef struct
 class EVNButton
 {
 private:
-	static const uint16_t DEBOUNCE_TIMING_MS = 300;
+	static const uint16_t DEBOUNCE_TIMING_MS = 5;
 	static const uint16_t LED_MIN_INTERVAL_MS = 100;
 
 public:
@@ -42,25 +43,20 @@ private:
 	static button_state_t button;
 	static void isr()
 	{
-		uint8_t reading = digitalRead(BUTTONPIN);
-
-		//falling edge (button pressed, debounced)
-		if (!reading)
+		if (millis() - button.last_change > DEBOUNCE_TIMING_MS)
 		{
-			if ((millis() - button.last_pressed) > DEBOUNCE_TIMING_MS)
-			{
-				if (button.mode == BUTTON_PUSHBUTTON)
-					button.state = true;
-				else if (button.mode == BUTTON_TOGGLE)
-					button.state = !button.state;
+			uint8_t reading = gpio_get(BUTTONPIN);
 
-				button.last_pressed = millis();
-			}
-		}
-		//rising edge (button released)
-		else {
 			if (button.mode == BUTTON_PUSHBUTTON)
-				button.state = false;
+			{
+				button.state = !reading;
+			}
+			else if (button.mode == BUTTON_TOGGLE)
+			{
+				if (!button.substate && !reading) button.state = !button.state;
+				button.substate = !reading;
+			}
+			button.last_change = millis();
 		}
 	}
 	static bool pidtimer(struct repeating_timer* t)
@@ -69,6 +65,18 @@ private:
 		{
 			button.flash_counter = !button.flash_counter;
 			digitalWrite(LEDPIN, button.flash_counter);
+		}
+
+		if (millis() - button.last_change > DEBOUNCE_TIMING_MS
+			&& gpio_get(BUTTONPIN))
+		{
+			if (button.mode == BUTTON_PUSHBUTTON && button.state)
+				button.state = false;
+
+			else if (button.mode == BUTTON_TOGGLE && button.substate)
+				button.substate = false;
+
+			button.last_change = millis();
 		}
 
 		//ensures that LED reflects output of read()

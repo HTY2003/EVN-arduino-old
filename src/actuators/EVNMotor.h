@@ -69,7 +69,7 @@ class EVNMotor
 		volatile bool run_pos;
 		volatile float target_pos;
 		volatile bool run_time;
-		volatile uint64_t run_time_ms;
+		volatile uint32_t run_time_ms;
 		volatile bool hold;
 		volatile uint8_t stop_action;
 
@@ -382,7 +382,7 @@ protected:
 				float max_error_before_decel = pow(fabs(pidArg->target_dps), 2) / pidArg->decel / 2;
 
 				if (error < max_error_before_decel)
-					decel_dps = sqrt(error / max_error_before_decel) * pidArg->target_dps; //possible overflow?
+					decel_dps = sqrt(error / max_error_before_decel) * fabs(pidArg->target_dps);
 			}
 
 			if (pidArg->run_time)
