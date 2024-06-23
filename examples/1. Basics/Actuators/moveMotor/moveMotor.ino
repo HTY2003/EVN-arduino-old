@@ -34,6 +34,6 @@ void loop()
 	}
 
 	//by default, if the button is toggled "Off", all motor run functions will end instantly and all motors will stop
-	//this can be disabled in EVNAlpha declaration (set link_motors to false)
+	//this can be disabled in EVNAlpha declaration (set link_movement to false)
 	//Note: button being "off" does not end other blocking functions (e.g. delay())
 }
