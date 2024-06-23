@@ -86,7 +86,7 @@ public:
 
     void clearY(uint8_t y, bool show = true)
     {
-        clearHLine(y, 0, 7 false, show);
+        clearHLine(y, 0, 7, show);
     };
 
     void clearX(uint8_t x, bool show = true)

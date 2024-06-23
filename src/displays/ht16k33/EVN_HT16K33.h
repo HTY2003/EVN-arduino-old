@@ -59,7 +59,7 @@ public:
         write8noReg((uint8_t)ris::OUTPUT);
         setDisplayMode(mode::ON);
         setBrightness(16);
-        clearAll();
+        clear();
 
         return _sensor_started;
     };

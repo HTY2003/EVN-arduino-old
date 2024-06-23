@@ -238,7 +238,7 @@ public:
         {
             float numberc = fabs(number);
 
-            clearAll(false);
+            clear(false);
 
             if (numberc > 10000)
             {
@@ -306,7 +306,7 @@ public:
             uint64_t numberc = abs(number);
             while (numberc > 9999) numberc /= 10;
 
-            clearAll(false);
+            clear(false);
             for (int i = 3; i >= 0; i--)
             {
                 if (numberc > 0) writeDigit(i, numberc % 10, false);
