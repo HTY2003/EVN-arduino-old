@@ -18,7 +18,7 @@
 # -- Project information -----------------------------------------------------
 
 project = "EVN"
-# copyright = "2024, Centre of Robotics Excellence"
+copyright = "2024, Centre of Robotics Excellence"
 author = "Heng Teng Yi"
 
 

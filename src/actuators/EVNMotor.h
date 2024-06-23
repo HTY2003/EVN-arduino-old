@@ -148,9 +148,9 @@ protected:
 
 	static bool motors_enabled()
 	{
-		return ((EVNAlpha::sharedButton().read() && EVNAlpha::sharedButton().sharedState()->link_motors)
+		return ((EVNAlpha::sharedButton().read() && EVNAlpha::sharedButton().sharedState()->link_movement)
 
-			|| !EVNAlpha::sharedButton().sharedState()->link_motors);
+			|| !EVNAlpha::sharedButton().sharedState()->link_movement);
 	}
 
 	static bool timed_control_enabled(pid_control_t* arg)
@@ -187,8 +187,8 @@ protected:
 	{
 		uint8_t state = arg->state & 3;
 
-		arg->enca_state = gpio_get(arg->enca);
-		arg->encb_state = gpio_get(arg->encb);
+		arg->enca_state = digitalRead(arg->enca);
+		arg->encb_state = digitalRead(arg->encb);
 
 		if (arg->enca_state)
 			state |= 4;
@@ -760,8 +760,8 @@ public:
 
 	static bool motors_enabled()
 	{
-		return ((EVNAlpha::sharedButton().read() && EVNAlpha::sharedButton().sharedState()->link_motors)
-			|| !EVNAlpha::sharedButton().sharedState()->link_motors);
+		return ((EVNAlpha::sharedButton().read() && EVNAlpha::sharedButton().sharedState()->link_movement)
+			|| !EVNAlpha::sharedButton().sharedState()->link_movement);
 	}
 
 	static void pid_update(drivebase_state_t* arg)

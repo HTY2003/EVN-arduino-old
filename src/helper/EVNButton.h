@@ -16,25 +16,30 @@ typedef struct
 	volatile bool substate;
 	volatile uint32_t last_change = 0;
 	volatile bool link_led;
-	volatile bool link_motors;
+	volatile bool link_movement;
 	volatile uint8_t mode;
-	volatile uint8_t flash;
+	volatile bool flash;
 	volatile uint8_t flash_counter;
+	volatile uint32_t last_flash = 0;
 } button_state_t;
 
 class EVNButton
 {
 private:
-	static const uint16_t DEBOUNCE_TIMING_MS = 5;
-	static const uint16_t LED_MIN_INTERVAL_MS = 100;
+	static const uint16_t DEBOUNCE_TIMING_MS = 10;
+	static const uint16_t UPDATE_INTERVAL_MS = 100;
+	static const uint16_t UPDATES_PER_FLASH = 10; //must be even number to maintain original state
+	static const uint16_t TIME_BETWEEN_FLASHES_MS = 3000;
 
 public:
-	EVNButton(uint8_t mode = BUTTON_TOGGLE, bool link_led = true, bool link_motors = true);
+	EVNButton(uint8_t mode = BUTTON_TOGGLE, bool link_led = true, bool link_movement = true);
 	void begin();
 	bool read();
 	void setMode(uint8_t mode);
-	void setLinkLED(bool link_led);
-	void setLinkMotors(bool link_motors);
+	void setLinkLED(bool enable);
+	void setLinkMovement(bool enable);
+	void setFlash(bool enable);
+	bool getFlash();
 
 	//singleton for state struct
 	button_state_t* sharedState() { return &button; }
@@ -45,42 +50,43 @@ private:
 	{
 		if (millis() - button.last_change > DEBOUNCE_TIMING_MS)
 		{
-			uint8_t reading = gpio_get(BUTTONPIN);
+			uint8_t reading = digitalRead(BUTTONPIN);
 
 			if (button.mode == BUTTON_PUSHBUTTON)
 			{
+				//flip reading for button state, as pin is LOW when button is pressed
 				button.state = !reading;
 			}
 			else if (button.mode == BUTTON_TOGGLE)
 			{
+				//for toggle mode, the raw button reading is stored in substate instead of state
+				//when button was not pressed (substate false) and is pressed now (reading false), state is flipped
 				if (!button.substate && !reading) button.state = !button.state;
 				button.substate = !reading;
 			}
 			button.last_change = millis();
 		}
-	}
-	static bool pidtimer(struct repeating_timer* t)
-	{
-		if (button.flash)
-		{
-			button.flash_counter = !button.flash_counter;
-			digitalWrite(LEDPIN, button.flash_counter);
-		}
-
-		if (millis() - button.last_change > DEBOUNCE_TIMING_MS
-			&& gpio_get(BUTTONPIN))
-		{
-			if (button.mode == BUTTON_PUSHBUTTON && button.state)
-				button.state = false;
-
-			else if (button.mode == BUTTON_TOGGLE && button.substate)
-				button.substate = false;
-
-			button.last_change = millis();
-		}
 
 		//ensures that LED reflects output of read()
-		if (button.link_led) digitalWrite(LEDPIN, button.state); return true;
+		if (button.link_led) digitalWrite(LEDPIN, button.state);
+	}
+
+	static bool update(struct repeating_timer* t)
+	{
+		if (button.flash && button.flash_counter > 0)
+		{
+			digitalWrite(LEDPIN, !digitalRead(LEDPIN));
+			if (button.flash_counter == 1) button.last_flash = millis();
+			button.flash_counter--;
+		}
+
+		else if (button.flash && millis() - button.last_flash > TIME_BETWEEN_FLASHES_MS)
+			button.flash_counter = UPDATES_PER_FLASH;
+
+		else
+			isr();
+
+		return true;
 	}
 };
 

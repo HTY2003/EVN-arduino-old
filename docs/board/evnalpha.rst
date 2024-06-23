@@ -26,7 +26,7 @@ EVN Alpha has 2 TCA9548A I2C multiplexers, 1 on each I2C bus. This allows users 
 .. note::
     For Ports 9-16, 3rd party libraries and end-user code have to use Wire1 to interface with their sensors, as these ports are connected to the I2C1 bus.
 
-.. class:: EVNAlpha(uint8_t mode = BUTTON_TOGGLE, bool link_led = true, bool link_motors = true, uint32_t i2c_freq = 100000)
+.. class:: EVNAlpha(uint8_t mode = BUTTON_TOGGLE, bool link_led = true, bool link_movement = true, uint32_t i2c_freq = 100000)
     
     :param mode: Determines behaviour of `buttonRead()`. Defaults to ``BUTTON_TOGGLE``
 
@@ -36,7 +36,7 @@ EVN Alpha has 2 TCA9548A I2C multiplexers, 1 on each I2C bus. This allows users 
 
     :param link_led: Links LED to display `buttonRead()` output. Defaults to true.
 
-    :param link_motors: Links motor operation to `buttonRead()` output. Defaults to true.
+    :param link_movement: Links all motor and servo operation to `buttonRead()` output. Defaults to true.
 
     :param i2c_freq: I2C frequency in Hz. Defaults to 100000 (100kHz).
 
@@ -133,15 +133,21 @@ Example Usage:
 Battery Voltage Reading
 """"""""""""""""""""""""
 
-.. function:: int16_t getBatteryVoltage()
+.. function:: int16_t getBatteryVoltage(bool flash_when_low = true)
+
+    :param flash_when_low: Sets LED to flash every 4 seconds when battery voltage falls below 6.7V. Defaults to ``true``
 
     :returns: combined voltage of both battery cells in millivolts
 
-.. function:: int16_t getCell1Voltage()
+.. function:: int16_t getCell1Voltage(bool flash_when_low = true)
+    
+    :param flash_when_low: Sets LED to flash every 4 seconds when cell voltage falls below 3.35V. Defaults to ``true``
 
     :returns: voltage of first cell in millivolts
 
-.. function:: int16_t getCell2Voltage()
+.. function:: int16_t getCell2Voltage(bool flash_when_low = true)
+
+    :param flash_when_low: Sets LED to flash every 4 seconds when cell voltage falls below 3.35V. Defaults to ``true``
 
     :returns: voltage of second cell in millivolts
 
@@ -178,10 +184,14 @@ Settings
     * BUTTON_PUSHBUTTON
     * BUTTON_DISABLE
 
-.. function:: void setLinkLED(bool link_led)
+.. function:: void setLinkLED(bool enable)
 
-    :param link_led: Links LED to display `buttonRead()` output
+    :param enable: Links LED to display `buttonRead()` output
 
-.. function:: void setLinkMotors(bool link_motors)
+.. function:: void setLinkMovement(bool enable)
 
-    :param link_motors: Links motor operation to `buttonRead()` output
+    :param enable: Links all motor and servo operation to `buttonRead()` output
+
+.. function:: void setFlash(bool enable)
+
+    :param enable: Sets LED to flash on and off for 1 second every 4 seconds
