@@ -185,7 +185,7 @@ public:
         }
     };
 
-    void clearSegment(uint8_t position, bool clear_point = true, bool show = true)
+    void clearPosition(uint8_t position, bool clear_point = true, bool show = true)
     {
         if (position > 3) return;
 

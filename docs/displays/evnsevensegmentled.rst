@@ -103,7 +103,7 @@ Functions
 
     Writes given letter to given element in buffer. If ``show`` is true, writes buffer to display.
 
-    Not all letters are supported, as seven segment displays do not officially support letter display.
+    Not all letters are supported, as seven segment displays do not officially support letter output.
     
     Supported letters: ``'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'L', 'N', 'O', 'P', 'R', 'T', 'U', 'Y'``
 
@@ -128,7 +128,7 @@ Functions
     :param number: Number to be written to display (accepts any of the data types listed above)
     :param show: Whether buffer will be written to display. Defaults to ``true``
 
-.. function:: void clearSegment(uint8_t position, bool clear_point = true, bool show = true)
+.. function:: void clearPosition(uint8_t position, bool clear_point = true, bool show = true)
 
     Sets all LEDs in specified element to be turned off in buffer. If ``show`` is true, writes buffer to display.
 
