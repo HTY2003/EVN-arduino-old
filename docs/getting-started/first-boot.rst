@@ -1,4 +1,4 @@
-Getting Started
+First Boot
 ===============
 
 What you Need
@@ -116,7 +116,7 @@ Board Detection Test
 
 2. Connect EVN Alpha to your computer using your USB cable. Once plugged in, the green Cable LED should light up.
 
-3. Once connected, EVN Alpha will appear as an USB storage device or USB Serial device. A USB Serial device can be hard to detect, so follow these steps to set the board into BOOTSEL (USB storage device) mode:
+3. Once connected, EVN Alpha will appear as an USB storage device or USB Serial device. A USB Serial device can be hard to detect, so follow these steps to set the board into USB Drive (BOOTSEL) mode:
 
     * Press and hold Reset Button (next of USB port)
     * Press and hold BOOTSEL Button (next to Reset button)

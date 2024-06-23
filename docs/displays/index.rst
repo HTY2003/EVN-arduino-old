@@ -5,4 +5,6 @@ Displays
    :maxdepth: 1
 
    evndisplay
+   evnmatrixled
+   evnsevensegmentled
    evnrgbled

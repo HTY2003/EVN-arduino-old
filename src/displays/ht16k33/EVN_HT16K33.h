@@ -29,9 +29,9 @@ public:
     {
         OFF = 0b10000000,
         ON = 0b10000001,
-        ON_BLINK_HZ_2 = 0b10000011,
-        ON_BLINK_HZ_1 = 0b10000101,
-        ON_BLINK_HZ_0_5 = 0b10000111,
+        BLINK_HZ_2 = 0b10000011,
+        BLINK_HZ_1 = 0b10000101,
+        BLINK_HZ_0_5 = 0b10000111,
     };
 
     enum ris : uint8_t
@@ -106,11 +106,20 @@ public:
         }
     };
 
-    void clearAll(bool show = true)
+    void clear(bool show = true)
     {
         if (_sensor_started)
         {
             memset(_buffer, 0, sizeof(_buffer));
+            if (show) this->update();
+        }
+    };
+
+    void fill(bool show = true)
+    {
+        if (_sensor_started)
+        {
+            memset(_buffer, 255, sizeof(_buffer));
             if (show) this->update();
         }
     };

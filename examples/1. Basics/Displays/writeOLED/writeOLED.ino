@@ -1,4 +1,4 @@
-/*printDisplay.ino
+/*writeOLED.ino
 
 The following program demonstrates some basic EVNDisplay functionality.
 */

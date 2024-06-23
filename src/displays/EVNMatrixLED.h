@@ -13,81 +13,96 @@ public:
     {
     };
 
-    void invertCol(bool enable)
+    void invertX(bool enable)
     {
-        _invert_col = enable;
+        _invert_x = enable;
     };
 
-    void invertRow(bool enable)
+    void invertY(bool enable)
     {
-        _invert_row = enable;
+        _invert_y = enable;
     };
 
-    void swapRowCol(bool enable)
+    void swapXY(bool enable)
     {
-        _swap_row_col = enable;
+        _swap_xy = enable;
     };
 
-    void write(uint8_t row, uint8_t col, bool on, bool show = true)
+    void writePixel(uint8_t x, uint8_t y, bool on = true, bool show = true)
     {
-        writeRaw(convertRowColtoRaw(row, col), on, show);
+        writeRaw(convertXYtoRaw(x, y), on, show);
     };
 
-    void writeRow(uint8_t row, uint8_t start_col, uint8_t end_col, bool on, bool show = true)
+    void clearPixel(uint8_t x, uint8_t y, bool show = true)
+    {
+        writePixel(y, x, false, show);
+    };
+
+    void writeHLine(uint8_t y, uint8_t start_x, uint8_t end_x, bool on = true, bool show = true)
     {
         if (_sensor_started)
         {
-            for (int i = start_col;i <= end_col; i++)
+            for (int i = start_x;i <= end_x; i++)
             {
-                writeRaw(convertRowColtoRaw(row, i), on, false);
+                writeRaw(convertXYtoRaw(i, y), on, false);
             }
 
             if (show) this->update();
         }
     };
 
-    void writeCol(uint8_t col, uint8_t start_row, uint8_t end_row, bool on, bool show = true)
+    void clearHLine(uint8_t y, uint8_t start_x, uint8_t end_x, bool show = true)
+    {
+        writeHLine(y, start_x, end_x, false, show);
+    };
+
+    void writeVLine(uint8_t x, uint8_t start_y, uint8_t end_y, bool on = true, bool show = true)
     {
         if (_sensor_started)
         {
-            for (int i = start_row;i <= end_row; i++)
+            for (int i = start_y;i <= end_y; i++)
             {
-                writeRaw(convertRowColtoRaw(i, col), on, false);
+                writeRaw(convertXYtoRaw(x, i), on, false);
             }
 
             if (show) this->update();
         }
     };
 
-    void writeFullRow(uint8_t row, bool on, bool show = true)
+    void clearVLine(uint8_t y, uint8_t start_x, uint8_t end_x, bool show = true)
     {
-        writeRow(row, 0, 7, on, show);
+        writeVLine(y, start_x, end_x, false, show);
     };
 
-    void writeFullCol(uint8_t col, bool on, bool show = true)
+    void writeY(uint8_t y, bool on = true, bool show = true)
     {
-        writeCol(col, 0, 7, on, show);
+        writeHLine(y, 0, 7, on, show);
     };
 
-    void clearFullRow(uint8_t row, bool show = true)
+    void writeX(uint8_t x, bool on = true, bool show = true)
     {
-        writeFullRow(row, false, show);
+        writeVLine(x, 0, 7, on, show);
     };
 
-    void clearFullCol(uint8_t col, bool show = true)
+    void clearY(uint8_t y, bool show = true)
     {
-        writeFullCol(col, false, show);
+        clearHLine(y, 0, 7 false, show);
     };
 
-    void writeRectangle(uint8_t top_left_row, uint8_t top_left_col, uint8_t bottom_right_row, uint8_t bottom_right_col, bool on, bool show = true)
+    void clearX(uint8_t x, bool show = true)
+    {
+        clearVLine(x, 0, 7, show);
+    };
+
+    void writeRectangle(uint8_t start_x, uint8_t end_x, uint8_t start_y, uint8_t end_y, bool on = true, bool show = true)
     {
         if (_sensor_started)
         {
-            for (int i = top_left_row;i <= bottom_right_row; i++)
+            for (int i = start_y;i <= end_y; i++)
             {
-                for (int j = top_left_col;j <= bottom_right_col; j++)
+                for (int j = start_x;j <= end_x; j++)
                 {
-                    writeRaw(convertRowColtoRaw(i, j), on, false);
+                    writeRaw(convertXYtoRaw(j, i), on, false);
                 }
             }
 
@@ -95,32 +110,37 @@ public:
         }
     };
 
-private:
-    uint8_t convertRowColtoRaw(uint8_t row, uint8_t col)
+    void clearRectangle(uint8_t start_x, uint8_t end_x, uint8_t start_y, uint8_t end_y, bool show = true)
     {
-        if (col > 7 || row > 7) return 255;
+        writeRectangle(start_y, start_x, end_y, end_x, false, show);
+    };
 
-        uint16_t rowc;
-        uint16_t colc;
+private:
+    uint8_t convertXYtoRaw(uint8_t x, uint8_t y)
+    {
+        if (x > 7 || y > 7) return 255;
 
-        if (!_swap_row_col)
+        uint16_t yc;
+        uint16_t xc;
+
+        if (!_swap_xy)
         {
-            rowc = row;
-            colc = col;
+            yc = y;
+            xc = x;
         }
         else
         {
-            rowc = col;
-            colc = row;
+            yc = x;
+            xc = y;
         }
 
-        if (_invert_col) colc = 7 - colc;
-        if (_invert_row) rowc = 7 - rowc;
+        if (_invert_x) xc = 7 - xc;
+        if (_invert_y) yc = 7 - yc;
 
-        return rowc * 16 + (colc + 7) % 8;
+        return yc * 16 + (xc + 7) % 8;
     };
 
-    bool _invert_col, _invert_row, _swap_row_col;
+    bool _invert_x, _invert_y, _swap_xy;
 };
 
 #endif

@@ -5,3 +5,4 @@ Others
    :maxdepth: 1
 
    evnbluetooth
+   evnanalogmux

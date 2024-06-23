@@ -19,7 +19,7 @@ void setup()
 
 void loop()
 {
-    float humidity = env.readClear();
+    float humidity = env.readHumidity();
     float temp = env.readTemp(false);
     float pressure = env.readPres(false);
     float altitude = env.readAltitude(false);

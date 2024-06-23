@@ -116,8 +116,11 @@ The Arduino-Pico core does introduce some ways to make this process faster:
 
 * After the upload button is pressed, the IDE should automatically detect any board in USB Drive mode and upload to it, making step 3 unnecessary
 
-* If the board is not in USB Drive mode, but its program has not crashed and the COM Port is correctly set **before** the upload button is pressed, 
+* If the board is not in USB Drive mode, but its program has not crashed and the board is connected with its COM Port correctly set **before** the upload button is pressed, 
     the IDE should automatically detect the board and upload to it, making steps 2 and 3 unnecessary
 
-However, since these "shortcuts" can fail for a variety of reasons (crashed code, USB inconsistencies from computer to computer or different operating systems),
-we cannot endorse them as foolproof upload methods that work 100% of the time. If they do fail, follow the basic uploading process and everything should work.
+* If you add ``rp2040.enableDoubleResetBootloader()`` inside ``void setup()``/ ``void setup1()`` or ``void loop()``/ ``void loop1()``, pressing the Reset button twice will set the board to USB Drive mode, making step 2 much easier.
+    Getting the correct timing for this may take a few tries; it will not enter USB Drive mode if double-tapped too quickly or too slowly.
+
+Since these "shortcuts" can fail for a variety of reasons (crashed code, USB inconsistencies from computer to computer or different operating systems),
+we cannot endorse them as foolproof upload methods that work 100% of the time. So if they do fail, follow the basic uploading process and everything should work.
