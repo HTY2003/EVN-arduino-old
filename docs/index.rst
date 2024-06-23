@@ -40,3 +40,17 @@ To find out more about purchasing, visit our `product website`_.
 
 Licenses
 --------
+
+The EVN libraries are licensed under GPL.
+
+In addition, it contains code from additional open source projects:
+
+* Arduino-Pico is licensed under the LGPL license.
+* The Arduino IDE and ArduinoCore-API are developed and maintained by the Arduino team. The IDE is licensed under GPL.
+* The RP2040 GCC-based toolchain is licensed under under the GPL.
+* The Pico-SDK and Pico-Extras are by Raspberry Pi (Trading) Ltd. and licensed under the BSD 3-Clause license.
+* The U8g2 Arduino library by olikraus is licensed under the BSD 2-Clause license.
+* The U8g2 font used is part of The Ultimate Oldschool PC Font Pack, which is licensed under a `Creative Commons Attribution-ShareAlike 4.0 International License`_.
+* Pololu's VL53L0X Arduino library is largely based on STMicroelectronics' VL53L0X API, which is licensed under the BSD 3-Clause license, and the rest is licensed under the MIT license.
+
+.. _Creative Commons Attribution-ShareAlike 4.0 International License: http://creativecommons.org/licenses/by-sa/4.0/
