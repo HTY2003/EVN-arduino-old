@@ -148,9 +148,9 @@ protected:
 
 	static bool motors_enabled()
 	{
-		return ((EVNAlpha::sharedButton().read() && EVNAlpha::sharedButton().sharedState()->link_movement)
+		return ((EVNAlpha::sharedButtonLED().read() && EVNAlpha::sharedButtonLED().sharedState()->link_movement)
 
-			|| !EVNAlpha::sharedButton().sharedState()->link_movement);
+			|| !EVNAlpha::sharedButtonLED().sharedState()->link_movement);
 	}
 
 	static bool timed_control_enabled(pid_control_t* arg)
@@ -760,8 +760,8 @@ public:
 
 	static bool motors_enabled()
 	{
-		return ((EVNAlpha::sharedButton().read() && EVNAlpha::sharedButton().sharedState()->link_movement)
-			|| !EVNAlpha::sharedButton().sharedState()->link_movement);
+		return ((EVNAlpha::sharedButtonLED().read() && EVNAlpha::sharedButtonLED().sharedState()->link_movement)
+			|| !EVNAlpha::sharedButtonLED().sharedState()->link_movement);
 	}
 
 	static void pid_update(drivebase_state_t* arg)

@@ -1,18 +1,21 @@
 #include "EVNAlpha.h"
 
-EVNButton EVNAlpha::button(_mode, _link_led, _link_movement);
-EVNPortSelector EVNAlpha::ports(_i2c_freq);
 uint8_t EVNAlpha::_mode;
 bool EVNAlpha::_link_led;
 bool EVNAlpha::_link_movement;
-uint32_t EVNAlpha::_i2c_freq;
+bool EVNAlpha::_button_invert;
+EVNButtonLED EVNAlpha::button_led(_mode, _link_led, _link_movement, _button_invert);
 
-EVNAlpha::EVNAlpha(uint8_t mode, bool link_led, bool link_movement, uint32_t i2c_freq)
+uint32_t EVNAlpha::_i2c_freq;
+EVNPortSelector EVNAlpha::ports(_i2c_freq);
+
+EVNAlpha::EVNAlpha(uint8_t mode, bool link_led, bool link_movement, bool button_invert, uint32_t i2c_freq)
 {
     _battery_adc_started = false;
     _mode = constrain(mode, 0, 2);
     _link_led = link_led;
     _link_movement = link_movement;
+    _button_invert = button_invert;
     _i2c_freq = i2c_freq;
 }
 
@@ -32,7 +35,7 @@ void EVNAlpha::begin()
 
     //initialize helper objects
     ports.begin();
-    button.begin();
+    button_led.begin();
 
     //initialize battery ADC if available
     if (this->beginBatteryADC()) _battery_adc_started = true;
@@ -73,7 +76,7 @@ bool EVNAlpha::beginBatteryADC()
     return true;
 }
 
-int16_t EVNAlpha::getBatteryVoltage(bool flash_when_low)
+int16_t EVNAlpha::getBatteryVoltage(bool flash_when_low, uint16_t low_threshold_mv)
 {
     if (_battery_adc_started)
     {
@@ -86,14 +89,14 @@ int16_t EVNAlpha::getBatteryVoltage(bool flash_when_low)
         Wire1.requestFrom((uint8_t)bq25887::I2C_ADDR, (uint8_t)2);
         vnom = Wire1.read() << 8 | Wire1.read();
 
-        if (flash_when_low) button.setFlash((vnom / 2 < LOW_CELL_THRESHOLD_MV));
+        if (flash_when_low) button_led.setFlash((vnom / 2 < low_threshold_mv));
 
         return vnom;
     }
     return 0;
 }
 
-int16_t EVNAlpha::getCell1Voltage(bool flash_when_low)
+int16_t EVNAlpha::getCell1Voltage(bool flash_when_low, uint16_t low_threshold_mv)
 {
     if (_battery_adc_started)
     {
@@ -106,20 +109,20 @@ int16_t EVNAlpha::getCell1Voltage(bool flash_when_low)
         Wire1.requestFrom((uint8_t)bq25887::I2C_ADDR, (uint8_t)2);
         vcell1 = Wire1.read() << 8 | Wire1.read();
 
-        if (flash_when_low) button.setFlash((vcell1 < LOW_CELL_THRESHOLD_MV));
+        if (flash_when_low) button_led.setFlash((vcell1 < low_threshold_mv));
 
         return vcell1;
     }
     return 0;
 }
 
-int16_t EVNAlpha::getCell2Voltage(bool flash_when_low)
+int16_t EVNAlpha::getCell2Voltage(bool flash_when_low, uint16_t low_threshold_mv)
 {
     if (_battery_adc_started)
     {
         //use total voltage reading - cell 1 voltage reading
         uint16_t vcell2 = this->getBatteryVoltage() - this->getCell1Voltage();
-        if (flash_when_low) button.setFlash((vcell2 < LOW_CELL_THRESHOLD_MV));
+        if (flash_when_low) button_led.setFlash((vcell2 < low_threshold_mv));
         return vcell2;
     }
     return 0;

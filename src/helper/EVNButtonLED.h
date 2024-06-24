@@ -1,5 +1,5 @@
-#ifndef EVNButton_h
-#define EVNButton_h
+#ifndef EVNButtonLED_h
+#define EVNButtonLED_h
 
 #include <Arduino.h>
 #include "EVNISRTimer.h"
@@ -14,38 +14,51 @@ typedef struct
 	volatile bool started;
 	volatile bool state;
 	volatile bool substate;
-	volatile uint32_t last_change = 0;
+	volatile uint32_t last_change;
+
+	volatile uint8_t mode;
 	volatile bool link_led;
 	volatile bool link_movement;
-	volatile uint8_t mode;
+	volatile bool button_invert;
+
+	volatile bool led_output;
+
 	volatile bool flash;
 	volatile uint8_t flash_counter;
-	volatile uint32_t last_flash = 0;
-} button_state_t;
+	volatile uint32_t last_flash;
+} button_led_state_t;
 
-class EVNButton
+class EVNButtonLED
 {
 private:
 	static const uint16_t DEBOUNCE_TIMING_MS = 10;
 	static const uint16_t UPDATE_INTERVAL_MS = 100;
-	static const uint16_t UPDATES_PER_FLASH = 10; //must be even number to maintain original state
+	static const uint16_t UPDATES_PER_FLASH = 10;
 	static const uint16_t TIME_BETWEEN_FLASHES_MS = 3000;
 
 public:
-	EVNButton(uint8_t mode = BUTTON_TOGGLE, bool link_led = true, bool link_movement = true);
+	EVNButtonLED(uint8_t mode = BUTTON_TOGGLE, bool link_led = true, bool link_movement = false, bool button_invert = false);
 	void begin();
 	bool read();
+	void write(bool state);
+
 	void setMode(uint8_t mode);
 	void setLinkLED(bool enable);
 	void setLinkMovement(bool enable);
+	void setButtonInvert(bool enable);
 	void setFlash(bool enable);
+
+	uint8_t getMode();
+	bool getLinkLED();
+	bool getLinkMovement();
+	bool getButtonInvert();
 	bool getFlash();
 
 	//singleton for state struct
-	button_state_t* sharedState() { return &button; }
+	button_led_state_t* sharedState() { return &button; }
 
 private:
-	static button_state_t button;
+	static button_led_state_t button;
 	static void isr()
 	{
 		if (millis() - button.last_change > DEBOUNCE_TIMING_MS)
@@ -55,20 +68,25 @@ private:
 			if (button.mode == BUTTON_PUSHBUTTON)
 			{
 				//flip reading for button state, as pin is LOW when button is pressed
-				button.state = !reading;
+				if (button.button_invert)
+					button.state = reading;
+				else
+					button.state = !reading;
 			}
 			else if (button.mode == BUTTON_TOGGLE)
 			{
 				//for toggle mode, the raw button reading is stored in substate instead of state
 				//when button was not pressed (substate false) and is pressed now (reading false), state is flipped
-				if (!button.substate && !reading) button.state = !button.state;
+				if (!button.substate && !reading)
+					button.state = !button.state;
+
 				button.substate = !reading;
 			}
 			button.last_change = millis();
 		}
 
 		//ensures that LED reflects output of read()
-		if (button.link_led) digitalWrite(LEDPIN, button.state);
+		if (button.link_led) button.led_output = button.state;
 	}
 
 	static bool update(struct repeating_timer* t)
@@ -84,7 +102,11 @@ private:
 			button.flash_counter = UPDATES_PER_FLASH;
 
 		else
+		{
+			if (!button.flash) button.flash_counter = 0;
 			isr();
+			digitalWrite(LEDPIN, button.led_output);
+		}
 
 		return true;
 	}

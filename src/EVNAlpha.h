@@ -1,15 +1,13 @@
 #ifndef EVNAlpha_h
 #define EVNAlpha_h
 
-#include "helper/EVNButton.h"
+#include "helper/EVNButtonLED.h"
 #include "helper/EVNPortSelector.h"
 #include "evn_alpha_pins.h"
 #include <Arduino.h>
 
 class EVNAlpha {
-public:
-    static const uint16_t LOW_CELL_THRESHOLD_MV = 3350;
-
+private:
     enum bq25887 : uint8_t
     {
         I2C_ADDR = 0x6A,
@@ -25,40 +23,43 @@ public:
         MASK_PART_INFO = 0b01111000,
     };
 
-    EVNAlpha(uint8_t mode = BUTTON_TOGGLE, bool link_led = true, bool link_movement = true, uint32_t i2c_freq = DEFAULT_I2C_FREQ);
+public:
+    EVNAlpha(uint8_t mode = BUTTON_TOGGLE, bool link_led = true, bool link_movement = false, bool button_invert = false, uint32_t i2c_freq = DEFAULT_I2C_FREQ);
     void begin();
 
     //Button & LED Functions
     bool read() { return this->buttonRead(); };
-    bool buttonRead() { return button.read(); };
-    void write(bool state) { this->ledWrite(state); };
+    bool buttonRead() { return button_led.read(); };
+    void write(bool state) { this->write(state); };
+    void ledWrite(bool state) { button_led.write(state); };
 
-    void ledWrite(bool state)
-    {
-        bool flash = button.getFlash();
-        button.setFlash(false);
-        digitalWrite(LEDPIN, state);
-        button.setFlash(flash);
-    };
+    void setMode(uint8_t mode) { button_led.setMode(mode); };
+    void setLinkLED(bool enable) { button_led.setLinkLED(enable); };
+    void setLinkMovement(bool enable) { button_led.setLinkMovement(enable); };
+    void setButtonInvert(bool enable) { button_led.setButtonInvert(enable); };
+    void setFlash(bool enable) { button_led.setFlash(enable); };
 
-    void setMode(uint8_t mode) { button.setMode(mode); };
-    void setLinkLED(bool enable) { button.setLinkLED(enable); };
-    void setLinkMovement(bool enable) { button.setLinkMovement(enable); };
-    void setFlash(bool enable) { button.setFlash(enable); };
+    uint8_t getMode() { return button_led.getMode(); };
+    bool getLinkLED() { return button_led.getLinkLED(); };
+    bool getLinkMovement() { return button_led.getLinkMovement(); };
+    bool getButtonInvert() { return button_led.getButtonInvert(); };
+    bool getFlash() { return button_led.getFlash(); };
 
     //I2C Multiplexer Functions
     void setPort(uint8_t port) { ports.setPort(port); }
     uint8_t getPort() { return ports.getPort(); }
     uint8_t getWirePort() { return ports.getWire0Port(); }
     uint8_t getWire1Port() { return ports.getWire1Port(); }
-    int16_t getBatteryVoltage(bool flash_when_low = true);
-    int16_t getCell1Voltage(bool flash_when_low = true);
-    int16_t getCell2Voltage(bool flash_when_low = true);
+
+    int16_t getBatteryVoltage(bool flash_when_low = true, uint16_t low_threshold_mv = 6700);
+    int16_t getCell1Voltage(bool flash_when_low = true, uint16_t low_threshold_mv = 3350);
+    int16_t getCell2Voltage(bool flash_when_low = true, uint16_t low_threshold_mv = 3350);
+
     void printPorts() { ports.printPorts(); }
 
-    //Singletons for Port Selector and Button
+    //Singletons for Port Selector and Button/LED
     static EVNPortSelector& sharedPorts() { static EVNAlpha shared; return shared.ports; }
-    static EVNButton& sharedButton() { static EVNAlpha shared; return shared.button; }
+    static EVNButtonLED& sharedButtonLED() { static EVNAlpha shared; return shared.button_led; }
 
 private:
     bool beginBatteryADC();
@@ -66,10 +67,10 @@ private:
     bool _low_battery;
     uint16_t _low_battery_threshold;
 
-    static EVNButton button;
+    static EVNButtonLED button_led;
     static EVNPortSelector ports;
     static uint8_t _mode;
-    static bool _link_led, _link_movement;
+    static bool _link_led, _link_movement, _button_invert;
     static uint32_t _i2c_freq;
 };
 
