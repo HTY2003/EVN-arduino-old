@@ -25,17 +25,17 @@ Constructor
     
     :param motortype: Type of motor connected. Defaults to ``EV3_LARGE``
 
-        * ``EV3_LARGE`` -- EV3 Large Servo Motor
-        * ``EV3_MED`` -- EV3 Medium Servo Motor
-        * ``NXT_LARGE`` -- NXT Large Servo Motor
-        * ``CUSTOM_MOTOR`` -- Custom Gearmotor
+        * ``EV3_LARGE`` - EV3 Large Servo Motor
+        * ``EV3_MED`` - EV3 Medium Servo Motor
+        * ``NXT_LARGE`` - NXT Large Servo Motor
+        * ``CUSTOM_MOTOR`` - Custom Gearmotor
     
-    :param motor_dir: Swaps motor **and** encoder pins, flipping the direction of the motor. Defaults to ``DIRECT``
+    :param motor_dir: When set to ``REVERSE``, flips motor **and** encoder pins, inverting the direction of the motor. Defaults to ``DIRECT``
 
-        * ``DIRECT`` -- Do not flip direction
-        * ``REVERSE`` -- Flip direction
+        * ``DIRECT`` - Do not flip direction
+        * ``REVERSE`` - Flip direction
 
-    :param enc_dir: Swaps encoder pins **only**. Not necessary for LEGO motors, but can be useful for non-LEGO gearmotors when the encoder input and motor output act in opposing directions. Defaults to ``DIRECT``
+    :param enc_dir: When set to ``REVERSE``, flips encoder pins **only**. Not necessary for LEGO motors, but useful for non-LEGO gearmotors when the encoder input and motor output increment in opposing directions. Defaults to ``DIRECT``
 
 Example Usage:
 

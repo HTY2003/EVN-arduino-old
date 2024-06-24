@@ -14,12 +14,9 @@ static PIOProgram _rgbLedPgm(&ws2812_program);
 class EVNRGBLED
 {
 public:
-
-    const static uint16_t MAX_LEDS = 48;
-
-    EVNRGBLED(uint8_t port, uint8_t num_leds = 8)
+    EVNRGBLED(uint8_t port, uint8_t led_count = 8, bool dir = DIRECT)
     {
-        _num_leds = constrain(num_leds, 0, MAX_LEDS);
+        _led_count = led_count;
 
         uint8_t portc = constrain(port, 1, 4);
 
@@ -43,6 +40,7 @@ public:
         _sm = -1;
         _offset = -1;
         _attached = false;
+        _dir = dir;
     };
 
     bool begin()
@@ -52,15 +50,76 @@ public:
 
         pio_add_program(_pio, &ws2812_program);
         ws2812_program_init(_pio, _sm, _offset, _pin, 800000, false);
-        this->clear();
+        this->clearAll();
 
         _attached = true;
         return _attached;
     };
 
-    void writeAll(uint8_t r = 0, uint8_t g = 0, uint8_t b = 0, bool show = true, bool blocking = true)
+    void setDirection(bool dir)
     {
-        for (int i = 0; i < _num_leds; i++)
+        _dir = dir;
+    };
+
+    uint8_t getDirection()
+    {
+        return _dir;
+    };
+
+    void setLEDCount(uint8_t led_count)
+    {
+        _led_count = led_count;
+    };
+
+    uint8_t getLEDCount()
+    {
+        return _led_count;
+    };
+
+    void writeOne(uint8_t led, uint8_t r = 0, uint8_t g = 0, uint8_t b = 0, bool show = true)
+    {
+        if (led > _led_count - 1) return;
+
+        uint8_t ledc = led;
+
+        if (_dir == REVERSE)
+            ledc = _led_count - 1 - ledc;
+
+        if (_buffer[ledc][0] != r || _buffer[ledc][1] != g || _buffer[ledc][2] != b)
+        {
+            _buffer[ledc][0] = r;
+            _buffer[ledc][1] = g;
+            _buffer[ledc][2] = b;
+            _buffer_changed = true;
+        }
+
+        if (show) this->update();
+    };
+
+    void clearOne(uint8_t led, uint8_t r = 0, uint8_t g = 0, uint8_t b = 0, bool show = true)
+    {
+        writeOne(led, 0, 0, 0, show);
+    };
+
+    void writeLine(uint8_t start_led, uint8_t end_led, uint8_t r = 0, uint8_t g = 0, uint8_t b = 0, bool show = true)
+    {
+        if (end_led > _led_count - 1) return;
+        if (start_led > _led_count - 1) return;
+
+        for (int i = start_led; i <= end_led; i++)
+            writeOne(i, r, g, b, false);
+
+        if (show) this->update();
+    };
+
+    void clearLine(uint8_t start_led, uint8_t end_led, bool show = true)
+    {
+        writeLine(start_led, end_led, 0, 0, 0, show);
+    }
+
+    void writeAll(uint8_t r = 0, uint8_t g = 0, uint8_t b = 0, bool show = true)
+    {
+        for (int i = 0; i < _led_count; i++)
         {
             if (_buffer[i][0] != r || _buffer[i][1] != g || _buffer[i][2] != b)
             {
@@ -71,27 +130,12 @@ public:
             }
         }
 
-        if (show) this->update(blocking);
+        if (show) this->update();
     };
 
-    void write(uint16_t led, uint8_t r = 0, uint8_t g = 0, uint8_t b = 0, bool show = true, bool blocking = true)
+    void clearAll(bool show = true)
     {
-        if (led > _num_leds - 1) return;
-
-        if (_buffer[led][0] != r || _buffer[led][1] != g || _buffer[led][2] != b)
-        {
-            _buffer[led][0] = r;
-            _buffer[led][1] = g;
-            _buffer[led][2] = b;
-            _buffer_changed = true;
-        }
-
-        if (show) this->update(blocking);
-    };
-
-    void clear(bool show = true, bool blocking = true)
-    {
-        for (int i = 0; i < _num_leds; i++)
+        for (int i = 0; i < _led_count; i++)
         {
             if (_buffer[i][0] != 0 || _buffer[i][1] != 0 || _buffer[i][2] != 0)
             {
@@ -102,17 +146,17 @@ public:
             }
         }
 
-        if (show) this->update(blocking);
+        if (show) this->update();
     };
 
-    void update(bool blocking = true)
+    void update()
     {
         if (_buffer_changed)
         {
-            if (blocking)
-                ensure_new_frame();
+            //TODO: Maybe let user toggle this? If there's a demand for it perhaps
+            delay_for_new_frame();
 
-            for (int i = 0; i < _num_leds; i++)
+            for (int i = 0; i < _led_count; i++)
                 put_pixel(urgb_u32(_buffer[i][0], _buffer[i][1], _buffer[i][2]));
 
             _buffer_changed = false;
@@ -131,13 +175,12 @@ private:
         pio_sm_put_blocking(_pio, _sm, pixel_grb << 8u);
     };
 
-    void ensure_new_frame()
+    void delay_for_new_frame()
     {
-        // ensure that 50us have elapsed since sending last int32 from the previous frame
-        // TODO: Find ways to make this non-blocking
-
+        //wait for 8-word fifo to empty itself (240us max)
         while (!pio_sm_is_tx_fifo_empty(_pio, _sm));
-        delayMicroseconds(100);
+        //30us for last word to be transmitted over IO pin + 280us for frame reset
+        delayMicroseconds(310);
     }
 
     PIO _pio;
@@ -148,9 +191,11 @@ private:
     bool _buffer_changed = true;
     uint64_t _last_transmission_us;
 
-    uint16_t _num_leds;
+    uint8_t _led_count;
     uint8_t _pin;
-    uint8_t _buffer[MAX_LEDS][3] = { 0 };
+    uint8_t _buffer[256][3] = { 0 };
+
+    bool _dir;
 };
 
 #endif

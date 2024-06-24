@@ -36,46 +36,105 @@ VCC         VCC               5V Power
 GND         GND               Ground (0V)
 ==========  ===============   ===========
 
-.. warning:: Each RGB LED consumes 60mA of current at max brightness. Using 48 RGB LEDs consumes 2.88A, which is close to the 3A limit of the Servo ports. Keep this in mind if you have other peripherals powered by Servo ports!
+.. warning:: Each RGB LED consumes 60mA of current at max brightness. Using 6 sticks (48 RGB LEDs) consumes 2.88A maximum, which is close to the 3A limit of the Servo ports. Keep this in mind if you have other peripherals powered by Servo ports!
 
 Constructor
 -----------
 
-.. class:: EVNRGBLED(uint8_t port, uint8_t num_leds = 8)
+.. class:: EVNRGBLED(uint8_t port, uint8_t led_count = 8)
 
     :param port: Servo port (1-4)
-    :param num_leds: Number of LEDs connected to the servo port. Defaults to 8
+    :param led_count: Number of LEDs connected to the servo port. Defaults to 8
 
 Functions
 ---------
 
-.. function:: void write(uint16_t led, uint8_t r = 0, uint8_t g = 0, uint8_t b = 0, bool show = true)
+.. function:: void writeOne(uint8_t led, uint8_t r = 0, uint8_t g = 0, uint8_t b = 0, bool show = true)
 
-    Updates given LED's RGB values in buffer and if ``show`` is true, writes buffer to peripheral.
+    Updates given LED's RGB values in buffer and if ``show`` is ``true``, writes buffer to peripheral.
 
-    :param led: Index of LED to update (0 to (num_leds-1)). LED 0 is the LED closest to the signal & power pins
+    :param led: Index of LED to update (0 to (led_count-1)). LED 0 is the LED closest to the signal & power pins
     :param r: Red channel intensity. Defaults to 0
     :param g: Green channel intensity. Defaults to 0
     :param b: Blue channel intensity. Defaults to 0
-    :param show: Whether to write buffer to LEDs. Defaults to true
+    :param show: Whether to write buffer to LEDs. Defaults to ``true``
+
+.. function:: void clearOne(uint8_t led, bool show = true)
+
+    Set given LED to turn off in buffer and if ``show`` is ``true``, writes buffer to peripheral.
+
+    :param led: Index of LED to update (0 to (led_count-1)). LED 0 is the LED closest to the signal & power pins
+    :param show: Whether to write buffer to LEDs. Defaults to ``true``
+
+.. function:: void writeLine(uint8_t start_led, uint8_t end_led, uint8_t r = 0, uint8_t g = 0, uint8_t b = 0, bool show = true)
+
+    Update given range of LEDs' RGB values in buffer and if ``show`` is ``true``, writes buffer to peripheral.
+
+    :param start_led: Starting index of LED to update (0 to (led_count-1)). LED 0 is the LED closest to the signal & power pins
+    :param end_led: Ending index of LED to update (0 to (led_count-1)). This LED will be updated as well.
+    :param r: Red channel intensity. Defaults to 0
+    :param g: Green channel intensity. Defaults to 0
+    :param b: Blue channel intensity. Defaults to 0
+    :param show: Whether to write buffer to LEDs. Defaults to ``true``
+
+.. function:: void writeLine(uint8_t start_led, uint8_t end_led, uint8_t r = 0, uint8_t g = 0, uint8_t b = 0, bool show = true)
+
+    Update given range of LEDs to turn off in buffer and if ``show`` is ``true``, writes buffer to peripheral.
+
+    :param start_led: Starting index of LED to update (0 to (led_count-1)). LED 0 is the LED closest to the signal & power pins
+    :param end_led: Ending index of LED to update (0 to (led_count-1)). This LED will be updated as well.
+    :param show: Whether to write buffer to LEDs. Defaults to ``true``
 
 .. function:: void writeAll(uint8_t r = 0, uint8_t g = 0, uint8_t b = 0, bool show = true)
 
-    Updates all LEDs' RGB values in buffer and if ``show`` is true, writes buffer to peripheral.
+    Updates all LEDs' RGB values in buffer and if ``show`` is ``true``, writes buffer to peripheral.
 
     :param r: Red channel intensity. Defaults to 0
     :param g: Green channel intensity. Defaults to 0
     :param b: Blue channel intensity. Defaults to 0
-    :param show: Whether to write buffer to LEDs. Defaults to true
+    :param show: Whether to write buffer to LEDs. Defaults to ``true``
 
-.. function:: void clear(bool show = true)
+.. function:: void clearAll(bool show = true)
 
-    Resets buffer and if ``show`` is true, writes buffer to peripheral, essentially turning all LEDs off.
+    Set all LEDs to turn off in buffer and if ``show`` is ``true``, writes buffer to peripheral, essentially turning all LEDs off.
 
-    :param show: Whether to write buffer to LEDs. Defaults to true
+    :param show: Whether to write buffer to LEDs. Defaults to ``true``
 
-.. function:: void update()
+.. function:: void show()
 
-    Writes buffer to LEDs. Use this function if buffer has been updated but not written to the LEDs yet.
+    Writes buffer to LEDs. 
 
+    By default, this function is internally called at the end of all the ``write#()`` / ``clear#()`` functions.
 
+    However, it may be more useful for you to make multiple changes to the buffer using the above functions 
+    with ``show`` set to ``false``, before calling ``show()`` at the end to update the LEDs. 
+    
+    This approach can achieve nicer visual output (all pixels change simultaneously) or faster updates (as ``show()`` is only called once).
+
+Set Functions
+""""""""""""""
+.. function:: void setLEDCount(uint8_t led_count)
+
+    :param led_count: Number of LEDs in array
+
+.. function:: void setDirection(bool dir)
+
+    By default (``dir`` == ``DIRECT``), the LED with index 0 is the one closest to the IN wire. 
+    Setting ``dir`` to ``false`` inverts the indexes' order, so that index 0 is the LED furthest from the IN wire.
+
+    :dir: Direction in which the LED indexes increase
+
+Get Functions
+""""""""""""""
+.. function:: uint8_t getLEDCount()
+
+    :returns: number of LEDs in the array
+
+.. function:: bool getDirection()
+
+    The written versions of direction (``DIRECT``, ``INVERSE``) are converted to these booleans when compiled, 
+    so statements like ``if (led.getDirection() == DIRECT) {}`` are valid.
+
+    :returns: Boolean representation of array Direction
+        * ``true`` (``DIRECT``)
+        * ``false`` (``INVERSE``)

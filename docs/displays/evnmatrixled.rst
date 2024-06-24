@@ -72,40 +72,28 @@ Functions
 
     :param enable: Boolean indicating whether X axis should be inverted
 
-.. function:: void update()
+.. function:: void show()
 
     Write buffer to display
 
-.. function:: void fill(bool show = true)
-
-    Set all LEDs to be turned on in buffer. If ``show`` is ``true``, write buffer to display.
-
-    :param show: Boolean indicating whether to write buffer to display. Defaults to ``true``
-
-.. function:: void clear(bool show = true)
-
-    Set all LEDs to be turned off in buffer. If ``show`` is ``true``, write buffer to display.
-
-    :param show: Boolean indicating whether to write buffer to display. Defaults to ``true``
-
-.. function:: void writePixel(uint8_t x, uint8_t y, bool on = true, bool show = true)
+.. function:: void writeOne(uint8_t x, uint8_t y, bool on = true, bool show = true)
 
     Set one LED at given XY coordinate to given state ``on``. If ``show`` is ``true``, write buffer to display.
     
     :param x: X-coordinate (or column) of pixel
     :param y: Y-coordinate (or row) of pixel
-    :param on: Boolean indicating whether to set LED to be on or off in buffer. Defaults to ``true``
-    :param show: Boolean indicating whether to write buffer to display. Defaults to ``true``
+    :param on: State of LED to be set in buffer (``true`` means on). Defaults to ``true``
+    :param show: Whether to write buffer to matrix. Defaults to ``true``
 
-.. function:: void clearPixel(uint8_t x, uint8_t y, bool show = true)
+.. function:: void clearOne(uint8_t x, uint8_t y, bool show = true)
 
     Set one LED at given XY coordinate to be turned off. If ``show`` is ``true``, write buffer to display.
 
-    Same as ``clearPixel()`` but specified pixels are turned off and the ``on`` input field is removed.
+    Same as ``clearOne()`` but specified pixels are turned off and the ``on`` input field is removed.
 
     :param x: X-coordinate (or column) of pixel
     :param y: Y-coordinate (or row) of pixel
-    :param show: Boolean indicating whether to write buffer to display. Defaults to ``true``
+    :param show: Whether to write buffer to matrix. Defaults to ``true``
 
 .. function:: void writeVLine(uint8_t x, uint8_t start_y, uint8_t end_y, bool on = true, bool show = true)
 
@@ -114,8 +102,8 @@ Functions
     :param x: X-coordinate (or column) of line
     :param start_y: start Y-coordinate (or row) of line
     :param end_y: ending Y-coordinate (or row) of line
-    :param on: Boolean indicating whether to set LEDs to be on or off in buffer. Defaults to ``true``
-    :param show: Boolean indicating whether to write buffer to display. Defaults to ``true``
+    :param on: State of LEDs to be set in buffer (``true`` means on). Defaults to ``true``
+    :param show: Whether to write buffer to matrix. Defaults to ``true``
 
 .. function:: void clearVLine(uint8_t x, uint8_t start_row, uint8_t end_row, bool show = true)
 
@@ -126,7 +114,7 @@ Functions
     :param x: X-coordinate (or column) of line
     :param start_y: start Y-coordinate (or row) of line
     :param end_y: ending Y-coordinate (or row) of line
-    :param show: Boolean indicating whether to write buffer to display. Defaults to ``true``
+    :param show: Whether to write buffer to matrix. Defaults to ``true``
 
 .. function:: void writeHLine(uint8_t y, uint8_t start_x, uint8_t end_x, bool on = true, bool show = true)
 
@@ -135,8 +123,8 @@ Functions
     :param y: Y-coordinate (or row) of line
     :param start_x: start X-coordinate (or column) of line
     :param end_x: ending X-coordinate (or column) of line
-    :param on: Boolean indicating whether to set LEDs to be on or off in buffer. Defaults to ``true``
-    :param show: Boolean indicating whether to write buffer to display. Defaults to ``true``
+    :param on: State of LEDs to be set in buffer (``true`` means on). Defaults to ``true``
+    :param show: Whether to write buffer to matrix. Defaults to ``true``
 
 .. function:: void clearHLine(uint8_t y, uint8_t start_x, uint8_t end_x, bool on = true, bool show = true)
 
@@ -147,15 +135,15 @@ Functions
     :param y: Y-coordinate (or row) of line
     :param start_x: start X-coordinate (or column) of line
     :param end_x: ending X-coordinate (or column) of line
-    :param show: Boolean indicating whether to write buffer to display. Defaults to ``true``
+    :param show: Whether to write buffer to matrix. Defaults to ``true``
 
 .. function:: void writeY(uint8_t y, bool on = true, bool show = true)
 
     Set entire row of LEDs with given Y-coordinate to given state ``on``. If ``show`` is ``true``, write buffer to display.
 
     :param y: Y-coordinate (or row) of line
-    :param on: Boolean indicating whether to set LEDs to be on or off in buffer. Defaults to ``true``
-    :param show: Boolean indicating whether to write buffer to display. Defaults to ``true``
+    :param on: State of LEDs to be set in buffer (``true`` means on). Defaults to ``true``
+    :param show: Whether to write buffer to matrix. Defaults to ``true``
 
 .. function:: void clearY(uint8_t y, bool show = true)
     
@@ -164,15 +152,15 @@ Functions
     Same as ``writeRow()`` but specified pixels are turned off and the ``on`` input field is removed.
 
     :param y: Y-coordinate (or row) of line
-    :param show: Boolean indicating whether to write buffer to display
+    :param show: Whether to write buffer to matrix. Defaults to ``true``
 
 .. function:: void writeX(uint8_t x, bool on = true, bool show = true)
 
     Set entire column of LEDs with given X-coordinate to given state ``on``. If ``show`` is ``true``, write buffer to display.
 
     :param x: X-coordinate (or column) of line
-    :param on: Boolean indicating whether to set LEDs to be on or off in buffer. Defaults to ``true``
-    :param show: Boolean indicating whether to write buffer to display. Defaults to ``true``
+    :param on: State of LEDs to be set in buffer (``true`` means on). Defaults to ``true``
+    :param show: Whether to write buffer to matrix. Defaults to ``true``
 
 .. function:: void clearX(uint8_t x, bool show = true)
 
@@ -181,7 +169,7 @@ Functions
     Same as ``writeX()`` but specified pixels are turned off and the ``on`` input field is removed.
 
     :param x: X-coordinate (or column) of line
-    :param show: Boolean indicating whether to write buffer to display. Defaults to ``true``
+    :param show: Whether to write buffer to matrix. Defaults to ``true``
 
 .. function:: void clearRectangle(uint8_t start_x, uint8_t end_x, uint8_t start_y, uint8_t end_y, bool on = true, bool show = true)
 
@@ -191,8 +179,8 @@ Functions
     :param end_x: ending X-coordinate (rightmost column) of region
     :param start_y: start Y-coordinate (top column) of region
     :param end_y: ending Y-coordinate (bottom column) of region
-    :param on: Boolean indicating whether to set LEDs to be on or off in buffer. Defaults to ``true``
-    :param show: Boolean indicating whether to write buffer to display. Defaults to ``true``
+    :param on: State of LEDs to be set in buffer (``true`` means on). Defaults to ``true``
+    :param show: Whether to write buffer to matrix. Defaults to ``true``
 
 .. function:: void clearRectangle(uint8_t start_x, uint8_t end_x, uint8_t start_y, uint8_t end_y, bool show = true)
 
@@ -204,9 +192,16 @@ Functions
     :param end_x: ending X-coordinate (rightmost column) of region
     :param start_y: start Y-coordinate (top column) of region
     :param end_y: ending Y-coordinate (bottom column) of region
-    :param show: Boolean indicating whether to write buffer to display. Defaults to ``true``
+    :param show: Whether to write buffer to matrix. Defaults to ``true``
     
+.. function:: void writeAll(bool show = true)
 
+    Set all LEDs to be turned on in buffer. If ``show`` is ``true``, write buffer to display.
 
+    :param show: Whether to write buffer to matrix. Defaults to ``true``
 
+.. function:: void clearAll(bool show = true)
 
+    Set all LEDs to be turned off in buffer. If ``show`` is ``true``, write buffer to display.
+
+    :param show: Whether to write buffer to matrix. Defaults to ``true``

@@ -38,7 +38,7 @@ void EVNAlpha::begin()
     button_led.begin();
 
     //initialize battery ADC if available
-    if (this->beginBatteryADC()) _battery_adc_started = true;
+    if (this->beginADC()) _battery_adc_started = true;
 
     ports.setPort(1);
 }
@@ -59,7 +59,7 @@ void EVNAlpha::printPorts()
 
 }
 
-bool EVNAlpha::beginBatteryADC()
+bool EVNAlpha::beginADC()
 {
     ports.setPort((uint8_t)bq25887::I2C_PORT);
 
@@ -138,7 +138,7 @@ void EVNAlpha::updateBatteryVoltage() { if (_battery_adc_started)_vbatt = readAD
 void EVNAlpha::updateCell1Voltage() { if (_battery_adc_started) _vcell1 = readADC16((uint8_t)bq25887::REG_VCELLTOP_ADC1); }
 void EVNAlpha::updateCell2Voltage() { if (_battery_adc_started) _vcell2 = readADC16((uint8_t)bq25887::REG_VCELLBOT_ADC1); }
 
-uint16_t readADC16(uint8_t reg)
+uint16_t EVNAlpha::readADC16(uint8_t reg)
 {
     ports.setPort((uint8_t)bq25887::I2C_PORT);
 

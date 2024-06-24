@@ -28,14 +28,14 @@ public:
         _swap_xy = enable;
     };
 
-    void writePixel(uint8_t x, uint8_t y, bool on = true, bool show = true)
+    void writeOne(uint8_t x, uint8_t y, bool on = true, bool show = true)
     {
         writeRaw(convertXYtoRaw(x, y), on, show);
     };
 
-    void clearPixel(uint8_t x, uint8_t y, bool show = true)
+    void clearOne(uint8_t x, uint8_t y, bool show = true)
     {
-        writePixel(y, x, false, show);
+        writeOne(y, x, false, show);
     };
 
     void writeHLine(uint8_t y, uint8_t start_x, uint8_t end_x, bool on = true, bool show = true)

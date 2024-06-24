@@ -64,7 +64,12 @@ public:
     static EVNButtonLED& sharedButtonLED() { static EVNAlpha shared; return shared.button_led; }
 
 private:
-    bool beginBatteryADC();
+    bool beginADC();
+    uint16_t readADC16(uint8_t reg);
+    void updateBatteryVoltage();
+    void updateCell1Voltage();
+    void updateCell2Voltage();
+
     bool _battery_adc_started;
 
     int16_t _vbatt = 0, _vcell1 = 0, _vcell2 = 0;

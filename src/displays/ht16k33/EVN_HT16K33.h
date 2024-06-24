@@ -59,7 +59,7 @@ public:
         write8noReg((uint8_t)ris::OUTPUT);
         setDisplayMode(mode::ON);
         setBrightness(16);
-        clear();
+        clearAll();
 
         return _sensor_started;
     };
@@ -106,7 +106,7 @@ public:
         }
     };
 
-    void clear(bool show = true)
+    void clearAll(bool show = true)
     {
         if (_sensor_started)
         {
@@ -115,7 +115,7 @@ public:
         }
     };
 
-    void fill(bool show = true)
+    void writeAll(bool show = true)
     {
         if (_sensor_started)
         {

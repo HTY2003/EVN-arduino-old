@@ -54,17 +54,9 @@ Functions
 
     :param brightness: Brightness level from 1 to 16
 
-.. function:: void update()
+.. function:: void show()
 
     Writes buffer to display
-
-.. function:: void fill(bool show = true)
-
-    Set all LEDs to be turned on in buffer. If ``show`` is ``true``, write buffer to display.
-
-.. function:: void clear(bool show = true)
-
-    Set all LEDs to be turned off in buffer. If ``show`` is ``true``, write buffer to display.
 
 .. function:: void writePoint(uint8_t position, bool on = true, bool show = true)
 
@@ -135,3 +127,11 @@ Functions
     :param position: Position of element to be cleared (0-3)
     :param clear_point: Whether decimal point for element will be cleared. Defaults to ``true``
     :param show: Whether buffer will be written to display. Defaults to ``true``
+
+.. function:: void writeAll(bool show = true)
+
+    Set all LEDs to be turned on in buffer. If ``show`` is ``true``, write buffer to display.
+
+.. function:: void clearAll(bool show = true)
+
+    Set all LEDs to be turned off in buffer. If ``show`` is ``true``, write buffer to display.
