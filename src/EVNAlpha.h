@@ -31,7 +31,7 @@ public:
     bool read() { return this->buttonRead(); };
     bool buttonRead() { return button_led.read(); };
     void write(bool state) { this->write(state); };
-    void ledWrite(bool state) { button_led.write(state); };
+    void ledWrite(bool state) { if (!button_led.getFlash()) digitalWrite(LEDPIN, state); };
 
     void setMode(uint8_t mode) { button_led.setMode(mode); };
     void setLinkLED(bool enable) { button_led.setLinkLED(enable); };
@@ -51,11 +51,11 @@ public:
     uint8_t getWirePort() { return ports.getWire0Port(); }
     uint8_t getWire1Port() { return ports.getWire1Port(); }
 
-    int16_t getBatteryVoltage(bool flash_when_low = true, uint16_t low_threshold_mv = 6700);
-    int16_t getCell1Voltage(bool flash_when_low = true, uint16_t low_threshold_mv = 3350);
-    int16_t getCell2Voltage(bool flash_when_low = true, uint16_t low_threshold_mv = 3350);
+    int16_t getBatteryVoltage(bool flash_when_low = true, uint16_t low_threshold_mv = 6900);
+    int16_t getCell1Voltage(bool flash_when_low = true, uint16_t low_threshold_mv = 3450);
+    int16_t getCell2Voltage(bool flash_when_low = true, uint16_t low_threshold_mv = 3450);
 
-    void printPorts() { ports.printPorts(); }
+    void printPorts();
 
     //Singletons for Port Selector and Button/LED
     static EVNPortSelector& sharedPorts() { static EVNAlpha shared; return shared.ports; }

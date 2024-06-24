@@ -43,6 +43,19 @@ void EVNAlpha::begin()
     ports.setPort(1);
 }
 
+void EVNAlpha::printPorts()
+{
+    Serial.println("EVN Alpha I2C Port Scanner");
+    Serial.print("Battery: ");
+    Serial.print(getBatteryVoltage());
+    Serial.print("V | Cell 1: ");
+    Serial.print(getCell1Voltage());
+    Serial.print("V | Cell 2: ");
+    Serial.println(getCell2Voltage());
+    ports.printPorts();
+
+}
+
 bool EVNAlpha::beginBatteryADC()
 {
     ports.setPort((uint8_t)bq25887::I2C_PORT);

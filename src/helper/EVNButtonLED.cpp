@@ -15,7 +15,6 @@ EVNButtonLED::EVNButtonLED(uint8_t mode, bool link_led, bool link_movement, bool
 		button.state = !button.state;
 
 	button.flash = false;
-	button.led_output = false;
 }
 
 void EVNButtonLED::begin()
@@ -38,8 +37,6 @@ void EVNButtonLED::begin()
 }
 
 bool EVNButtonLED::read() { return (button.mode == BUTTON_DISABLE) ? true : button.state; }
-
-void EVNButtonLED::write(bool state) { button.led_output = state; }
 
 void EVNButtonLED::setMode(uint8_t mode) { button.mode = constrain(mode, 0, 2); }
 uint8_t EVNButtonLED::getMode() { return button.mode; }

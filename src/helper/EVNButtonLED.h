@@ -15,17 +15,14 @@ typedef struct
 	volatile bool state;
 	volatile bool substate;
 	volatile uint32_t last_change;
+	volatile uint32_t now;
 
 	volatile uint8_t mode;
 	volatile bool link_led;
 	volatile bool link_movement;
 	volatile bool button_invert;
 
-	volatile bool led_output;
-
 	volatile bool flash;
-	volatile uint8_t flash_counter;
-	volatile uint32_t last_flash;
 } button_led_state_t;
 
 class EVNButtonLED
@@ -33,14 +30,11 @@ class EVNButtonLED
 private:
 	static const uint16_t DEBOUNCE_TIMING_MS = 10;
 	static const uint16_t UPDATE_INTERVAL_MS = 100;
-	static const uint16_t UPDATES_PER_FLASH = 10;
-	static const uint16_t TIME_BETWEEN_FLASHES_MS = 3000;
 
 public:
 	EVNButtonLED(uint8_t mode = BUTTON_TOGGLE, bool link_led = true, bool link_movement = false, bool button_invert = false);
 	void begin();
 	bool read();
-	void write(bool state);
 
 	void setMode(uint8_t mode);
 	void setLinkLED(bool enable);
@@ -86,27 +80,15 @@ private:
 		}
 
 		//ensures that LED reflects output of read()
-		if (button.link_led) button.led_output = button.state;
+		if (button.link_led && !button.flash) digitalWrite(LEDPIN, button.state);
 	}
 
 	static bool update(struct repeating_timer* t)
 	{
-		if (button.flash && button.flash_counter > 0)
-		{
+		if (button.flash)
 			digitalWrite(LEDPIN, !digitalRead(LEDPIN));
-			if (button.flash_counter == 1) button.last_flash = millis();
-			button.flash_counter--;
-		}
-
-		else if (button.flash && millis() - button.last_flash > TIME_BETWEEN_FLASHES_MS)
-			button.flash_counter = UPDATES_PER_FLASH;
-
 		else
-		{
-			if (!button.flash) button.flash_counter = 0;
 			isr();
-			digitalWrite(LEDPIN, button.led_output);
-		}
 
 		return true;
 	}
