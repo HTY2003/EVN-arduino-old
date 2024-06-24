@@ -18,5 +18,13 @@ void setup()
 
 void loop()
 {
+    for (int i = 0; i < 8; i++)
+    {
 
+    }
+
+    delay(1000);
+
+
+    delay(1000)
 }
