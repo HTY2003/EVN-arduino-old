@@ -45,13 +45,16 @@ void EVNAlpha::begin()
 
 void EVNAlpha::printPorts()
 {
+    uint16_t vbatt = getBatteryVoltage(false);
+    uint16_t vcell1 = getCell1Voltage(false);
+    uint16_t vcell2 = vbatt - vcell1;
     Serial.println("EVN Alpha I2C Port Scanner");
     Serial.print("Battery: ");
-    Serial.print(getBatteryVoltage());
+    Serial.print((float)vbatt / 1000, 3);
     Serial.print("V | Cell 1: ");
-    Serial.print(getCell1Voltage());
+    Serial.print((float)vcell1 / 1000, 3);
     Serial.print("V | Cell 2: ");
-    Serial.println(getCell2Voltage());
+    Serial.println((float)vcell2 / 1000, 3);
     ports.printPorts();
 
 }

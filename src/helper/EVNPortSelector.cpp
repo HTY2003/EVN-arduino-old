@@ -32,9 +32,7 @@ void EVNPortSelector::printPorts()
 	for (uint8_t t = 1; t < 9; t++)
 	{
 		this->setPort(t);
-		Serial.print("---Port ");
-		Serial.print(t);
-		Serial.println("---");
+		bool line_started = false;
 
 		for (uint8_t addr = 0; addr <= 127; addr++)
 		{
@@ -43,19 +41,25 @@ void EVNPortSelector::printPorts()
 			Wire.beginTransmission(addr);
 			if (!Wire.endTransmission())
 			{
-				Serial.print("Address 0x");
+				if (!line_started)
+				{
+					Serial.print("Port ");
+					Serial.print(t);
+					Serial.print(": ");
+					line_started = true;
+				}
+				Serial.print("0x");
 				Serial.print(addr, HEX);
-				Serial.println(" found");
+				Serial.print(" ");
 			}
 		}
+		if (line_started) Serial.println();
 	}
 
 	for (uint8_t t = 9; t < 17; t++)
 	{
 		this->setPort(t);
-		Serial.print("---Port ");
-		Serial.print(t);
-		Serial.println("---");
+		bool line_started = false;
 
 		for (uint8_t addr = 0; addr <= 127; addr++)
 		{
@@ -64,11 +68,19 @@ void EVNPortSelector::printPorts()
 			Wire1.beginTransmission(addr);
 			if (!Wire1.endTransmission())
 			{
-				Serial.print("Address 0x");
+				if (!line_started)
+				{
+					Serial.print("Port ");
+					Serial.print(t);
+					Serial.print(": ");
+					line_started = true;
+				}
+				Serial.print("0x");
 				Serial.print(addr, HEX);
-				Serial.println(" found");
+				Serial.print(" ");
 			}
 		}
+		if (line_started) Serial.println();
 	}
 }
 

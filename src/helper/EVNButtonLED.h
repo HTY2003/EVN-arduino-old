@@ -15,7 +15,6 @@ typedef struct
 	volatile bool state;
 	volatile bool substate;
 	volatile uint32_t last_change;
-	volatile uint32_t now;
 
 	volatile uint8_t mode;
 	volatile bool link_led;
