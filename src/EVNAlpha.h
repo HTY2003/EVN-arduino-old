@@ -18,6 +18,7 @@ private:
         REG_VBAT_ADC1 = 0x1D,
         REG_VCELLTOP_ADC1 = 0x1F,
         REG_PART_INFO = 0x25,
+        REG_VCELLBOT_ADC1 = 0x26,
         CMD_ADC_CONTROL_ENABLE = 0b10110000,
         CMD_WATCHDOG_DISABLE = 0b10001101,
         MASK_PART_INFO = 0b01111000,
@@ -37,13 +38,14 @@ public:
     void setLinkLED(bool enable) { button_led.setLinkLED(enable); };
     void setLinkMovement(bool enable) { button_led.setLinkMovement(enable); };
     void setButtonInvert(bool enable) { button_led.setButtonInvert(enable); };
-    void setFlash(bool enable) { button_led.setFlash(enable); };
 
     uint8_t getMode() { return button_led.getMode(); };
     bool getLinkLED() { return button_led.getLinkLED(); };
     bool getLinkMovement() { return button_led.getLinkMovement(); };
     bool getButtonInvert() { return button_led.getButtonInvert(); };
-    bool getFlash() { return button_led.getFlash(); };
+
+    // void setFlash(bool enable) { button_led.setFlash(enable); };
+    // bool getFlash() { return button_led.getFlash(); };
 
     //I2C Multiplexer Functions
     void setPort(uint8_t port) { ports.setPort(port); }
@@ -64,8 +66,8 @@ public:
 private:
     bool beginBatteryADC();
     bool _battery_adc_started;
-    bool _low_battery;
-    uint16_t _low_battery_threshold;
+
+    int16_t _vbatt = 0, _vcell1 = 0, _vcell2 = 0;
 
     static EVNButtonLED button_led;
     static EVNPortSelector ports;

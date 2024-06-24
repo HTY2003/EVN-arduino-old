@@ -96,18 +96,12 @@ int16_t EVNAlpha::getBatteryVoltage(bool flash_when_low, uint16_t low_threshold_
 {
     if (_battery_adc_started)
     {
-        ports.setPort((uint8_t)bq25887::I2C_PORT);
+        updateBatteryVoltage();
 
-        uint16_t vnom = 0;
-        Wire1.beginTransmission((uint8_t)bq25887::I2C_ADDR);
-        Wire1.write((uint8_t)bq25887::REG_VBAT_ADC1);
-        Wire1.endTransmission();
-        Wire1.requestFrom((uint8_t)bq25887::I2C_ADDR, (uint8_t)2);
-        vnom = Wire1.read() << 8 | Wire1.read();
+        if (flash_when_low)
+            button_led.setFlash(_vbatt < low_threshold_mv);
 
-        if (flash_when_low) button_led.setFlash((vnom / 2 < low_threshold_mv));
-
-        return vnom;
+        return _vbatt;
     }
     return 0;
 }
@@ -116,18 +110,12 @@ int16_t EVNAlpha::getCell1Voltage(bool flash_when_low, uint16_t low_threshold_mv
 {
     if (_battery_adc_started)
     {
-        ports.setPort((uint8_t)bq25887::I2C_PORT);
+        updateCell1Voltage();
 
-        uint16_t vcell1 = 0;
-        Wire1.beginTransmission((uint8_t)bq25887::I2C_ADDR);
-        Wire1.write((uint8_t)bq25887::REG_VCELLTOP_ADC1);
-        Wire1.endTransmission();
-        Wire1.requestFrom((uint8_t)bq25887::I2C_ADDR, (uint8_t)2);
-        vcell1 = Wire1.read() << 8 | Wire1.read();
+        if (flash_when_low)
+            button_led.setFlash(_vcell1 < low_threshold_mv);
 
-        if (flash_when_low) button_led.setFlash((vcell1 < low_threshold_mv));
-
-        return vcell1;
+        return _vcell1;
     }
     return 0;
 }
@@ -136,10 +124,28 @@ int16_t EVNAlpha::getCell2Voltage(bool flash_when_low, uint16_t low_threshold_mv
 {
     if (_battery_adc_started)
     {
-        //use total voltage reading - cell 1 voltage reading
-        uint16_t vcell2 = this->getBatteryVoltage() - this->getCell1Voltage();
-        if (flash_when_low) button_led.setFlash((vcell2 < low_threshold_mv));
-        return vcell2;
+        updateCell2Voltage();
+
+        if (flash_when_low)
+            button_led.setFlash(_vcell2 < low_threshold_mv);
+
+        return _vcell2;
     }
     return 0;
+}
+
+void EVNAlpha::updateBatteryVoltage() { if (_battery_adc_started)_vbatt = readADC16((uint8_t)bq25887::REG_VBAT_ADC1); }
+void EVNAlpha::updateCell1Voltage() { if (_battery_adc_started) _vcell1 = readADC16((uint8_t)bq25887::REG_VCELLTOP_ADC1); }
+void EVNAlpha::updateCell2Voltage() { if (_battery_adc_started) _vcell2 = readADC16((uint8_t)bq25887::REG_VCELLBOT_ADC1); }
+
+uint16_t readADC16(uint8_t reg)
+{
+    ports.setPort((uint8_t)bq25887::I2C_PORT);
+
+    Wire1.beginTransmission((uint8_t)bq25887::I2C_ADDR);
+    Wire1.write(reg);
+    Wire1.endTransmission();
+    Wire1.requestFrom((uint8_t)bq25887::I2C_ADDR, (uint8_t)2);
+
+    return Wire1.read() << 8 | Wire1.read();
 }

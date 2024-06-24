@@ -26,19 +26,21 @@ EVN Alpha has 2 TCA9548A I2C multiplexers, 1 on each I2C bus. This allows users 
 .. note::
     For Ports 9-16, 3rd party libraries and end-user code have to use Wire1 to interface with their sensors, as these ports are connected to the I2C1 bus.
 
-.. class:: EVNAlpha(uint8_t mode = BUTTON_TOGGLE, bool link_led = true, bool link_movement = true, uint32_t i2c_freq = 100000)
+.. class:: EVNAlpha(uint8_t mode = BUTTON_TOGGLE, bool link_led = true, bool link_movement = false, bool button_invert = false, uint32_t i2c_freq = 100000)
     
-    :param mode: Determines behaviour of `buttonRead()`. Defaults to ``BUTTON_TOGGLE``
+    :param mode: Determines behaviour of ``buttonRead()``. Defaults to ``BUTTON_TOGGLE``
 
         * ``BUTTON_TOGGLE`` -- Returns false on startup and toggles between true and false with each button press
         * ``BUTTON_PUSHBUTTON`` -- Returns true only when button is pressed
         * ``BUTTON_DISABLE`` -- Always returns true
 
-    :param link_led: Links LED to display `buttonRead()` output. Defaults to true.
+    :param link_led: Links LED to display ``buttonRead()`` output. Defaults to ``true``.
 
-    :param link_movement: Links all motor and servo operation to `buttonRead()` output. Defaults to true.
+    :param link_movement: Links all motor and servo operation to ``buttonRead()`` output. Defaults to ``false``.
 
-    :param i2c_freq: I2C frequency in Hz. Defaults to 100000 (100kHz).
+    :param button_invert: Inverts output of ``buttonRead()``. Defaults to ``false``.
+
+    :param i2c_freq: I2C frequency in Hz. Defaults to 400000 (400kHz).
 
 Example Usage:
 
@@ -80,7 +82,7 @@ LED / Button
 .. function::   void write(bool state)
                 void ledWrite(bool state)
 
-    Set LED to turn on (`true`) or off (`false`)
+    Set LED to turn on (``true``) or off (``false``). However, the LED state can be overridden by the battery reading functions (see below).
 
     :param state: state to write to LED
 
@@ -101,19 +103,19 @@ I2C Port Control
 
 .. function:: uint8_t getPort()
 
-    :returns: last I2C port called using `setPort()` (1--16)
+    :returns: last I2C port called using ``setPort()`` (1--16)
 
 .. function:: uint8_t getWirePort()
 
-    :returns: last Wire I2C port called using `setPort()` (1--8)
+    :returns: last Wire I2C port called using ``setPort()`` (1--8)
 
 .. function:: uint8_t getWire1Port()
 
-    :returns: last Wire1 I2C port called using `setPort()` (9--16)
+    :returns: last Wire1 I2C port called using ``setPort()`` (9--16)
 
 .. function:: void printPorts()
 
-    Prints all I2C devices on every port over `Serial`
+    Prints all I2C devices on every port using ``Serial``
 
 Example Usage:
 
@@ -132,22 +134,44 @@ Example Usage:
 
 Battery Voltage Reading
 """"""""""""""""""""""""
+All battery voltage reading functions have a ``flash_when_low`` input. 
+This is a low battery alert function, which flashes the LED at a rate of 5Hz (5 blinks per second) when the battery voltage is too low.
 
-.. function:: int16_t getBatteryVoltage(bool flash_when_low = true)
+When the alert is on, the LED's previous output (whether linked to button or controlled by the user) will be overridden.
+To add the alert to your code, add ``getBatteryVoltage()`` (or ``getCell1Voltage()`` **and** ``getCell2Voltage()``) to ``void loop()`` and they will check the voltage each loop.
 
-    :param flash_when_low: Sets LED to flash every 4 seconds when battery voltage falls below 6.7V. Defaults to ``true``
+.. code-block:: c++
+
+    void loop()
+    {
+      //main code here
+      
+      board.getBatteryVoltage(); //battery alert!
+    }
+
+
+.. function:: int16_t getBatteryVoltage(bool flash_when_low = true, uint16_t low_threshold_mv = 6900)
+
+    :param flash_when_low: Sets LED to flash when battery voltage falls below ``low_threshold_mv``. Defaults to ``true``
+    :param low_threshold_mv: Battery voltage threshold (in millivolts). When battery voltage falls below this voltage and ``flash_when_low`` is ``true``, low voltage alert is triggered. Defaults to 6900.
 
     :returns: combined voltage of both battery cells in millivolts
 
-.. function:: int16_t getCell1Voltage(bool flash_when_low = true)
+.. function:: int16_t getCell1Voltage(bool flash_when_low = true, uint16_t low_threshold_mv = 3450)
+
+    Cell 1 refers to the cell nearer to the edge of the board.
     
-    :param flash_when_low: Sets LED to flash every 4 seconds when cell voltage falls below 3.35V. Defaults to ``true``
+    :param flash_when_low: Sets LED to flash when battery voltage falls below ``low_threshold_mv``. Defaults to ``true``
+    :param low_threshold_mv: Cell voltage threshold (in millivolts). When this cell's voltage falls below this threshold and ``flash_when_low`` is ``true``, low battery alert is triggered. Defaults to 3450.
 
     :returns: voltage of first cell in millivolts
 
-.. function:: int16_t getCell2Voltage(bool flash_when_low = true)
+.. function:: int16_t getCell2Voltage(bool flash_when_low = true, uint16_t low_threshold_mv = 3450)
 
-    :param flash_when_low: Sets LED to flash every 4 seconds when cell voltage falls below 3.35V. Defaults to ``true``
+    Cell 2 refers to the cell nearer to the centre of the board.
+
+    :param flash_when_low: Sets LED to flash when battery voltage falls below ``low_threshold_mv``. Defaults to ``true``
+    :param low_threshold_mv: Cell voltage threshold (in millivolts). When this cell's voltage falls below this threshold and ``flash_when_low`` is ``true``, the low battery alert is triggered. Defaults to 3450.
 
     :returns: voltage of second cell in millivolts
 
@@ -174,24 +198,52 @@ Example Output (on Serial Monitor):
     4198
     4194
 
-Settings
-""""""""
+Set Functions
+"""""""""""""
 .. function:: void setMode(uint8_t mode)
 
-    :param mode: Determines behaviour of `buttonRead()`
+    :param mode: Determines behaviour of ``buttonRead()``
     
-    * BUTTON_TOGGLE
-    * BUTTON_PUSHBUTTON
-    * BUTTON_DISABLE
+    * ``BUTTON_TOGGLE``
+    * ``BUTTON_PUSHBUTTON``
+    * ``BUTTON_DISABLE``
 
 .. function:: void setLinkLED(bool enable)
 
-    :param enable: Links LED to display `buttonRead()` output
+    :param enable: Links LED to display ``buttonRead()`` output
 
 .. function:: void setLinkMovement(bool enable)
 
-    :param enable: Links all motor and servo operation to `buttonRead()` output
+    :param enable: Links all motor and servo operation to ``buttonRead()`` output
 
-.. function:: void setFlash(bool enable)
+.. function:: void setButtonInvert(bool enable)
 
-    :param enable: Sets LED to flash on and off for 1 second every 4 seconds
+    :param enable: Inverts output of ``buttonRead()``
+
+Get Functions
+""""""""""""""
+
+.. function:: uint8_t getMode()
+
+    This function returns the button mode in numbers, as shown below.
+
+    The written button modes (e.g. ``BUTTON_TOGGLE``, ``BUTTON_PUSHBUTTON``) are converted to these numbers when compiled, 
+    so statements like ``if (board.getMode() == BUTTON_TOGGLE) {}`` are valid.
+
+    :returns: Mode of button in numerical form
+    * 0 (``BUTTON_DISABLE``)
+    * 1 (``BUTTON_TOGGLE``)
+    * 2 (``BUTTON_PUSHBUTTON``)
+
+.. function:: bool setLinkLED()
+
+    :returns: Whether LED is linked to ``buttonRead()`` output
+
+.. function:: bool setLinkMovement()
+
+    :returns: Whether motor and servo operation is linked to ``buttonRead()`` output
+
+.. function:: bool setButtonInvert()
+
+    :returns: Whether output of ``buttonRead()`` is inverted
+
