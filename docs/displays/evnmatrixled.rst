@@ -241,6 +241,6 @@ Display Functions
 
     :param show: Whether to write buffer to matrix. Defaults to ``true``
 
-.. function:: void show()
+.. function:: void update()
 
     Write buffer to display
