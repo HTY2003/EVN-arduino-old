@@ -175,7 +175,7 @@ List of Standard Peripherals
 .. _EVNIMUSensor: ../sensors/EVNIMUSensor.html
 .. _EVNGestureSensor: ../sensors/EVNGestureSensor.html
 .. _EVNEnvSensor: ../sensors/EVNEnvSensor.html
-.. _EVNCapacitiveTouchArray: ../sensors/EVNCapacitiveTouchArray.html
+.. _EVNTouchArray: ../sensors/EVNTouchArray.html
 .. _EVNDisplay: ../sensors/EVNDisplay.html
 .. _EVNMatrixLED: ../sensors/EVNMatrixLED.html
 .. _EVNSevenSegmentLED: ../sensors/EVNSevenSegmentLED.html

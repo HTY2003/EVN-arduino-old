@@ -159,6 +159,6 @@ Display Functions
 
     Set all LEDs to be turned off in buffer. If ``show`` is ``true``, write buffer to display.
 
-.. function:: void show()
+.. function:: void update()
 
     Writes buffer to display

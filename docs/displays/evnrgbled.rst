@@ -124,7 +124,7 @@ Display Functions
 
     :param show: Whether to write buffer to LEDs. Defaults to ``true``
 
-.. function:: void show()
+.. function:: void update()
 
     Writes buffer to LEDs. 
 

@@ -5,4 +5,4 @@ Picture,Name,Port Type,Library
 |imu.png|,6-Axis IMU Sensor,I2C,`EVNIMUSensor`_
 |gesture.png|,Gesture Sensor,I2C,`EVNGestureSensor`_
 |env.png|,Environment Sensor,I2C,`EVNEnvSensor`_
-|touch.png|,Capacitive Touch Array,I2C,`EVNCapacitiveTouchArray`_
+|touch.png|,Capacitive Touch Array,I2C,`EVNTouchArray`_
