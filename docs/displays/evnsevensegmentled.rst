@@ -36,6 +36,9 @@ Functions
 
     :returns: Boolean indicating whether the sensor was successfully initialized. If ``false`` is returned, all other functions may fail.
 
+Set Functions
+"""""""""""""
+
 .. function:: void setDisplayMode(mode mode)
 
     Set mode of display (off, on, or blinking at given frequency)
@@ -54,9 +57,29 @@ Functions
 
     :param brightness: Brightness level from 1 to 16
 
-.. function:: void show()
+Get Functions
+"""""""""""""
 
-    Writes buffer to display
+.. function:: EVNMatrixLED::mode getDisplayMode()
+
+    Get mode of display (off, on, or blinking at given frequency)
+
+    :param mode: Mode that display is set to
+
+    * ``EVNMatrixLED::mode::OFF`` (Off)
+    * ``EVNMatrixLED::mode::ON`` (On)
+    * ``EVNMatrixLED::mode::BLINK_HZ_0_5`` (Blinking at 0.5Hz)
+    * ``EVNMatrixLED::mode::BLINK_HZ_1`` (Blinking at 1Hz)
+    * ``EVNMatrixLED::mode::BLINK_HZ_2`` (Blinking at 2Hz)
+    
+.. function:: uint8_t getBrightness()
+
+    Get brightness level of display (1-16)
+
+    :param brightness: Brightness level from 1 to 16
+
+Display Functions
+------------------
 
 .. function:: void writePoint(uint8_t position, bool on = true, bool show = true)
 
@@ -135,3 +158,7 @@ Functions
 .. function:: void clearAll(bool show = true)
 
     Set all LEDs to be turned off in buffer. If ``show`` is ``true``, write buffer to display.
+
+.. function:: void show()
+
+    Writes buffer to display

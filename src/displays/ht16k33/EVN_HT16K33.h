@@ -68,7 +68,8 @@ public:
     {
         if (_sensor_started)
         {
-            write8noReg((uint8_t)mode);
+            _mode = mode;
+            write8noReg((uint8_t)_mode);
         }
     };
 
@@ -76,11 +77,20 @@ public:
     {
         if (_sensor_started)
         {
-            uint8_t brightnessc = constrain(brightness, 1, 16);
-
-            write8noReg((brightness - 1) | 0xE0);
+            _brightness = constrain(brightness, 1, 16);
+            write8noReg((_brightness - 1) | 0xE0);
         }
     };
+
+    uint8_t getBrightness()
+    {
+        return _brightness;
+    };
+
+    mode getMode()
+    {
+        return _mode;
+    }
 
     void writeRaw(uint8_t led, bool on, bool show = true)
     {
@@ -144,6 +154,8 @@ private:
     };
 
     uint8_t _buffer[16];
+    uint8_t _brightness;
+    mode _mode;
 };
 
 #endif

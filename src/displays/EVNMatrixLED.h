@@ -13,19 +13,34 @@ public:
     {
     };
 
-    void invertX(bool enable)
+    void setInvertX(bool enable)
     {
         _invert_x = enable;
     };
 
-    void invertY(bool enable)
+    void setInvertY(bool enable)
     {
         _invert_y = enable;
     };
 
-    void swapXY(bool enable)
+    void setSwapXY(bool enable)
     {
         _swap_xy = enable;
+    };
+
+    bool getInvertX()
+    {
+        return _invert_x;
+    };
+
+    bool getInvertY()
+    {
+        return _invert_y;
+    };
+
+    bool getSwapXY()
+    {
+        return _swap_xy;
     };
 
     void writeOne(uint8_t x, uint8_t y, bool on = true, bool show = true)
@@ -123,24 +138,25 @@ private:
         uint16_t yc;
         uint16_t xc;
 
-        if (!_swap_xy)
-        {
-            yc = y;
-            xc = x;
-        }
-        else
+        if (_swap_xy)
         {
             yc = x;
             xc = y;
+        }
+        else
+        {
+            yc = y;
+            xc = x;
         }
 
         if (_invert_x) xc = 7 - xc;
         if (_invert_y) yc = 7 - yc;
 
-        return yc * 16 + (xc + 7) % 8;
+        // return yc * 16 + (xc + 7) % 8;
+        return (7 - xc) * 16 + (yc + 7) % 8;
     };
 
-    bool _invert_x, _invert_y, _swap_xy;
+    bool _invert_x = false, _invert_y = false, _swap_xy = false;
 };
 
 #endif

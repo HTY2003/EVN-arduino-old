@@ -41,13 +41,37 @@ GND         GND               Ground (0V)
 Constructor
 -----------
 
-.. class:: EVNRGBLED(uint8_t port, uint8_t led_count = 8)
+.. class:: EVNRGBLED(uint8_t port, uint8_t led_count = 8, bool invert = false)
 
     :param port: Servo port (1-4)
     :param led_count: Number of LEDs connected to the servo port. Defaults to 8
+    :param invert: Whether order of LED indexes should be inverted
 
-Functions
----------
+Set Functions
+""""""""""""""
+.. function:: void setLEDCount(uint8_t led_count)
+
+    :param led_count: Number of LEDs in array
+
+.. function:: void setInvert(bool enable)
+
+    By default, the LED with index 0 is the one closest to the IN wire. 
+    When enabled (set to ``true``), the index order is inverted, so that index 0 is the LED furthest from the IN wire.
+
+    :dir: Whether LED index is inverted
+
+Get Functions
+""""""""""""""
+.. function:: uint8_t getLEDCount()
+
+    :returns: number of LEDs in the array
+
+.. function:: bool getInvert()
+
+    :returns: Whether LED index is inverted
+
+Display Functions
+-----------------
 
 .. function:: void writeOne(uint8_t led, uint8_t r = 0, uint8_t g = 0, uint8_t b = 0, bool show = true)
 
@@ -110,31 +134,3 @@ Functions
     with ``show`` set to ``false``, before calling ``show()`` at the end to update the LEDs. 
     
     This approach can achieve nicer visual output (all pixels change simultaneously) or faster updates (as ``show()`` is only called once).
-
-Set Functions
-""""""""""""""
-.. function:: void setLEDCount(uint8_t led_count)
-
-    :param led_count: Number of LEDs in array
-
-.. function:: void setDirection(bool dir)
-
-    By default (``dir`` == ``DIRECT``), the LED with index 0 is the one closest to the IN wire. 
-    Setting ``dir`` to ``false`` inverts the indexes' order, so that index 0 is the LED furthest from the IN wire.
-
-    :dir: Direction in which the LED indexes increase
-
-Get Functions
-""""""""""""""
-.. function:: uint8_t getLEDCount()
-
-    :returns: number of LEDs in the array
-
-.. function:: bool getDirection()
-
-    The written versions of direction (``DIRECT``, ``INVERSE``) are converted to these booleans when compiled, 
-    so statements like ``if (led.getDirection() == DIRECT) {}`` are valid.
-
-    :returns: Boolean representation of array Direction
-        * ``true`` (``DIRECT``)
-        * ``false`` (``INVERSE``)

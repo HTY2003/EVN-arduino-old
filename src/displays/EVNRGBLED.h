@@ -14,7 +14,7 @@ static PIOProgram _rgbLedPgm(&ws2812_program);
 class EVNRGBLED
 {
 public:
-    EVNRGBLED(uint8_t port, uint8_t led_count = 8, bool dir = DIRECT)
+    EVNRGBLED(uint8_t port, uint8_t led_count = 8, bool invert = false)
     {
         _led_count = led_count;
 
@@ -40,7 +40,7 @@ public:
         _sm = -1;
         _offset = -1;
         _attached = false;
-        _dir = dir;
+        _invert = invert;
     };
 
     bool begin()
@@ -56,14 +56,14 @@ public:
         return _attached;
     };
 
-    void setDirection(bool dir)
+    void setInvert(bool enable)
     {
-        _dir = dir;
+        _invert = enable;
     };
 
-    uint8_t getDirection()
+    uint8_t getInvert()
     {
-        return _dir;
+        return _invert;
     };
 
     void setLEDCount(uint8_t led_count)
@@ -82,7 +82,7 @@ public:
 
         uint8_t ledc = led;
 
-        if (_dir == REVERSE)
+        if (_invert)
             ledc = _led_count - 1 - ledc;
 
         if (_buffer[ledc][0] != r || _buffer[ledc][1] != g || _buffer[ledc][2] != b)
@@ -146,6 +146,8 @@ public:
             }
         }
 
+        // memset(_buffer, 255, sizeof(_buffer));
+
         if (show) this->update();
     };
 
@@ -195,7 +197,7 @@ private:
     uint8_t _pin;
     uint8_t _buffer[256][3] = { 0 };
 
-    bool _dir;
+    bool _invert;
 };
 
 #endif

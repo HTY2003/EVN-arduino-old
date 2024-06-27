@@ -146,6 +146,16 @@ Battery Voltage Cutoff
 
 When the battery voltage dips below 6.2V, On Mode is disabled. Pressing the On/Off button will do nothing until the battery is charged above 6.3V.
 
+As lithium-ion batteries get nearer to depletion, high current loads such as motors can cause their voltages to drop suddenly. 
+
+For instance, the batteries may be 6.4V at idle, but dip below 6.2V when the motors start running, causing the board to turn off.
+
+After the board (and motors) are turned off, the battery voltage may rise back to 6.4V, allowing the board to be turned on again. 
+
+Nevertheless, it's strongly recommended to charge the board when the voltage cutoff occurs.
+
+Battery voltage measurements and low battery alerts can be configured in the ``EVNAlpha`` class.
+
 Disassembly
 -----------
 

@@ -36,6 +36,9 @@ Functions
 
     :returns: Boolean indicating whether the sensor was successfully initialized. If ``false`` is returned, all other functions may fail.
 
+Set Functions
+"""""""""""""
+
 .. function:: void setDisplayMode(mode mode)
 
     Set mode of display (off, on, or blinking at given frequency)
@@ -54,27 +57,59 @@ Functions
 
     :param brightness: Brightness level from 1 to 16
 
-.. function:: void swapXY(bool enable)
+.. function:: void setSwapXY(bool enable)
 
-    Swaps X and Y axes (e.g. the pixel at X = 0, Y = 7 becomes X = 7, Y = 0)
+    When enabled, swaps X and Y axes (e.g. the pixel at X = 0, Y = 7 becomes X = 7, Y = 0)
 
     :param enable: Boolean indicating whether X and Y axes should be swapped
 
-.. function:: void invertY(bool enable)
+.. function:: void setInvertY(bool enable)
 
-    Inverts order of Y axis (e.g. when set to ``true``, the row Y = 0 becomes X = 7)
+    When enabled, inverts order of Y axis (e.g. when set to ``true``, the row Y = 0 becomes X = 7)
 
     :param enable: Boolean indicating whether Y axis should be inverted
 
-.. function:: void invertX(bool enable)
+.. function:: void setInvertX(bool enable)
 
-    Inverts order of X axis (e.g. when set to ``true``, the column X = 0 becomes X = 7)
+    When enabled, inverts order of X axis (e.g. when set to ``true``, the column X = 0 becomes X = 7)
 
     :param enable: Boolean indicating whether X axis should be inverted
 
-.. function:: void show()
+Get Functions
+"""""""""""""
 
-    Write buffer to display
+.. function:: EVNMatrixLED::mode getDisplayMode()
+
+    Get mode of display (off, on, or blinking at given frequency)
+
+    :param mode: Mode that display is set to
+
+    * ``EVNMatrixLED::mode::OFF`` (Off)
+    * ``EVNMatrixLED::mode::ON`` (On)
+    * ``EVNMatrixLED::mode::BLINK_HZ_0_5`` (Blinking at 0.5Hz)
+    * ``EVNMatrixLED::mode::BLINK_HZ_1`` (Blinking at 1Hz)
+    * ``EVNMatrixLED::mode::BLINK_HZ_2`` (Blinking at 2Hz)
+    
+.. function:: uint8_t getBrightness()
+
+    Get brightness level of display (1-16)
+
+    :param brightness: Brightness level from 1 to 16
+
+.. function:: bool getSwapXY()
+
+    :returns: Whether X and Y axes are swapped
+
+.. function:: bool getInvertY()
+
+    :returns: Whether Y axis is inverted
+
+.. function:: bool getInvertX()
+
+    :returns: Whether X axis is inverted
+
+Display Functions
+"""""""""""""""""
 
 .. function:: void writeOne(uint8_t x, uint8_t y, bool on = true, bool show = true)
 
@@ -205,3 +240,7 @@ Functions
     Set all LEDs to be turned off in buffer. If ``show`` is ``true``, write buffer to display.
 
     :param show: Whether to write buffer to matrix. Defaults to ``true``
+
+.. function:: void show()
+
+    Write buffer to display
