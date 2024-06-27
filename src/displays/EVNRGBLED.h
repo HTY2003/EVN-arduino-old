@@ -96,7 +96,7 @@ public:
         if (show) this->update();
     };
 
-    void clearOne(uint8_t led, uint8_t r = 0, uint8_t g = 0, uint8_t b = 0, bool show = true)
+    void clearOne(uint8_t led, bool show = true)
     {
         writeOne(led, 0, 0, 0, show);
     };
@@ -135,20 +135,7 @@ public:
 
     void clearAll(bool show = true)
     {
-        for (int i = 0; i < _led_count; i++)
-        {
-            if (_buffer[i][0] != 0 || _buffer[i][1] != 0 || _buffer[i][2] != 0)
-            {
-                _buffer[i][0] = 0;
-                _buffer[i][1] = 0;
-                _buffer[i][2] = 0;
-                _buffer_changed = true;
-            }
-        }
-
-        // memset(_buffer, 255, sizeof(_buffer));
-
-        if (show) this->update();
+        this->writeAll(0, 0, 0, show);
     };
 
     void update()

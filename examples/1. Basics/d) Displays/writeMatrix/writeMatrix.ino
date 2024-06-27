@@ -32,7 +32,7 @@ void loop()
 
     matrix.writeAll();
     delay(1000);
-    for (int i = 0; i < 4; i = i + 2)
+    for (int i = 0; i < 8; i = i + 2)
     {
         //writeX and writeY control entire rows/columns
         //write functions can be used to turn off LEDs too
@@ -51,6 +51,9 @@ void loop()
     matrix.update();
     delay(1000);
 
+    matrix.clearAll();
+    delay(1000);
+
     //partial lines can be displayed
     //controls pixels on line Y=1, from X=1 to X=6
     matrix.writeHLine(1, 1, 6);
@@ -59,8 +62,11 @@ void loop()
     matrix.writeVLine(1, 1, 6);
     delay(1000);
 
+    matrix.clearAll();
+    delay(1000);
+
     //and rectangular regions too
-    matrix.writeRectangle(1, 7, 1, 7, true, false);
+    matrix.writeRectangle(1, 6, 1, 6, true, false);
     matrix.writeRectangle(2, 5, 2, 5, false, false);
     matrix.writeRectangle(3, 4, 3, 4, true, false);
     matrix.update();

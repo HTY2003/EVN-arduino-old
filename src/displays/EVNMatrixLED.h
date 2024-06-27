@@ -9,9 +9,7 @@
 class EVNMatrixLED : public EVN_HT16K33
 {
 public:
-    EVNMatrixLED(uint8_t port) : EVN_HT16K33(port)
-    {
-    };
+    EVNMatrixLED(uint8_t port) : EVN_HT16K33(port) {};
 
     void setInvertX(bool enable)
     {

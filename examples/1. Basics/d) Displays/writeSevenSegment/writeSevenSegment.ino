@@ -46,24 +46,24 @@ void loop()
 
         //individual positions can be cleared too
         seg.clearPosition(0);
-        delay(1000);
+        delay(500);
     }
 
     for (int i = 0; i < 4; i++)
     {
         //controls points in all positions
         //but with "show" set to false, so no changes are shown on display until seg.update() is called;
-        seg.writePoint(0, i, false);
+        seg.writePoint(i, true, false);
     }
-    update();
+    seg.update();
     delay(1000);
     for (int i = 0; i < 4; i++)
     {
         //controls points in all positions
         //but with set to false
-        seg.clearPoint(0, i, false);
+        seg.clearPoint(i, false);
     }
-    update();
+    seg.update();
     delay(1000);
 
     seg.writeNumber(0.356);
