@@ -1,6 +1,8 @@
 Magnetometer Calibration
 ==========================
 
+.. warning:: This page is a work-in-progress. Coming Soon!
+
 If you have tried using the compass sensor, you may find that the readings are not great all the time. In fact, you may find that they are bad most of the time.
 This is a guide to calibrate the compass sensor for much better readings.
 
