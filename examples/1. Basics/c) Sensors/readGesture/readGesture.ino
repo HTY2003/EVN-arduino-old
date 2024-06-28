@@ -5,16 +5,16 @@ The following program demonstrates some basic EVNGestureSensor functionality.
 
 #include <EVN.h>
 
-#define GESTURE_SENS_PORT 1  //set I2C port for gesture sensor here
+#define GESTURE_I2C_PORT 1  //set I2C port for gesture sensor here
 
 EVNAlpha board;
-EVNGestureSensor gesture(GESTURE_SENS_PORT);
+EVNGestureSensor gesture(GESTURE_I2C_PORT);
 
 void setup()
 {
-    board.begin();  //initialize board at start of void setup()
+    board.begin();      //initialize board at start of void setup()
+    gesture.begin();    //sensor initialization comes after
     Serial.begin(9600);
-    gesture.begin();
 }
 
 void loop()

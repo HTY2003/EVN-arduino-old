@@ -7,7 +7,7 @@ The following program demonstrates the LED blinking on and off.
 
 
 //by default, the board is set such that the button toggles on/off with each press, and the LED output is linked to the button
-//here, this function is disabled so the LED can be controlled independently
+//in this program, this "link" is disabled so the LED can be controlled independently
 EVNAlpha board(BUTTON_TOGGLE, false);
 
 void setup() {
@@ -15,11 +15,11 @@ void setup() {
 }
 
 void loop() {
-    //turn onboard blue LED on
+    //turn onboard blue LED on for 1000 milliseconds (1 second)
     board.ledWrite(true);
     delay(1000);
 
-    //turn onboard blue LED off
+    //turn LED off for 1 second
     board.ledWrite(false);
     delay(1000);
 }

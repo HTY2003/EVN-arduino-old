@@ -5,10 +5,10 @@ The following program demonstrates some basic EVNSevenSegmentLED functionality.
 
 #include <EVN.h>
 
-#define I2C_PORT 1  //set I2C port here
+#define SEG_I2C_PORT 1  //set I2C port here
 
 EVNAlpha board;
-EVNSevenSegmentLED seg(I2C_PORT);
+EVNSevenSegmentLED seg(SEG_I2C_PORT);
 
 void setup()
 {

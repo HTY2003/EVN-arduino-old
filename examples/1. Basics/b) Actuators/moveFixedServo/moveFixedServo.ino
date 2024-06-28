@@ -10,6 +10,11 @@ The following program demonstrates some basic EVNServo functionality.
 EVNAlpha board(BUTTON_TOGGLE, true, true);
 EVNServo servo(SERVO_PORT);
 
+//EVNAlpha board(BUTTON_TOGGLE, true, true);
+//by default, any servos will not stop moving until they are instructed to stop using library functions 
+//however, you can set link_movement to true to use the button as an enable/disable switch for motors and servos
+//to try this out, uncomment line 11 and comment line 10
+
 void setup1()
 {
     //initialize servo
@@ -24,14 +29,11 @@ void setup()
 
 void loop()
 {
-    //if the button is "On"
+    //each button press toggles the button's output between "true" and "false" (by default, button outputs "false" on startup)
+    //if button outputs "true", run the servo to different positions and speeds for 10 seconds
     if (board.buttonRead())
     {
-        servo.write(0, 1000);
-        servo.write(270, 5000, 20);
+        servo.write(0, 1000);       //set servo to move to position of 0deg, and wait for 1 second
+        servo.write(270, 9500, 20); //set servo to move to position of 270deg at a speed of 20deg per second, and wait for 5 seconds
     }
-
-    //by default, if the user button is toggled "Off", all motor run functions will end instantly and all servos will stop
-    //this can be disabled in EVNAlpha declaration (set link_movement to false)
-    //Note: button being "off" does not end other blocking functions (e.g. delay())
 }

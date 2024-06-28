@@ -5,16 +5,16 @@ The following program demonstrates some basic EVNTouchArray functionality.
 
 #include <EVN.h>
 
-#define TOUCH_SENS_PORT 1  //set I2C port for touch array here
+#define TOUCH_I2C_PORT 1  //set I2C port for touch array here
 
 EVNAlpha board;
-EVNTouchArray touch(TOUCH_SENS_PORT);
+EVNTouchArray touch(TOUCH_I2C_PORT);
 
 void setup()
 {
     board.begin();  //initialize board at start of void setup()
+    touch.begin();  //sensor initialization comes after
     Serial.begin(9600);
-    touch.begin();
 }
 
 void loop()
@@ -38,7 +38,6 @@ void loop()
     Serial.print(last_pressed);
     Serial.print(" Last Released: ");
     Serial.println(last_released);
-
     Serial.println();
 
     delay(1000);

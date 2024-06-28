@@ -5,31 +5,31 @@ The following program demonstrates some basic EVNColourSensor functionality.
 
 #include <EVN.h>
 
-#define COLOUR_SENS_PORT 1  //set I2C port for colour sensor here
+#define COL_I2C_PORT 1  //set I2C port for colour sensor here
 
 EVNAlpha board;
-EVNColourSensor cs(COLOUR_SENS_PORT);
+EVNColourSensor cs(COL_I2C_PORT);
 
 void setup()
 {
     board.begin();  //initialize board at start of void setup()
+    cs.begin();     //sensor initialization comes after
     Serial.begin(9600);
-    cs.begin();
 }
 
 void loop()
 {
     int clear = cs.readClear();
-    int red = cs.readRed(false);
-    int green = cs.readGreen(false);
+    int red = cs.readRed(false);        //blocking is set to false
+    int green = cs.readGreen(false);    //to ensure that the sensor does not wait for a new reading
     int blue = cs.readBlue(false);
 
-    Serial.print("C ");
+    Serial.print("CLEAR ");
     Serial.print(clear);
-    Serial.print("R ");
+    Serial.print(" RED ");
     Serial.print(red);
-    Serial.print("G ");
+    Serial.print(" GREEN ");
     Serial.print(green);
-    Serial.print("B ");
+    Serial.print(" BLUE ");
     Serial.println(blue);
 }

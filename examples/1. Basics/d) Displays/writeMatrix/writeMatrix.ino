@@ -5,10 +5,10 @@ The following program demonstrates some basic EVNMatrixLED functionality.
 
 #include <EVN.h>
 
-#define I2C_PORT 1  //set I2C port here
+#define MATRIX_I2C_PORT 1  //set I2C port here
 
 EVNAlpha board;
-EVNMatrixLED matrix(I2C_PORT);
+EVNMatrixLED matrix(MATRIX_I2C_PORT);
 
 void setup()
 {
