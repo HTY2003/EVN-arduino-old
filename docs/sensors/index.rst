@@ -7,5 +7,7 @@ Sensors
    evncoloursensor
    evndistancesensor
    evncompasssensor
+   evnimusensor
+   evngesturesensor
    evnenvsensor
    evntoucharray

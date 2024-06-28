@@ -69,7 +69,7 @@ class EVNMotor
 		volatile bool run_pos;
 		volatile float target_pos;
 		volatile bool run_time;
-		volatile uint64_t run_time_ms;
+		volatile uint32_t run_time_ms;
 		volatile bool hold;
 		volatile uint8_t stop_action;
 
@@ -148,9 +148,9 @@ protected:
 
 	static bool motors_enabled()
 	{
-		return ((EVNAlpha::sharedButton().read() && EVNAlpha::sharedButton().sharedState()->link_motors)
+		return ((EVNAlpha::sharedButtonLED().read() && EVNAlpha::sharedButtonLED().sharedState()->link_movement)
 
-			|| !EVNAlpha::sharedButton().sharedState()->link_motors);
+			|| !EVNAlpha::sharedButtonLED().sharedState()->link_movement);
 	}
 
 	static bool timed_control_enabled(pid_control_t* arg)
@@ -187,8 +187,8 @@ protected:
 	{
 		uint8_t state = arg->state & 3;
 
-		arg->enca_state = gpio_get(arg->enca);
-		arg->encb_state = gpio_get(arg->encb);
+		arg->enca_state = digitalRead(arg->enca);
+		arg->encb_state = digitalRead(arg->encb);
 
 		if (arg->enca_state)
 			state |= 4;
@@ -382,7 +382,7 @@ protected:
 				float max_error_before_decel = pow(fabs(pidArg->target_dps), 2) / pidArg->decel / 2;
 
 				if (error < max_error_before_decel)
-					decel_dps = sqrt(error / max_error_before_decel) * pidArg->target_dps; //possible overflow?
+					decel_dps = sqrt(error / max_error_before_decel) * fabs(pidArg->target_dps);
 			}
 
 			if (pidArg->run_time)
@@ -760,8 +760,8 @@ public:
 
 	static bool motors_enabled()
 	{
-		return ((EVNAlpha::sharedButton().read() && EVNAlpha::sharedButton().sharedState()->link_motors)
-			|| !EVNAlpha::sharedButton().sharedState()->link_motors);
+		return ((EVNAlpha::sharedButtonLED().read() && EVNAlpha::sharedButtonLED().sharedState()->link_movement)
+			|| !EVNAlpha::sharedButtonLED().sharedState()->link_movement);
 	}
 
 	static void pid_update(drivebase_state_t* arg)

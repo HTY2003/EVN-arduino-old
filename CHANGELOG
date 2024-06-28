@@ -1,3 +1,17 @@
+0.10.1 (28/06/24)
+
+-- Features --
+
+- Added docs and more unified syntax for almost all classes introduced in 0.10.0 (except EVNAnalogMux)
+- Added more hardware/product docs
+- Added example programs for almost everything (at this point I should relook at the old ones)
+- Low Battery Alert has officially been added!
+
+-- Bugfixes --
+
+- EVNRGBLED: Stability of update() improved (should be perfect now)
+- EVNButton: Stability of button readings should be much improved
+
 0.10.0 (30/05/24)
 
 "Why is every revision a major one?"

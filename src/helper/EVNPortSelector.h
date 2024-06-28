@@ -4,7 +4,7 @@
 #include <Arduino.h>
 #include <Wire.h>
 
-#define DEFAULT_I2C_FREQ (uint32_t)100000
+#define DEFAULT_I2C_FREQ (uint32_t)400000
 
 class EVNPortSelector
 {

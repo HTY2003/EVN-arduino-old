@@ -47,7 +47,7 @@ public:
 
     EVNSevenSegmentLED(uint8_t port) : EVN_HT16K33(port)
     {
-
+        _addr = 0x74;
     };
 
     void writeDigit(uint8_t position, uint8_t digit, bool show = true)
@@ -185,7 +185,7 @@ public:
         }
     };
 
-    void clear(uint8_t position, bool clear_point = true, bool show = true)
+    void clearPosition(uint8_t position, bool clear_point = true, bool show = true)
     {
         if (position > 3) return;
 
@@ -200,23 +200,33 @@ public:
         }
     };
 
-    void writePoint(uint8_t position, bool enable, bool show = true)
+    void writePoint(uint8_t position, bool on = true, bool show = true)
     {
         if (position > 3)
             return;
 
         if (_sensor_started)
         {
-            this->writeRaw(_point_lut[position], enable, show);
+            this->writeRaw(_point_lut[position], on, show);
         }
     };
 
-    void writeColon(bool enable, bool show = true)
+    void clearPoint(uint8_t position, bool show = true)
+    {
+        writePoint(position, false, show);
+    };
+
+    void writeColon(bool on = true, bool show = true)
     {
         if (_sensor_started)
         {
-            this->writeRaw(_colon_index, enable, show);
+            this->writeRaw(_colon_index, on, show);
         }
+    };
+
+    void clearColon(bool show = true)
+    {
+        writeColon(false, show);
     };
 
     void writeNumber(float number, bool show = true)

@@ -413,7 +413,7 @@ public:
         }
     };
 
-    bool gestureAvailable()
+    bool gestureDetected()
     {
         if (_sensor_started)
         {
@@ -421,16 +421,6 @@ public:
             return (value & 0b1);
         }
         return false;
-    };
-
-    uint8_t getGestureFIFOLevel()
-    {
-        if (_sensor_started)
-        {
-            uint8_t value = read8((uint8_t)reg::GFLVL, false);
-            return value;
-        }
-        return 0;
     };
 
     uint8_t readGesture(bool blocking = false, uint64_t timeout_ms = 5000)
@@ -617,6 +607,16 @@ public:
     };
 
 private:
+    uint8_t getGestureFIFOLevel()
+    {
+        if (_sensor_started)
+        {
+            uint8_t value = read8((uint8_t)reg::GFLVL, false);
+            return value;
+        }
+        return 0;
+    };
+
     void updateColourandProximity(bool blocking = false)
     {
         uint64_t measurement_time_us =
@@ -676,7 +676,7 @@ private:
         uint64_t start = millis();
         uint64_t timeout_msc = timeout_ms;
         if (timeout_ms == 0) timeout_msc = INT_MAX;
-        while (millis() - start <= timeout_msc && !gestureAvailable());
+        while (millis() - start <= timeout_msc && !gestureDetected());
     };
 
     void updateGesture(uint8_t fifo_lvl)
@@ -693,12 +693,12 @@ private:
             _gesture_ud = GESTURE_NONE;
             _gesture_lr = GESTURE_NONE;
 
-            if (!gestureAvailable())
+            if (!gestureDetected())
                 return GESTURE_NONE;   //NO GESTURE
 
             while (true)
             {
-                if (gestureAvailable())
+                if (gestureDetected())
                 {
                     uint8_t fifo_lvl = getGestureFIFOLevel();
 

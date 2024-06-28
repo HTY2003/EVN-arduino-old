@@ -1,9 +1,10 @@
-User Guides
-============
-
 .. toctree::
    :maxdepth: 1
 
-   motorpidcal
-   drivebasepidcal
-   magcal
+..
+   mag-cal
+   platformio
+   third-party-i2c
+   motor-pid-cal
+   drivebase-pid-cal
+   

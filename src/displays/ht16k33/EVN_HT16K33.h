@@ -29,9 +29,9 @@ public:
     {
         OFF = 0b10000000,
         ON = 0b10000001,
-        ON_BLINK_HZ_2 = 0b10000011,
-        ON_BLINK_HZ_1 = 0b10000101,
-        ON_BLINK_HZ_0_5 = 0b10000111,
+        BLINK_HZ_2 = 0b10000011,
+        BLINK_HZ_1 = 0b10000101,
+        BLINK_HZ_0_5 = 0b10000111,
     };
 
     enum ris : uint8_t
@@ -68,7 +68,8 @@ public:
     {
         if (_sensor_started)
         {
-            write8noReg((uint8_t)mode);
+            _mode = mode;
+            write8noReg((uint8_t)_mode);
         }
     };
 
@@ -76,11 +77,20 @@ public:
     {
         if (_sensor_started)
         {
-            uint8_t brightnessc = constrain(brightness, 1, 16);
-
-            write8noReg((brightness - 1) | 0xE0);
+            _brightness = constrain(brightness, 1, 16);
+            write8noReg((_brightness - 1) | 0xE0);
         }
     };
+
+    uint8_t getBrightness()
+    {
+        return _brightness;
+    };
+
+    mode getMode()
+    {
+        return _mode;
+    }
 
     void writeRaw(uint8_t led, bool on, bool show = true)
     {
@@ -115,6 +125,15 @@ public:
         }
     };
 
+    void writeAll(bool show = true)
+    {
+        if (_sensor_started)
+        {
+            memset(_buffer, 255, sizeof(_buffer));
+            if (show) this->update();
+        }
+    };
+
     void update()
     {
         if (_sensor_started)
@@ -135,6 +154,8 @@ private:
     };
 
     uint8_t _buffer[16];
+    uint8_t _brightness;
+    mode _mode;
 };
 
 #endif

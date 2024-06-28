@@ -123,8 +123,8 @@ protected:
 
     static bool motors_enabled()
     {
-        return ((EVNAlpha::sharedButton().read() && EVNAlpha::sharedButton().sharedState()->link_motors)
-            || !EVNAlpha::sharedButton().sharedState()->link_motors);
+        return ((EVNAlpha::sharedButtonLED().read() && EVNAlpha::sharedButtonLED().sharedState()->link_movement)
+            || !EVNAlpha::sharedButtonLED().sharedState()->link_movement);
     }
 };
 
@@ -181,8 +181,8 @@ protected:
 
     static bool motors_enabled()
     {
-        return ((EVNAlpha::sharedButton().read() && EVNAlpha::sharedButton().sharedState()->link_motors)
-            || !EVNAlpha::sharedButton().sharedState()->link_motors);
+        return ((EVNAlpha::sharedButtonLED().read() && EVNAlpha::sharedButtonLED().sharedState()->link_movement)
+            || !EVNAlpha::sharedButtonLED().sharedState()->link_movement);
     }
 };
 

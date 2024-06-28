@@ -1,0 +1,3 @@
+Picture,Name,Port Type,Library
+|servo.png|,270 Degree Servo,Servo,`EVNServo`_
+|conservo.png|,Continuous Rotation Servo,Servo,`EVNContinuousServo`_
