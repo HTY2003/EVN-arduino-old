@@ -20,24 +20,24 @@ void setup()
 void loop()
 {
     bool button0 = touch.read(0);
-    bool pressed = touch.pressed(false);
-    int last_pressed = touch.lastPressed(false);
-    int last_released = touch.lastReleased(false);
+    bool pressed = touch.pressed();
+    int last_pressed = touch.lastPressed();
+    int last_released = touch.lastReleased();
 
     if (button0)
-        Serial.println("Button 0: Pressed | ");
+        Serial.println("Button 0: Pressed");
     else
-        Serial.println("Button 0: Not Pressed | ");
+        Serial.println("Button 0: Not Pressed");
 
-    if (pressed)
-        Serial.println("No Button Pressed | ");
+    if (!pressed)
+        Serial.println("No Button Pressed");
     else
-        Serial.println("One (or more) Buttons Pressed | ");
+        Serial.println("One (or more) Buttons Pressed");
 
     Serial.print("Last Pressed: ");
     Serial.print(last_pressed);
     Serial.print(" Last Released: ");
-    Serial.println(last_pressed);
+    Serial.println(last_released);
 
     Serial.println();
 

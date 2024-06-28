@@ -119,7 +119,7 @@ public:
         if (_sensor_started)
         {
             this->readAll();
-            return (_reading & 0x0FFF != 0);
+            return (_reading & 0x0FFF) > 0;
         }
         return false;
     }

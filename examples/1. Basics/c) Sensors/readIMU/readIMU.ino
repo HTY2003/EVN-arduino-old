@@ -33,7 +33,7 @@ void loop()
     Serial.print(" Z ");
     Serial.print(accel_z);
 
-    Serial.print("| Gyro X ");
+    Serial.print(" | Gyro X ");
     Serial.print(gyro_x);
     Serial.print(" Y ");
     Serial.print(gyro_y);
