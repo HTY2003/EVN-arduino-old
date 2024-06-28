@@ -5,10 +5,10 @@ The following program demonstrates some basic EVNDisplay functionality.
 
 #include <EVN.h>
 
-#define DISPLAY_PORT 1  //set I2C port for display here
+#define DISPLAY_I2C_PORT 1  //set I2C port for display here
 
 EVNAlpha board;
-EVNDisplay display(DISPLAY_PORT);
+EVNDisplay display(DISPLAY_I2C_PORT);
 
 void setup()
 {

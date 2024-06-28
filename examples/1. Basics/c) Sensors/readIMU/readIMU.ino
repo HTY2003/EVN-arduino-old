@@ -5,16 +5,16 @@ The following program demonstrates some basic EVNIMUSensor functionality.
 
 #include <EVN.h>
 
-#define IMU_SENS_PORT 1  //set I2C port for IMU sensor here
+#define IMU_I2C_PORT 1  //set I2C port for IMU sensor here
 
 EVNAlpha board;
-EVNIMUSensor imu(IMU_SENS_PORT);
+EVNIMUSensor imu(IMU_I2C_PORT);
 
 void setup()
 {
     board.begin();  //initialize board at start of void setup()
+    imu.begin();    //sensor initialization comes after
     Serial.begin(9600);
-    imu.begin();
 }
 
 void loop()
