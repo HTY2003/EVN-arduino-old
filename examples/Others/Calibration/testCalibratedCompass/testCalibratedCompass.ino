@@ -1,6 +1,6 @@
-/*calibrateCompass.ino
+/*testCalibratedCompass.ino
 
-The following program prints the raw compass readings to be passed to MotionCal for calibration.
+The following program prints the calibrated compass readings to be passed to MotionCal for testing.
 */
 
 #include <EVN.h>
@@ -8,7 +8,11 @@ The following program prints the raw compass readings to be passed to MotionCal 
 #define COMPASS_I2C_PORT 1  //set I2C port for compass sensor here
 
 EVNAlpha board;
-EVNCompassSensor compass(COMPASS_I2C_PORT);
+EVNCompassSensor compass(COMPASS_I2C_PORT,  //add in calibration values here!
+    0, 0, 0
+    1, 0, 0,
+    0, 1, 0,
+    0, 0, 1);
 
 void setup()
 {
@@ -19,12 +23,12 @@ void setup()
 
 void loop()
 {
-    //collect raw readings
-    float mx = compass.readRawX();
-    float my = compass.readRawY(false);
-    float mz = compass.readRawZ(false);
+    //collect calibrated readings
+    float mx = compass.readCalX();
+    float my = compass.readCalY(false);
+    float mz = compass.readCalZ(false);
 
-    //print raw readings in format expected by MotionCal
+    //print calibrated readings in format expected by MotionCal
     //readings are scaled by 1000 and converted to integers
 
     Serial.print("Raw:0,0,0,0,0,0,");
