@@ -60,7 +60,10 @@ sphinx==5.0.2
     #   -r requirements.in
     #   pydata-sphinx-theme
     #   sphinx-book-theme
+    #   sphinx-copybutton
 sphinx-book-theme==1.1.2
+    # via -r requirements.in
+sphinx-copybutton==0.5.2
     # via -r requirements.in
 sphinxcontrib-applehelp==1.0.2
     # via sphinx
