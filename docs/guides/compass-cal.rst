@@ -61,11 +61,9 @@ MotionCal will read the raw XYZ magnetometer readings and spit out the calibrati
 
     This sketch can be found in File > Examples > EVN > Others > Calibration > calibrateCompass.
 
-    It prints the raw (uncalibrated) readings from the Compass Sensor.
-
     Remember to set the I2C port to the port your Compass Sensor is connected to!
 
-    Once uploaded, Serial Monitor should continuously print the raw readings in the format below.
+    Once uploaded, Alpha should appear as a COM Port, and when it's selected Serial Monitor should depict the raw (uncalibrated) readings in the format below.
 
     .. code-block::
 
@@ -74,27 +72,66 @@ MotionCal will read the raw XYZ magnetometer readings and spit out the calibrati
         Raw:0,0,0,0,0,0,294,123,342
         Raw:0,0,0,0,0,0,283,111,353
 
-    Once you've checked that it's all working, close Serial Monitor to leave the serial port available for MotionCal to read from.
+    Once you've checked that it's all working, close Serial Monitor to leave the COM port available for MotionCal to read from.
 
-3. Open MotionCal. Select the COM Port for the EVN Alpha board. Once selected, MotionCal will begin plotting each reading as a red dot in a 3D space (X, Y and Z).
+3. Open MotionCal. Select the COM Port of your EVN Alpha.
 
-    Insert Picture Here
+    .. image:: ../images/motioncal/motioncal1.png
+    
+    Once selected, MotionCal will begin plotting each reading as a red dot in a 3D space (X, Y and Z).
+    
+    .. image:: ../images/motioncal/motioncal2.png
 
-4. Start rotating the robot. Ideally, there should be a reading to evenly cover the entire "sphere" of possible orientations.
+4. Start rotating the robot. Ideally, there should be enough readings to cover the entire "sphere" of possible orientations.
 
-    Insert Picture Here
+    .. image:: ../images/motioncal/motioncal3.png
 
-5. Read the 12 values on the right of the screen from left-to-right, top-to-bottom, and place them in the EVNCompassSensor declaration.
+    As you collect more readings, the 4 error values at the bottom of the window will decrease. 
+    When the errors are deemed low enough, the status circle on the left will turn green, and the Send Cal button becomes available (although we will not be using it).
 
-6. Test your new calibration
+    .. image:: ../images/motioncal/motioncal4.png
 
-    As a quick test, you can run the readCompass example sketch (File > Examples > EVN > 1. Basics > c) Sensors > readCompass).
+5. Note down the 12 values on the right of the screen from left-to-right, top-to-bottom, and place them in the EVNCompassSensor declaration.
 
-    When the sensor's heading (or yaw) is printed, a rotation of the sensor by 90 degrees should result in the number being printed also shifting by 90 degrees.
+    .. image:: ../images/motioncal/motioncal5.png
+
+    Previously, our declaration may have looked like this:
+
+    .. code-block:: c++
+
+        EVNCompassSensor compass(1);
+
+    But the 12 values will now be added to the declaration, as shown in the example below:
+
+    .. code-block:: c++
+
+        EVNCompassSensor compass(1, 1.93, 34.79, 19.87,
+                                    1.027, 0.006, 0.008,
+                                    0.006, 0.960, 0.013,
+                                    0.008, 0.013, 1.014);
+
+6. Test your new calibration!
+
+    As a quick test, you can run the readCompass example sketch (File > Examples > EVN > 1. Basics > c) Sensors > readCompass), but with the new calibration values substituted in.
+
+    When the sensor's heading (or yaw) is printed as a value from 0 to 360, it should now closely match the real-life heading of the sensor.
 
     But if you want a more thorough check, we can use the testCalibratedCompass sketch (File > Examples > EVN > Others > Calibration > testCalibratedCompass).
 
-    It's exactly the same as 
+    It's exactly the same as calibrateCompass, but it sends calibrated readings instead of uncalibrated ones to MotionCal.
+
+    When you've gathered enough data points, the 12 values should be very close to the values below (but small deviations are to be expected).
+
+    .. code-block:: c++
+
+        0 0 0   //hard iron offsets
+
+        1 0 0   //soft iron offsets
+        0 1 0
+        0 0 1
+
+    .. image:: ../images/motioncal/motioncal6.png
+
 
 .. _this page: https://www.pjrc.com/store/prop_shield.html
 .. _webpage: https://www.vectornav.com/resources/inertial-navigation-primer/specifications--and--error-budgets/specs-hsicalibration

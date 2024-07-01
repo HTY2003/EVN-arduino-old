@@ -71,7 +71,7 @@ For this guide, we will use example code for DFRobot's HuskyLens. This is lifted
 
 .. _wiki: https://wiki.dfrobot.com/HUSKYLENS_V1.0_SKU_SEN0305_SEN0336
 
-.. code-block:: c
+.. code-block:: c++
 
     #include "HUSKYLENS.h"
     #include "SoftwareSerial.h"
@@ -127,7 +127,7 @@ Here are the following changes:
 
 These 4 changes actually amount to just 5 lines, which have been labelled with ``//EVN modification``.
 
-.. code-block:: c
+.. code-block:: c++
 
     #include "HUSKYLENS.h"
     #include "SoftwareSerial.h"

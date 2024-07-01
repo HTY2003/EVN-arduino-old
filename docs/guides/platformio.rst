@@ -1,7 +1,7 @@
 Programming with PlatformIO on VSCode
 =====================================
 
-.. image:: ../images/platformio.png
+.. image:: ../images/platformio/platformio.png
 
 As the Arduino-Pico core `docs`_ state:
 
@@ -34,21 +34,21 @@ Steps
 
         git config --system core.longpaths true
 
-    .. image:: ../images/platformio2.png
+    .. image:: ../images/platformio/platformio2.png
 
     * Enable long paths in the OS
 
         1. Click Windows key+R and type gpedit.msc, then press the Enter key. This launches the Local Group Policy Editor.
 
-        .. image:: ../images/platformio3.png
+        .. image:: ../images/platformio/platformio3.png
 
         2. Navigate to Local Computer Policy > Computer Configuration > Administrative Templates > System > Filesystem.
         
-        .. image:: ../images/platformio4.png
+        .. image:: ../images/platformio/platformio4.png
 
         3. Double click Enable NTFS/Win32 long paths. This should popup a window.
 
-        .. image:: ../images/platformio5.png
+        .. image:: ../images/platformio/platformio5.png
 
         4. Select Enabled, then click Apply, followed by OK.
     
@@ -62,7 +62,7 @@ Steps
 
     Search for "PlatformIO IDE" in the search bar and install the first result.
 
-    .. image:: ../images/platformio6.png
+    .. image:: ../images/platformio/platformio6.png
 
 5. Download (or Git Clone) our Example PlatformIO Project
 
@@ -99,7 +99,7 @@ Steps
 
     On the bottom, you'll find the PIO toolbar, which contains the familiar buttons for Compile, Upload and Serial Port Monitor.
 
-    .. image:: ../images/platformio7.png
+    .. image:: ../images/platformio/platformio7.png
 
     ``platformio.ini`` contains many important project settings, that we have configured to work with the Arduino-Pico Core and EVN libraries.
 
