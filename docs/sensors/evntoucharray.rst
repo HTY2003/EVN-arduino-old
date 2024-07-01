@@ -8,15 +8,6 @@ This class provides the following features and functionalities for our Capacitiv
 
 .. note:: This class does I2C port selection automatically, so users do not need to call ``setPort()`` using their EVNAlpha objects.
 
-Constructor
------------
-
-.. class:: EVNTouchArray(uint8_t port, uint8_t touch_threshold = 12, uint8_t release_threshold = 6)
-
-    :param port: I2C port the sensor is connected to (1-16)
-    :param touch_threshold: Threshold for a button press to be registered (0-255)
-    :param release_threshold: Threshold for a button released to be registered (0-255)
-
 Wiring (I2C)
 ------------
 
@@ -29,6 +20,15 @@ SCL   SCL         I2C Serial Clock
 SDA   SDA         I2C Serial Data
 GND   GND         Ground (0V)
 ====  ==========  ===========
+
+Constructor
+-----------
+
+.. class:: EVNTouchArray(uint8_t port, uint8_t touch_threshold = 12, uint8_t release_threshold = 6)
+
+    :param port: I2C port the sensor is connected to (1-16)
+    :param touch_threshold: Threshold for a button press to be registered (0-255)
+    :param release_threshold: Threshold for a button released to be registered (0-255)
 
 Functions
 ---------

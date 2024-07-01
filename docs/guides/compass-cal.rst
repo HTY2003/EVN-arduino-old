@@ -35,7 +35,7 @@ However, these distortions change when the distance and differences in orientati
 the distortion created by a strong magnet 10cm away can differ greatly in magnitude from that of a strong magnet 20cm away.
 
 So our calibration can only really compensate for **internal** sources of interference, that always remain at the same position and orientation relative to the sensor. 
-For instance, a robot's motors usually remain in the same distance and orientation relative to the motor, so its interference can be accounted for.
+For instance, a robot's motors usually remain in the same distance and orientation relative to the sensor, so its interference can be accounted for.
 
 But this isn't to say calibration is useless. Usually it can make the difference between "useful" and "unusable" readings. 
 Just keep in mind that the more your robot's environment/location changes, the less valid your calibration values may be.

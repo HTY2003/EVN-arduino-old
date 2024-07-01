@@ -120,9 +120,13 @@ For this guide, we will use example code for DFRobot's HuskyLens. This is lifted
     }
 
 Here are the following changes:
+
 * Include the EVN library header (if not already included)
+
 * Declare an EVNAlpha object 
+
 * Initialize the EVNAlpha object in ``void setup()``
+
 * Call ``board.setPort(the peripheral's I2C port)`` whenever we are about to begin, read or write to the HuskyLens. For this example, let's assume the HuskyLens is connected to I2C Port 1. 
 
 These 4 changes actually amount to just 5 lines, which have been labelled with ``//EVN modification``.
