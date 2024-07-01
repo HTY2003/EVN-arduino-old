@@ -1,6 +1,8 @@
 Programming with PlatformIO on VSCode
 =====================================
 
+.. image:: ../images/platformio.png
+
 As the Arduino-Pico core `docs`_ state:
 
     "PlatformIO is a free, open-source build-tool written in Python, which also integrates into VSCode code as an extension.
@@ -22,26 +24,35 @@ Steps
 
 2. Install the latest version of `Visual Studio Code`_ for your OS.
 
-3. (For Windows Users only) Enabling Long Paths in Windows
+3. **(For Windows Users only)** Enabling Long Paths in Windows
 
     Taken from the Arduino-Pico core `docpage`_ on using PlatformIO:
 
-    * Open a Command Prompt window and execute the following command
+    * Open a Command Prompt window and execute the following command. Depending on your Git install, you may need to run Command Prompt to run as administrator (Instead of clicking Command Prompt to open, right-click and select "Run as administrator".
 
     .. code-block::
 
         git config --system core.longpaths true
 
-    * Enable long paths in the Windows OS
+    .. image:: ../images/platformio2.png
+
+    * Enable long paths in the OS
+
         1. Click Windows key+R and type gpedit.msc, then press the Enter key. This launches the Local Group Policy Editor.
 
+        .. image:: ../images/platformio3.png
+
         2. Navigate to Local Computer Policy > Computer Configuration > Administrative Templates > System > Filesystem.
+        
+        .. image:: ../images/platformio4.png
 
         3. Double click Enable NTFS/Win32 long paths. This should popup a window.
 
+        .. image:: ../images/platformio5.png
+
         4. Select Enabled, then click Apply, followed by OK.
     
-    * Reboot your computer to lock in the changes
+    * Reboot your computer for the changes to take effect
 
 4. Install the PlatformIO IDE Extension on Visual Studio Code
 
@@ -50,6 +61,8 @@ Steps
     Next, open the Extensions Panel by clicking the Extension Button on the left side of Visual Studio Code.
 
     Search for "PlatformIO IDE" in the search bar and install the first result.
+
+    .. image:: ../images/platformio6.png
 
 5. Download (or Git Clone) our Example PlatformIO Project
 
@@ -85,6 +98,8 @@ Steps
         |__ .gitignore
 
     On the bottom, you'll find the PIO toolbar, which contains the familiar buttons for Compile, Upload and Serial Port Monitor.
+
+    .. image:: ../images/platformio7.png
 
     ``platformio.ini`` contains many important project settings, that we have configured to work with the Arduino-Pico Core and EVN libraries.
 
