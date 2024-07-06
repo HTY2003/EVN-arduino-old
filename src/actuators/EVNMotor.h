@@ -455,8 +455,6 @@ protected:
 					if (old_sign_from_target_pos != new_sign_from_target_pos)
 						pidArg->x = pidArg->target_pos;
 				}
-
-				//TODO: Add this method of controlling target overshoot to drivebase as well
 			}
 			else
 			{
@@ -919,6 +917,15 @@ public:
 			arg->motor_left->runSpeed(arg->target_motor_left_dps);
 			arg->motor_right->runSpeed(arg->target_motor_right_dps);
 
+
+			bool old_sign_from_target_dist;
+			bool old_sign_from_target_angle;
+			if (arg->drive_position)
+			{
+				old_sign_from_target_dist = (arg->target_distance - arg->end_distance >= 0) ? true : false;
+				old_sign_from_target_angle = (arg->target_distance - arg->end_distance >= 0) ? true : false;
+			}
+
 			//increment target angle and XY position
 			//if output of speed or turn rate output is saturated or motors are stalled, stop incrementing (avoid excessive overshoot that PID cannot correct)
 			if (fabs(arg->speed_error * arg->speed_pid->getKp()
@@ -1057,13 +1064,13 @@ public:
 
 			if (arg->drive_position)
 			{
-				if ((arg->target_speed_constrained >= 0 && arg->target_distance >= arg->end_distance)
-					|| (arg->target_speed_constrained < 0 && arg->target_distance <= arg->end_distance))
+				bool new_sign_from_target_dist = (arg->target_distance - arg->end_distance >= 0) ? true : false;
+				bool new_sign_from_target_angle = (arg->target_distance - arg->end_distance >= 0) ? true : false;
+
+				if (old_sign_from_target_dist != new_sign_from_target_dist)
 					arg->target_distance = arg->end_distance;
 
-
-				if ((arg->target_turn_rate_constrained >= 0 && arg->target_angle >= arg->end_angle)
-					|| (arg->target_turn_rate_constrained < 0 && arg->target_angle <= arg->end_angle))
+				if (old_sign_from_target_angle != new_sign_from_target_angle)
 					arg->target_angle = arg->end_angle;
 
 				if (fabs(arg->end_angle - arg->current_angle) <= USER_DRIVE_POS_MIN_ERROR_DEG
