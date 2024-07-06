@@ -62,6 +62,8 @@ class EVNMotor
 		PIDController* pos_pid;
 
 		//USER-SET VARIABLES
+		volatile bool stopAction_static_running;
+		volatile bool core0_writing;
 		volatile bool run_pwm;
 		volatile bool run_speed;
 		volatile bool run_dir;
@@ -254,13 +256,8 @@ protected:
 
 	static void stopAction_static(pid_control_t* pidArg, encoder_state_t* encoderArg, uint64_t now, float pos, float dps)
 	{
-		//reset PID controller, stop loop control
-		pidArg->pos_pid->reset();
-
-		pidArg->run_pwm = false;
-		pidArg->run_speed = false;
-		pidArg->run_pos = false;
-		pidArg->run_time = false;
+		if (pidArg->core0_writing) return;
+		pidArg->stopAction_static_running = true;
 
 		//keep start_time and x at most recent states
 		pidArg->start_time_us = now;
@@ -287,6 +284,15 @@ protected:
 			pidArg->hold = true;
 			break;
 		}
+
+		//reset PID controller, stop loop control
+		pidArg->pos_pid->reset();
+		pidArg->run_pwm = false;
+		pidArg->run_speed = false;
+		pidArg->run_pos = false;
+		pidArg->run_time = false;
+
+		pidArg->stopAction_static_running = false;
 	}
 
 	static float getPosition_static(encoder_state_t* arg)
@@ -434,15 +440,23 @@ protected:
 						pidArg->target_dps_constrained = signed_target_dps_end_decel;
 				}
 
+				bool old_sign_from_target_pos;
+				if (position_control_enabled(pidArg))
+				{
+					old_sign_from_target_pos = (pidArg->x - pidArg->target_pos >= 0) ? true : false;
+				}
+
 				pidArg->x += time_since_last_loop * pidArg->target_dps_constrained;
 
 				if (position_control_enabled(pidArg))
 				{
-					if (pidArg->target_dps_constrained >= 0)
-						pidArg->x = min(pidArg->x, pidArg->target_pos);
-					else
-						pidArg->x = max(pidArg->x, pidArg->target_pos);
+					bool new_sign_from_target_pos = (pidArg->x - pidArg->target_pos >= 0) ? true : false;
+
+					if (old_sign_from_target_pos != new_sign_from_target_pos)
+						pidArg->x = pidArg->target_pos;
 				}
+
+				//TODO: Add this method of controlling target overshoot to drivebase as well
 			}
 			else
 			{
