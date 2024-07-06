@@ -421,7 +421,7 @@ protected:
 
 				if (pidArg->target_dps_constrained <= signed_target_dps_end_decel)
 				{
-					if (signed_target_dps_end_decel > 0)
+					if (pidArg->target_dps_constrained > 0)
 						pidArg->target_dps_constrained += time_since_last_loop * pidArg->accel;
 					else
 						pidArg->target_dps_constrained += time_since_last_loop * pidArg->decel;
@@ -431,7 +431,7 @@ protected:
 				}
 				else
 				{
-					if (signed_target_dps_end_decel > 0)
+					if (pidArg->target_dps_constrained > 0)
 						pidArg->target_dps_constrained -= time_since_last_loop * pidArg->decel;
 					else
 						pidArg->target_dps_constrained -= time_since_last_loop * pidArg->accel;
@@ -679,9 +679,9 @@ public:
 	bool completed();
 
 	//TODO: add end function
+	//TODO: make functions more thread-safe
 
 private:
-public:
 	float clean_input_turn_rate(float turn_rate);
 	float clean_input_speed(float speed, float turn_rate);
 	uint8_t clean_input_stop_action(uint8_t stop_action);
@@ -1014,7 +1014,7 @@ public:
 				//apply accel/decel to hit target speed
 				if (arg->target_speed_constrained <= target_speed_after_decel)
 				{
-					if (target_speed_after_decel > 0)
+					if (arg->target_speed_constrained > 0)
 						arg->target_speed_constrained += time_since_last_loop * new_speed_accel;
 					else
 						arg->target_speed_constrained += time_since_last_loop * new_speed_decel;
@@ -1024,7 +1024,7 @@ public:
 				}
 				else
 				{
-					if (target_speed_after_decel > 0)
+					if (arg->target_speed_constrained > 0)
 						arg->target_speed_constrained -= time_since_last_loop * new_speed_decel;
 					else
 						arg->target_speed_constrained -= time_since_last_loop * new_speed_accel;
@@ -1036,7 +1036,7 @@ public:
 				//apply accel/decel to hit target turn rate
 				if (arg->target_turn_rate_constrained <= target_turn_rate_after_decel)
 				{
-					if (target_turn_rate_after_decel > 0)
+					if (arg->target_turn_rate_constrained > 0)
 						arg->target_turn_rate_constrained += time_since_last_loop * new_turn_rate_accel;
 					else
 						arg->target_turn_rate_constrained += time_since_last_loop * new_turn_rate_decel;
@@ -1046,7 +1046,7 @@ public:
 				}
 				else
 				{
-					if (target_turn_rate_after_decel > 0)
+					if (arg->target_turn_rate_constrained > 0)
 						arg->target_turn_rate_constrained -= time_since_last_loop * new_turn_rate_decel;
 					else
 						arg->target_turn_rate_constrained -= time_since_last_loop * new_turn_rate_accel;

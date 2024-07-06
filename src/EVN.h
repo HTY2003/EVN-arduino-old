@@ -20,7 +20,7 @@
 #include "displays/EVNDisplay.h"            //SSD1306
 
 #include "others/EVNBluetooth.h"            //HC-05 (UART)
-#include "others/EVNADC.h"            //ADS1115
+#include "others/EVNADC.h"                  //ADS1115
 
 #include "helper/PIDController.h"
 
