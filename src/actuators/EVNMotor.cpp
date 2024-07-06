@@ -97,7 +97,7 @@ EVNMotor::EVNMotor(uint8_t port, uint8_t motortype, uint8_t motor_dir, uint8_t e
 	}
 
 	//make sure motor does not run
-	_pid_control.run_pwm = true;
+	_pid_control.run_pwm = false;
 	_pid_control.hold = false;
 	_pid_control.run_speed = false;
 	_pid_control.run_time = false;
