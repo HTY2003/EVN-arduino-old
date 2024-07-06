@@ -1,12 +1,12 @@
-#ifndef EVNAnalogMux_h
-#define EVNAnalogMux_h
+#ifndef EVNADC_h
+#define EVNADC_h
 
 #include <Arduino.h>
 #include <Wire.h>
 #include "../EVNAlpha.h"
 #include "../helper/EVNI2CDevice.h"
 
-class EVNAnalogMux : private EVNI2CDevice {
+class EVNADC : private EVNI2CDevice {
 public:
 
     enum reg : uint8_t
@@ -59,7 +59,7 @@ public:
     static const uint8_t I2C_ADDR = 0x48;
     static const uint16_t ID = 0x8583;
 
-    EVNAnalogMux(uint8_t port) : EVNI2CDevice(port)
+    EVNADC(uint8_t port) : EVNI2CDevice(port)
     {
         _addr = I2C_ADDR;
     };
@@ -203,12 +203,12 @@ public:
         return 0;
     };
 
-    float read(uint8_t pin, bool blocking = true)
+    float read(uint8_t pin)
     {
         if (_sensor_started && !_continuous_enabled)
         {
             request(pin);
-            return receive(blocking);
+            return receive(true);
         }
         return 0;
     };
