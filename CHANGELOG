@@ -1,3 +1,31 @@
+0.10.2 (07/07/24)
+
+-- Features --
+
+- User Guides have been added to the docs site! With more coming soon
+- This small update is mainly to fix bugs with EVNMotor and EVNDrivebase
+- There will be at least one more before this repository is displayed on the main EVNdevs GitHub repo.
+
+-- Bugfixes --
+
+- runPosition and similar position-based run functions now work properly when called back-to-back
+- Accel/decel has correct logic now
+- Motor jitter on boot is now gone
+
+0.10.1 (28/06/24)
+
+-- Features --
+
+- Added docs and more unified syntax for almost all classes introduced in 0.10.0 (except EVNAnalogMux)
+- Added more hardware/product docs
+- Added example programs for almost everything (at this point I should relook at the old ones)
+- Low Battery Alert has officially been added!
+
+-- Bugfixes --
+
+- EVNRGBLED: Stability of update() improved (should be perfect now)
+- EVNButton: Stability of button readings should be much improved
+
 0.10.1 (28/06/24)
 
 -- Features --

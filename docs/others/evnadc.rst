@@ -1,6 +1,8 @@
 ``EVNADC``
 ================
 
+.. warning:: This page is a work-in-progress!
+
 This class provides the following features and functionalities for our Analog Multiplexer Standard Peripheral (ADS1115 IC):
 
     * 16-bit precision Analog-to-Digital Converter (ADC)
