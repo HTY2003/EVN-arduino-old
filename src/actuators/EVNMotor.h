@@ -62,6 +62,8 @@ class EVNMotor
 		PIDController* pos_pid;
 
 		//USER-SET VARIABLES
+		volatile bool stopAction_static_running;
+		volatile bool core0_writing;
 		volatile bool run_pwm;
 		volatile bool run_speed;
 		volatile bool run_dir;
@@ -254,13 +256,8 @@ protected:
 
 	static void stopAction_static(pid_control_t* pidArg, encoder_state_t* encoderArg, uint64_t now, float pos, float dps)
 	{
-		//reset PID controller, stop loop control
-		pidArg->pos_pid->reset();
-
-		pidArg->run_pwm = false;
-		pidArg->run_speed = false;
-		pidArg->run_pos = false;
-		pidArg->run_time = false;
+		if (pidArg->core0_writing) return;
+		pidArg->stopAction_static_running = true;
 
 		//keep start_time and x at most recent states
 		pidArg->start_time_us = now;
@@ -287,6 +284,15 @@ protected:
 			pidArg->hold = true;
 			break;
 		}
+
+		//reset PID controller, stop loop control
+		pidArg->pos_pid->reset();
+		pidArg->run_pwm = false;
+		pidArg->run_speed = false;
+		pidArg->run_pos = false;
+		pidArg->run_time = false;
+
+		pidArg->stopAction_static_running = false;
 	}
 
 	static float getPosition_static(encoder_state_t* arg)
@@ -415,7 +421,7 @@ protected:
 
 				if (pidArg->target_dps_constrained <= signed_target_dps_end_decel)
 				{
-					if (signed_target_dps_end_decel > 0)
+					if (pidArg->target_dps_constrained > 0)
 						pidArg->target_dps_constrained += time_since_last_loop * pidArg->accel;
 					else
 						pidArg->target_dps_constrained += time_since_last_loop * pidArg->decel;
@@ -425,7 +431,7 @@ protected:
 				}
 				else
 				{
-					if (signed_target_dps_end_decel > 0)
+					if (pidArg->target_dps_constrained > 0)
 						pidArg->target_dps_constrained -= time_since_last_loop * pidArg->decel;
 					else
 						pidArg->target_dps_constrained -= time_since_last_loop * pidArg->accel;
@@ -434,14 +440,20 @@ protected:
 						pidArg->target_dps_constrained = signed_target_dps_end_decel;
 				}
 
+				bool old_sign_from_target_pos;
+				if (position_control_enabled(pidArg))
+				{
+					old_sign_from_target_pos = (pidArg->x - pidArg->target_pos >= 0) ? true : false;
+				}
+
 				pidArg->x += time_since_last_loop * pidArg->target_dps_constrained;
 
 				if (position_control_enabled(pidArg))
 				{
-					if (pidArg->target_dps_constrained >= 0)
-						pidArg->x = min(pidArg->x, pidArg->target_pos);
-					else
-						pidArg->x = max(pidArg->x, pidArg->target_pos);
+					bool new_sign_from_target_pos = (pidArg->x - pidArg->target_pos >= 0) ? true : false;
+
+					if (old_sign_from_target_pos != new_sign_from_target_pos)
+						pidArg->x = pidArg->target_pos;
 				}
 			}
 			else
@@ -667,9 +679,9 @@ public:
 	bool completed();
 
 	//TODO: add end function
+	//TODO: make functions more thread-safe
 
 private:
-public:
 	float clean_input_turn_rate(float turn_rate);
 	float clean_input_speed(float speed, float turn_rate);
 	uint8_t clean_input_stop_action(uint8_t stop_action);
@@ -905,6 +917,15 @@ public:
 			arg->motor_left->runSpeed(arg->target_motor_left_dps);
 			arg->motor_right->runSpeed(arg->target_motor_right_dps);
 
+
+			bool old_sign_from_target_dist;
+			bool old_sign_from_target_angle;
+			if (arg->drive_position)
+			{
+				old_sign_from_target_dist = (arg->target_distance - arg->end_distance >= 0) ? true : false;
+				old_sign_from_target_angle = (arg->target_distance - arg->end_distance >= 0) ? true : false;
+			}
+
 			//increment target angle and XY position
 			//if output of speed or turn rate output is saturated or motors are stalled, stop incrementing (avoid excessive overshoot that PID cannot correct)
 			if (fabs(arg->speed_error * arg->speed_pid->getKp()
@@ -993,7 +1014,7 @@ public:
 				//apply accel/decel to hit target speed
 				if (arg->target_speed_constrained <= target_speed_after_decel)
 				{
-					if (target_speed_after_decel > 0)
+					if (arg->target_speed_constrained > 0)
 						arg->target_speed_constrained += time_since_last_loop * new_speed_accel;
 					else
 						arg->target_speed_constrained += time_since_last_loop * new_speed_decel;
@@ -1003,7 +1024,7 @@ public:
 				}
 				else
 				{
-					if (target_speed_after_decel > 0)
+					if (arg->target_speed_constrained > 0)
 						arg->target_speed_constrained -= time_since_last_loop * new_speed_decel;
 					else
 						arg->target_speed_constrained -= time_since_last_loop * new_speed_accel;
@@ -1015,7 +1036,7 @@ public:
 				//apply accel/decel to hit target turn rate
 				if (arg->target_turn_rate_constrained <= target_turn_rate_after_decel)
 				{
-					if (target_turn_rate_after_decel > 0)
+					if (arg->target_turn_rate_constrained > 0)
 						arg->target_turn_rate_constrained += time_since_last_loop * new_turn_rate_accel;
 					else
 						arg->target_turn_rate_constrained += time_since_last_loop * new_turn_rate_decel;
@@ -1025,7 +1046,7 @@ public:
 				}
 				else
 				{
-					if (target_turn_rate_after_decel > 0)
+					if (arg->target_turn_rate_constrained > 0)
 						arg->target_turn_rate_constrained -= time_since_last_loop * new_turn_rate_decel;
 					else
 						arg->target_turn_rate_constrained -= time_since_last_loop * new_turn_rate_accel;
@@ -1043,13 +1064,13 @@ public:
 
 			if (arg->drive_position)
 			{
-				if ((arg->target_speed_constrained >= 0 && arg->target_distance >= arg->end_distance)
-					|| (arg->target_speed_constrained < 0 && arg->target_distance <= arg->end_distance))
+				bool new_sign_from_target_dist = (arg->target_distance - arg->end_distance >= 0) ? true : false;
+				bool new_sign_from_target_angle = (arg->target_distance - arg->end_distance >= 0) ? true : false;
+
+				if (old_sign_from_target_dist != new_sign_from_target_dist)
 					arg->target_distance = arg->end_distance;
 
-
-				if ((arg->target_turn_rate_constrained >= 0 && arg->target_angle >= arg->end_angle)
-					|| (arg->target_turn_rate_constrained < 0 && arg->target_angle <= arg->end_angle))
+				if (old_sign_from_target_angle != new_sign_from_target_angle)
 					arg->target_angle = arg->end_angle;
 
 				if (fabs(arg->end_angle - arg->current_angle) <= USER_DRIVE_POS_MIN_ERROR_DEG

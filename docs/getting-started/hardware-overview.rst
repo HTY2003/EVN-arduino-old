@@ -15,6 +15,7 @@ Back Side:
     For pre-production versions of EVN Alpha (V1.3 & below, unless stated otherwise), there are changes to board layout:
 
     * Servo ports have their pin order flipped, such that the ground pin is closer to the edge of the board. This means all pre-production versions **do not work with our Servo Standard Peripherals** due to their connectors, but will work with regular hobby servos.
+
     ============================  ============================
     V1.4                          <=V1.3
     ============================  ============================
@@ -24,6 +25,7 @@ Back Side:
     * Servo port numbers (1-4) are not printed onboard, but the GPIO pins are. The GPIO pins 2, 3, 10 and 11 are mapped to servo ports 1, 2, 3 and 4 respectively (e.g. Port labelled GPIO pin 2 is Servo Port 1).
 
     * On V1.2 and V1.1 boards, Serial ports have their pin order changed as shown below:
+   
     ================================  ================================
     V1.4,  1.3                        <=V1.2
     ================================  ================================

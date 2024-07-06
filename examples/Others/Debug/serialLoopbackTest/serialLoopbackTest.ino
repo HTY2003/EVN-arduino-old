@@ -1,5 +1,12 @@
+/*serialLoopbackTest.ino
+
+The following program performs a loopback test on both Serial Ports to ensure that transmit/receive works.
+*/
+
 #include <EVN.h>
 
+// Serial Port 1 TX should be connected to RX
+// and the same for Serial Port 2
 EVNAlpha board;
 
 void setup()

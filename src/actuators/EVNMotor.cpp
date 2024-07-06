@@ -97,11 +97,14 @@ EVNMotor::EVNMotor(uint8_t port, uint8_t motortype, uint8_t motor_dir, uint8_t e
 	}
 
 	//make sure motor does not run
-	_pid_control.run_pwm = true;
+	_pid_control.run_pwm = false;
 	_pid_control.hold = false;
 	_pid_control.run_speed = false;
 	_pid_control.run_time = false;
 	_pid_control.run_pos = false;
+	_pid_control.stopAction_static_running = false;
+	_pid_control.core0_writing = false;
+
 	_encoder.position = 0;
 	_encoder.position_offset = 0;
 	_encoder.dps_calculated = false;
@@ -169,16 +172,6 @@ float EVNMotor::getDPS()
 	return getDPS_static(&_encoder);
 }
 
-void EVNMotor::runPWM(float duty_cycle)
-{
-	_pid_control.run_pwm = true;
-	_pid_control.run_speed = false;
-	_pid_control.run_time = false;
-	_pid_control.run_pos = false;
-	_pid_control.hold = false;
-	runPWM_static(&_pid_control, duty_cycle);
-}
-
 float EVNMotor::clean_input_dps(float dps)
 {
 	return min(fabs(dps), _pid_control.max_rpm * 6);
@@ -194,8 +187,27 @@ uint8_t EVNMotor::clean_input_stop_action(uint8_t stop_action)
 	return min(2, stop_action);
 }
 
+void EVNMotor::runPWM(float duty_cycle)
+{
+	while (_pid_control.stopAction_static_running);
+	_pid_control.core0_writing = true;
+
+	_pid_control.run_pwm = true;
+	_pid_control.run_speed = false;
+	_pid_control.run_time = false;
+	_pid_control.run_pos = false;
+	_pid_control.hold = false;
+
+	_pid_control.core0_writing = false;
+
+	runPWM_static(&_pid_control, duty_cycle);
+}
+
 void EVNMotor::runDPS(float dps)
 {
+	while (_pid_control.stopAction_static_running);
+	_pid_control.core0_writing = true;
+
 	_pid_control.target_dps = clean_input_dps(dps);
 	_pid_control.run_dir = clean_input_dir(dps);
 
@@ -204,10 +216,15 @@ void EVNMotor::runDPS(float dps)
 	_pid_control.run_time = false;
 	_pid_control.run_speed = true;
 	_pid_control.hold = false;
+
+	_pid_control.core0_writing = false;
 }
 
 void EVNMotor::runPosition(float dps, float position, uint8_t stop_action, bool wait)
 {
+	while (_pid_control.stopAction_static_running);
+	_pid_control.core0_writing = true;
+
 	_pid_control.target_dps = clean_input_dps(dps);
 	_pid_control.target_pos = position;
 	_pid_control.stop_action = clean_input_stop_action(stop_action);
@@ -217,6 +234,8 @@ void EVNMotor::runPosition(float dps, float position, uint8_t stop_action, bool 
 	_pid_control.run_time = false;
 	_pid_control.run_speed = false;
 	_pid_control.hold = false;
+
+	_pid_control.core0_writing = false;
 
 	if (wait) while (!this->completed());
 }
@@ -245,6 +264,9 @@ void EVNMotor::runHeading(float dps, float heading, uint8_t stop_action, bool wa
 
 void EVNMotor::runTime(float dps, uint32_t time_ms, uint8_t stop_action, bool wait)
 {
+	while (_pid_control.stopAction_static_running);
+	_pid_control.core0_writing = true;
+
 	_pid_control.target_dps = clean_input_dps(dps);
 	_pid_control.run_dir = clean_input_dir(dps);
 	_pid_control.run_time_ms = time_ms;
@@ -255,6 +277,8 @@ void EVNMotor::runTime(float dps, uint32_t time_ms, uint8_t stop_action, bool wa
 	_pid_control.run_time = true;
 	_pid_control.run_speed = false;
 	_pid_control.hold = false;
+
+	_pid_control.core0_writing = false;
 
 	if (wait) while (!this->completed());
 }
@@ -273,9 +297,15 @@ void EVNMotor::coast()
 
 void EVNMotor::hold()
 {
+	while (_pid_control.stopAction_static_running);
+	_pid_control.core0_writing = true;
+
 	_pid_control.target_pos = getPosition_static(&_encoder);
 	_pid_control.target_dps = _pid_control.max_rpm * 3;
 	_pid_control.stop_action = STOP_HOLD;
+
+	_pid_control.core0_writing = false;
+
 	stopAction_static(&_pid_control, &_encoder, micros(), getPosition(), getDPS());
 }
 

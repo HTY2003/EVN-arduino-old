@@ -57,7 +57,8 @@ Definition         Number
 
 The function outputs can be evaluated against numbers or their written versions (in C, they're called macros).
 
-.. code-block:: c++
+.. code-block:: c
+
     void loop() {
         if (readGesture() == 0)
         {

@@ -1,7 +1,7 @@
 Soldering
 ==========
 
-.. warning:: This page is a work-in-progress. Coming Soon!
+.. note:: This page is a work-in-progress! Coming Soon!
 
 What You Need (or Should Have)
 ------------------------------

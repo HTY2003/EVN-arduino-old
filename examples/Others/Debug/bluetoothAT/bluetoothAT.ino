@@ -1,3 +1,8 @@
+/*bluetoothAT.ino
+
+The following program allows one to use the Serial Monitor to program a Bluetooth Module Standard Peripheral in Settings (AT) Mode.
+*/
+
 #include <EVN.h>
 
 #define BT_SERIAL Serial1 //can be Serial1 or Serial2

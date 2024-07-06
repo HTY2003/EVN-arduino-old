@@ -231,6 +231,7 @@ Get Functions
     so statements like ``if (board.getMode() == BUTTON_TOGGLE) {}`` are valid.
 
     :returns: Mode of button in numerical form
+    
     * 0 (``BUTTON_DISABLE``)
     * 1 (``BUTTON_TOGGLE``)
     * 2 (``BUTTON_PUSHBUTTON``)

@@ -152,21 +152,21 @@ List of Standard Peripherals
 
 .. note:: There are more actuator software classes for the LEGO® MINDSTORMS® EV3 and NXT motors (``EVNMotor``, ``EVNDrivebase``), which are of course fully compatible despite not being Standard Peripherals.
 
-.. |colour.png| image:: ../tables/standard-peripherals/colour.png
-.. |distance.png| image:: ../tables/standard-peripherals/distance.png
-.. |compass.png| image:: ../tables/standard-peripherals/compass.png
-.. |imu.png| image:: ../tables/standard-peripherals/imu.png
-.. |gesture.png| image:: ../tables/standard-peripherals/gesture.png
-.. |env.png| image:: ../tables/standard-peripherals/env.png
-.. |touch.png| image:: ../tables/standard-peripherals/touch.png
-.. |oled.png| image:: ../tables/standard-peripherals/oled.png
-.. |matrix.png| image:: ../tables/standard-peripherals/matrix.png
-.. |sevenseg.png| image:: ../tables/standard-peripherals/sevenseg.png
-.. |rgb.png| image:: ../tables/standard-peripherals/rgb.png
-.. |analog.png| image:: ../tables/standard-peripherals/analog.png
-.. |bluetooth.png| image:: ../tables/standard-peripherals/bluetooth.png
-.. |servo.png| image:: ../tables/standard-peripherals/servo.png
-.. |contservo.png| image:: ../tables/standard-peripherals/contservo.png
+.. |colour.png| image:: ../images/standard-peripherals/colour.png
+.. |distance.png| image:: ../images/standard-peripherals/distance.png
+.. |compass.png| image:: ../images/standard-peripherals/compass.png
+.. |imu.png| image:: ../images/standard-peripherals/imu.png
+.. |gesture.png| image:: ../images/standard-peripherals/gesture.png
+.. |env.png| image:: ../images/standard-peripherals/env.png
+.. |touch.png| image:: ../images/standard-peripherals/touch.png
+.. |oled.png| image:: ../images/standard-peripherals/oled.png
+.. |matrix.png| image:: ../images/standard-peripherals/matrix.png
+.. |sevenseg.png| image:: ../images/standard-peripherals/sevenseg.png
+.. |rgb.png| image:: ../images/standard-peripherals/rgb.png
+.. |analog.png| image:: ../images/standard-peripherals/analog.png
+.. |bluetooth.png| image:: ../images/standard-peripherals/bluetooth.png
+.. |servo.png| image:: ../images/standard-peripherals/servo.png
+.. |contservo.png| image:: ../images/standard-peripherals/contservo.png
 
 
 .. _EVNColourSensor: ../sensors/EVNColourSensor.html
