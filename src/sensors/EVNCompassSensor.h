@@ -6,8 +6,12 @@
 #include "../EVNAlpha.h"
 #include "../helper/EVNI2CDevice.h"
 
+// TODO: Allow for switching of axes to read yaw in diff orientations
+
 class EVNCompassSensor : private EVNI2CDevice {
 public:
+
+    friend class EVNIMUSensor;
 
     static const uint8_t HMC_I2C_ADDR = 0x1E;
     static const uint8_t HMC_CHIP_ID = 0x48 ^ 0x34 ^ 0x33;
@@ -434,17 +438,7 @@ public:
         if (_sensor_started)
         {
             this->update(blocking);
-
-            if (_calibrated)
-            {
-                this->calibrateReadings();
-            }
-            else
-            {
-                _xcal = (float)_x / _gain;
-                _ycal = (float)_y / _gain;
-                _zcal = (float)_z / _gain;
-            }
+            this->calibrateReadings();
 
             _yaw = (atan2(_ycal, _xcal) / M_PI * 180) + 180;
             return fmod(_yaw - _yaw_offset + 360, 360);
@@ -457,8 +451,7 @@ public:
         _yaw_offset = _yaw;
     };
 
-private:
-
+protected:
     void update(bool blocking = true)
     {
         if (_sensor_started)
@@ -491,13 +484,22 @@ private:
     {
         if (_sensor_started)
         {
-            float x0, y0, z0;
-            x0 = (float)_x / _gain - _x_hard_cal;
-            y0 = (float)_y / _gain - _y_hard_cal;
-            z0 = (float)_z / _gain - _z_hard_cal;
-            _xcal = x0 * _x_soft_cal[0] + y0 * _x_soft_cal[1] + z0 * _x_soft_cal[2];
-            _ycal = x0 * _y_soft_cal[0] + y0 * _y_soft_cal[1] + z0 * _y_soft_cal[2];
-            _zcal = x0 * _z_soft_cal[0] + y0 * _z_soft_cal[1] + z0 * _z_soft_cal[2];
+            if (_calibrated)
+            {
+                float x0, y0, z0;
+                x0 = (float)_x / _gain - _x_hard_cal;
+                y0 = (float)_y / _gain - _y_hard_cal;
+                z0 = (float)_z / _gain - _z_hard_cal;
+                _xcal = x0 * _x_soft_cal[0] + y0 * _x_soft_cal[1] + z0 * _x_soft_cal[2];
+                _ycal = x0 * _y_soft_cal[0] + y0 * _y_soft_cal[1] + z0 * _y_soft_cal[2];
+                _zcal = x0 * _z_soft_cal[0] + y0 * _z_soft_cal[1] + z0 * _z_soft_cal[2];
+            }
+            else
+            {
+                _xcal = (float)_x / _gain;
+                _ycal = (float)_y / _gain;
+                _zcal = (float)_z / _gain;
+            }
         }
     };
 

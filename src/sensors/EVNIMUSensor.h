@@ -3,8 +3,11 @@
 
 #include <Arduino.h>
 #include <Wire.h>
+#include "../helper/MadgwickAHRS/MadgwickAHRS.h"
 #include "../EVNAlpha.h"
 #include "../helper/EVNI2CDevice.h"
+
+// TODO: Allow for switching of axes to read R/P/Y in diff orientations (must work with EVNCompassSensor too)
 
 class EVNIMUSensor : private EVNI2CDevice {
 public:
@@ -87,12 +90,20 @@ public:
 
     //TODO: Maybe explore low power mode and sample rate divider in future
 
-    EVNIMUSensor(uint8_t port) : EVNI2CDevice(port)
+    EVNIMUSensor(uint8_t port,
+        float gx_offset = 0, float gy_offset = 0, float gz_offset = 0,
+        float ax_low = 0, float ax_high = 0, float ay_low = 0,
+        float ay_high = 0, float az_low = 0, float az_high = 0)
+        : EVNI2CDevice(port)
     {
         _addr = I2C_ADDR;
+        _filter = new Madgwick;
+
+        setCalibrationGyro(gx_offset, gy_offset, gz_offset);
+        setCalibrationAccel(ax_low, ax_high, ay_low, ay_high, az_low, az_high);
     };
 
-    bool begin()
+    bool begin(bool calibrate_gyro = true)
     {
         EVNAlpha::sharedPorts().begin();
 
@@ -110,6 +121,31 @@ public:
         setAccelRange(accel_range::G_4);
         setGyroRange(gyro_range::DPS_500);
         setDataRate(data_rate::HZ_92);
+
+        if (calibrate_gyro)
+        {
+            uint64_t start_time = millis();
+
+            setCalibrationGyro(0, 0, 0);
+
+            float sum_gx = 0, sum_gy = 0, sum_gz = 0;
+            uint32_t counter = 0;
+
+            while (millis() - start_time < 3000)
+            {
+                this->update(true);
+                sum_gx += _gx;
+                sum_gy += _gy;
+                sum_gz += _gz;
+                counter += 1;
+            }
+
+            sum_gx /= (float)counter;
+            sum_gy /= (float)counter;
+            sum_gz /= (float)counter;
+
+            setCalibrationGyro(-sum_gx, -sum_gy, -sum_gz);
+        }
 
         return _sensor_started;
     };
@@ -168,21 +204,27 @@ public:
         {
         case data_rate::HZ_5:
             _measurement_time_us = 200000;
+            _filter->begin(5);
             break;
         case data_rate::HZ_10:
             _measurement_time_us = 100000;
+            _filter->begin(10);
             break;
         case data_rate::HZ_20:
             _measurement_time_us = 50000;
+            _filter->begin(20);
             break;
         case data_rate::HZ_41:
             _measurement_time_us = 24391;
+            _filter->begin(41);
             break;
         case data_rate::HZ_92:
             _measurement_time_us = 10870;
+            _filter->begin(92);
             break;
         case data_rate::HZ_184:
             _measurement_time_us = 5435;
+            _filter->begin(184);
             break;
         }
 
@@ -199,6 +241,91 @@ public:
         value &= 0b11110000;
         value |= ((uint8_t)data_rate);
         write8((uint8_t)reg::ACCEL_CONFIG2, value);
+    };
+
+    void setCalibrationGyro(float gx_offset, float gy_offset, float gz_offset)
+    {
+        _gx_offset = gx_offset;
+        _gy_offset = gy_offset;
+        _gz_offset = gz_offset;
+    };
+
+    void setCalibrationAccel(float ax_low, float ax_high, float ay_low, float ay_high, float az_low, float az_high)
+    {
+        if ((ax_high > ax_low) && (ay_high > ay_low) && (az_high > az_low))
+        {
+            _ax_offset = -(ax_low + ax_high) / 2;
+            _ay_offset = -(ay_low + ay_high) / 2;
+            _az_offset = -(az_low + az_high) / 2;
+
+            _ax_scale = 1 / (ax_high + _ax_offset);
+            _ay_scale = 1 / (ay_high + _ay_offset);
+            _az_scale = 1 / (az_high + _az_offset);
+
+            _accel_calibrated = true;
+        }
+        else
+            _accel_calibrated = false;
+    };
+
+    float readYaw(bool blocking = true)
+    {
+        if (_sensor_started)
+        {
+            this->update(blocking);
+            return _filter->getYaw();
+        }
+        return 0;
+    };
+
+    float readRoll(bool blocking = true)
+    {
+        if (_sensor_started)
+        {
+            this->update(blocking);
+            return _filter->getRoll();
+        }
+        return 0;
+    };
+
+    float readPitch(bool blocking = true)
+    {
+        if (_sensor_started)
+        {
+            this->update(blocking);
+            return _filter->getPitch();
+        }
+        return 0;
+    };
+
+    float readYawRadians(bool blocking = true)
+    {
+        if (_sensor_started)
+        {
+            this->update(blocking);
+            return _filter->getYawRadians();
+        }
+        return 0;
+    };
+
+    float readRollRadians(bool blocking = true)
+    {
+        if (_sensor_started)
+        {
+            this->update(blocking);
+            return _filter->getRollRadians();
+        }
+        return 0;
+    };
+
+    float readPitchRadians(bool blocking = true)
+    {
+        if (_sensor_started)
+        {
+            this->update(blocking);
+            return _filter->getPitchRadians();
+        }
+        return 0;
     };
 
     float readAccelX(bool blocking = true)
@@ -261,6 +388,11 @@ public:
         return 0;
     };
 
+    void linkCompass(EVNCompassSensor* compass)
+    {
+        _compass = compass;
+    };
+
 private:
     void update(bool blocking = false)
     {
@@ -287,19 +419,60 @@ private:
             _gx = (float)_gxr / _gyro_sens;
             _gy = (float)_gyr / _gyro_sens;
             _gz = (float)_gzr / _gyro_sens;
+
+            _gx += _gx_offset;
+            _gy += _gy_offset;
+            _gz += _gz_offset;
+
+            if (_accel_calibrated)
+            {
+                _ax += _ax_offset;
+                _ay += _ay_offset;
+                _az += _az_offset;
+
+                _ax *= _ax_scale;
+                _ay *= _ay_scale;
+                _az *= _az_scale;
+            }
+
+            if (_compass_linked)
+            {
+                _compass->update(blocking);
+                if (_compass->isCalibrated())
+                    _compass->calibrateReadings();
+                _filter->update(_gx, _gy, _gz, _ax, _ay, _az, _compass->_xcal, _compass->_ycal, _compass->_zcal);
+            }
+            else
+                _filter->updateIMU(_gx, _gy, _gz, _ax, _ay, _az);
         }
     };
 
     uint8_t _buffer[14];
     int16_t _temp;
+
     int16_t _axr = 0, _ayr = 0, _azr = 0;
     int16_t _gxr = 0, _gyr = 0, _gzr = 0;
+
     float _ax = 0, _ay = 0, _az = 0;
     float _gx = 0, _gy = 0, _gz = 0;
+
     float _gyro_sens;
     float _accel_sens;
+
     uint64_t _measurement_time_us;
     uint64_t _last_reading_us;
+
+    bool _accel_calibrated;
+
+    bool _compass_linked;
+
+    float _gx_offset, _gy_offset, _gz_offset;
+
+    float _ax_scale, _ay_scale, _az_scale,
+        _ax_offset, _ay_offset, _az_offset;
+
+    Madgwick* _filter;
+    EVNCompassSensor* _compass;
 };
 
 #endif
