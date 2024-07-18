@@ -441,7 +441,6 @@ public:
         {
             this->update(blocking);
             this->calibrateReadings();
-            this->calibrateReadings();
 
             _yaw = (atan2(_ycal, _xcal) / M_PI * 180) + 180;
             return fmod(_yaw - _yaw_offset + 360, 360);
@@ -635,42 +634,25 @@ protected:
                 _ycal = (float)_y / _gain;
                 _zcal = (float)_z / _gain;
             }
-            {
-                if (_calibrated)
-                {
-                    float x0, y0, z0;
-                    x0 = (float)_x / _gain - _x_hard_cal;
-                    y0 = (float)_y / _gain - _y_hard_cal;
-                    z0 = (float)_z / _gain - _z_hard_cal;
-                    _xcal = x0 * _x_soft_cal[0] + y0 * _x_soft_cal[1] + z0 * _x_soft_cal[2];
-                    _ycal = x0 * _y_soft_cal[0] + y0 * _y_soft_cal[1] + z0 * _y_soft_cal[2];
-                    _zcal = x0 * _z_soft_cal[0] + y0 * _z_soft_cal[1] + z0 * _z_soft_cal[2];
-                }
-                else
-                {
-                    _xcal = (float)_x / _gain;
-                    _ycal = (float)_y / _gain;
-                    _zcal = (float)_z / _gain;
-                }
-            }
-        };
-
-        int16_t _x = 0, _y = 0, _z = 0;
-        float _xcal = 0, _ycal = 0, _zcal = 0;
-        float _yaw_offset = 0;
-        float _yaw;
-
-        float _x_hard_cal, _x_soft_cal[3];
-        float _y_hard_cal, _y_soft_cal[3];
-        float _z_hard_cal, _z_soft_cal[3];
-
-        uint8_t _top_axis = AXIS_Z, _front_axis = AXIS_X, _right_axis = AXIS_Y;
-
-        float _freq, _gain;
-        uint32_t _last_reading_us = 0;
-        bool _calibrated = true, _is_qmc = false;
-
-        uint8_t _buffer[6] = { 0 };
+        }
     };
+
+    int16_t _x = 0, _y = 0, _z = 0;
+    float _xcal = 0, _ycal = 0, _zcal = 0;
+    float _yaw_offset = 0;
+    float _yaw;
+
+    float _x_hard_cal, _x_soft_cal[3];
+    float _y_hard_cal, _y_soft_cal[3];
+    float _z_hard_cal, _z_soft_cal[3];
+
+    uint8_t _top_axis = AXIS_Z, _front_axis = AXIS_X, _right_axis = AXIS_Y;
+
+    float _freq, _gain;
+    uint32_t _last_reading_us = 0;
+    bool _calibrated = true, _is_qmc = false;
+
+    uint8_t _buffer[6] = { 0 };
+};
 
 #endif
