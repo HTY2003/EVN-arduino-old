@@ -7,6 +7,7 @@ Guides
    compass-cal
    third-party-i2c
    platformio
+   soldering
 
 ..
    third-party-motors

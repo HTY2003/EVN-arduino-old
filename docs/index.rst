@@ -53,3 +53,12 @@ In addition, it contains code from additional open source projects:
 * The U8g2 Arduino library by olikraus is licensed under the BSD 2-Clause license.
 * The U8g2 font used is part of The Ultimate Oldschool PC Font Pack, which is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
 * Pololu's VL53L0X Arduino library is largely based on STMicroelectronics' VL53L0X API, which is licensed under the BSD 3-Clause license, and the rest is licensed under the MIT license.
+
+Acknowledgements
+----------------
+
+We'd like to thank the following people for their contributions to the Kickstarter
+
+Without them, EVN would not exist today.
+
+.. table:: 
