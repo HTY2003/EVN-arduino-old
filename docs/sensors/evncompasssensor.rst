@@ -34,18 +34,18 @@ Constructor
 .. class:: EVNCompassSensor(uint8_t port, float hard_x = 0, float hard_y = 0, float hard_z = 0, float soft_x_0 = 1, float soft_x_1 = 0, float soft_x_2 = 0, float soft_y_0 = 0, float soft_y_1 = 1, float soft_y_2 = 0, float soft_z_0 = 0, float soft_z_1 = 0, float soft_z_2 = 1)
   
     :param port: I2C port the sensor is connected to (1-16)
-    :param hard_x: X-axis hard iron calibration value
-    :param hard_y: Y-axis hard iron calibration value
-    :param hard_z: Z-axis hard iron calibration value
-    :param soft_x_0: X-axis soft iron calibration value 0
-    :param soft_x_1: X-axis soft iron calibration value 1
-    :param soft_x_2: X-axis soft iron calibration value 2
-    :param soft_y_0: Y-axis soft iron calibration value 0
-    :param soft_y_1: Y-axis soft iron calibration value 1
-    :param soft_y_2: Y-axis soft iron calibration value 2
-    :param soft_z_0: Z-axis soft iron calibration value 0
-    :param soft_z_1: Z-axis soft iron calibration value 1
-    :param soft_z_2: Z-axis soft iron calibration value 2
+    :param hard_x: X-axis hard iron calibration value. Defaults to 0
+    :param hard_y: Y-axis hard iron calibration value. Defaults to 0
+    :param hard_z: Z-axis hard iron calibration value. Defaults to 0
+    :param soft_x_0: X-axis soft iron calibration value 0. Defaults to 1
+    :param soft_x_1: X-axis soft iron calibration value 1. Defaults to 0
+    :param soft_x_2: X-axis soft iron calibration value 2. Defaults to 0
+    :param soft_y_0: Y-axis soft iron calibration value 0. Defaults to 0
+    :param soft_y_1: Y-axis soft iron calibration value 1. Defaults to 1
+    :param soft_y_2: Y-axis soft iron calibration value 2. Defaults to 0
+    :param soft_z_0: Z-axis soft iron calibration value 0. Defaults to 0
+    :param soft_z_1: Z-axis soft iron calibration value 1. Defaults to 0
+    :param soft_z_2: Z-axis soft iron calibration value 2. Defaults to 1
 
 Functions
 ---------
@@ -70,18 +70,18 @@ Functions
 
 .. function:: void setCalibration(float hard_x = 0, float hard_y = 0, float hard_z = 0, float soft_x_0 = 1, float soft_x_1 = 0, float soft_x_2 = 0, float soft_y_0 = 0, float soft_y_1 = 1, float soft_y_2 = 0, float soft_z_0 = 0, float soft_z_1 = 0, float soft_z_2 = 1)
 
-    :param hard_x: X-axis hard iron calibration value
-    :param hard_y: Y-axis hard iron calibration value
-    :param hard_z: Z-axis hard iron calibration value
-    :param soft_x_0: X-axis soft iron calibration value 0
-    :param soft_x_1: X-axis soft iron calibration value 1
-    :param soft_x_2: X-axis soft iron calibration value 2
-    :param soft_y_0: Y-axis soft iron calibration value 0
-    :param soft_y_1: Y-axis soft iron calibration value 1
-    :param soft_y_2: Y-axis soft iron calibration value 2
-    :param soft_z_0: Z-axis soft iron calibration value 0
-    :param soft_z_1: Z-axis soft iron calibration value 1
-    :param soft_z_2: Z-axis soft iron calibration value 2
+    :param hard_x: X-axis hard iron calibration value. Defaults to 0
+    :param hard_y: Y-axis hard iron calibration value. Defaults to 0
+    :param hard_z: Z-axis hard iron calibration value. Defaults to 0
+    :param soft_x_0: X-axis soft iron calibration value 0. Defaults to 1
+    :param soft_x_1: X-axis soft iron calibration value 1. Defaults to 0
+    :param soft_x_2: X-axis soft iron calibration value 2. Defaults to 0
+    :param soft_y_0: Y-axis soft iron calibration value 0. Defaults to 0
+    :param soft_y_1: Y-axis soft iron calibration value 1. Defaults to 1
+    :param soft_y_2: Y-axis soft iron calibration value 2. Defaults to 0
+    :param soft_z_0: Z-axis soft iron calibration value 0. Defaults to 0
+    :param soft_z_1: Z-axis soft iron calibration value 1. Defaults to 0
+    :param soft_z_2: Z-axis soft iron calibration value 2. Defaults to 1
     
 Reading Yaw / Heading
 """"""""""""""""""""""
