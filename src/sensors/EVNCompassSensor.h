@@ -467,17 +467,17 @@ public:
 
         if (_top_axis == _front_axis)
         {
-            if (_right_axis == AXIS_X && _top_axis == AXIS_Y)
+            if ((_right_axis == AXIS_X && _top_axis == AXIS_Y) || (_top_axis == AXIS_X && _right_axis == AXIS_Y))
                 _front_axis = AXIS_Z;
-            else if (_right_axis == AXIS_Y && _top_axis == AXIS_Z)
+            else if ((_right_axis == AXIS_Y && _top_axis == AXIS_Z) || (_top_axis == AXIS_Y && _right_axis == AXIS_Z))
                 _front_axis = AXIS_X;
             else
                 _front_axis = AXIS_Y;
         }
 
-        if (_top_axis == AXIS_X && _front_axis == AXIS_Y)
+        if ((_top_axis == AXIS_X && _front_axis == AXIS_Y) || (_front_axis == AXIS_X && _top_axis == AXIS_Y))
             _right_axis = AXIS_Z;
-        else if (_top_axis == AXIS_Y && _front_axis == AXIS_Z)
+        else if ((_top_axis == AXIS_Y && _front_axis == AXIS_Z) || (_front_axis == AXIS_Y && _top_axis == AXIS_Z))
             _right_axis = AXIS_X;
         else
             _right_axis = AXIS_Y;
