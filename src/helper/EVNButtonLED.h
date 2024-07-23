@@ -3,7 +3,6 @@
 
 #include <Arduino.h>
 #include "EVNISRTimer.h"
-#include "../evn_alpha_pins.h"
 
 #define BUTTON_DISABLE		0
 #define BUTTON_TOGGLE		1
@@ -56,7 +55,7 @@ private:
 	{
 		if (millis() - button.last_change > DEBOUNCE_TIMING_MS)
 		{
-			uint8_t reading = digitalRead(BUTTONPIN);
+			uint8_t reading = digitalRead(PIN_BUTTON);
 
 			if (button.mode == BUTTON_PUSHBUTTON)
 			{
@@ -79,13 +78,13 @@ private:
 		}
 
 		//ensures that LED reflects output of read()
-		if (button.link_led && !button.flash) digitalWrite(LEDPIN, button.state);
+		if (button.link_led && !button.flash) digitalWrite(PIN_LED, button.state);
 	}
 
 	static bool update(struct repeating_timer* t)
 	{
 		if (button.flash)
-			digitalWrite(LEDPIN, !digitalRead(LEDPIN));
+			digitalWrite(PIN_LED, !digitalRead(PIN_LED));
 		else
 			isr();
 

@@ -22,16 +22,14 @@ EVNAlpha::EVNAlpha(uint8_t mode, bool link_led, bool link_movement, bool button_
 void EVNAlpha::begin()
 {
     //set correct I2C and Serial pins
-    //TODO: to be removed after getting our board in arduino-pico core
-    Wire.setSDA(WIRE0_SDA);
-    Wire.setSCL(WIRE0_SCL);
-    Wire1.setSDA(WIRE1_SDA);
-    Wire1.setSCL(WIRE1_SCL);
-
-    Serial1.setRX(SERIAL1_RX);
-    Serial1.setTX(SERIAL1_TX);
-    Serial2.setRX(SERIAL2_RX);
-    Serial2.setTX(SERIAL2_TX);
+    // Wire.setSDA(WIRE0_SDA);
+    // Wire.setSCL(WIRE0_SCL);
+    // Wire1.setSDA(WIRE1_SDA);
+    // Wire1.setSCL(WIRE1_SCL);
+    // Serial1.setRX(SERIAL1_RX);
+    // Serial1.setTX(SERIAL1_TX);
+    // Serial2.setRX(SERIAL2_RX);
+    // Serial2.setTX(SERIAL2_TX);
 
     //initialize helper objects
     ports.begin();

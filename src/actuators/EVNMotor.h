@@ -5,7 +5,6 @@
 #include "../EVNAlpha.h"
 #include "../helper/EVNISRTimer.h"
 #include "../helper/PIDController.h"
-#include "../evn_alpha_pins.h"
 #include "../evn_motor_defs.h"
 
 //INPUT PARAMETER MACROS
@@ -497,8 +496,8 @@ protected:
 		}
 		switch (encoderArg->enca)
 		{
-		case OUTPUT1ENCA:
-		case OUTPUT1ENCB:
+		case PIN_MOTOR1_ENCA:
+		case PIN_MOTOR1_ENCB:
 			encoderArgs[0] = encoderArg;
 			pidArgs[0] = pidArg;
 			ports_started[0] = true;
@@ -506,8 +505,8 @@ protected:
 			attachInterrupt(encoderArg->encb, isr1, CHANGE);
 			break;
 
-		case OUTPUT2ENCA:
-		case OUTPUT2ENCB:
+		case PIN_MOTOR2_ENCA:
+		case PIN_MOTOR2_ENCB:
 			encoderArgs[1] = encoderArg;
 			pidArgs[1] = pidArg;
 			ports_started[1] = true;
@@ -515,8 +514,8 @@ protected:
 			attachInterrupt(encoderArg->encb, isr3, CHANGE);
 			break;
 
-		case OUTPUT3ENCA:
-		case OUTPUT3ENCB:
+		case PIN_MOTOR3_ENCA:
+		case PIN_MOTOR3_ENCB:
 			encoderArgs[2] = encoderArg;
 			pidArgs[2] = pidArg;
 			ports_started[2] = true;
@@ -524,8 +523,8 @@ protected:
 			attachInterrupt(encoderArg->encb, isr5, CHANGE);
 			break;
 
-		case OUTPUT4ENCA:
-		case OUTPUT4ENCB:
+		case PIN_MOTOR4_ENCA:
+		case PIN_MOTOR4_ENCB:
 			encoderArgs[3] = encoderArg;
 			pidArgs[3] = pidArg;
 			ports_started[3] = true;

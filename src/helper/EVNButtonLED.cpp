@@ -23,11 +23,11 @@ void EVNButtonLED::begin()
 	if (!button.started)
 	{
 		//button pin change interrupt
-		pinMode(BUTTONPIN, INPUT_PULLUP);
-		attachInterrupt(BUTTONPIN, isr, CHANGE);
+		pinMode(PIN_BUTTON, INPUT_PULLUP);
+		attachInterrupt(PIN_BUTTON, isr, CHANGE);
 
 		//led timer interrupt
-		pinMode(LEDPIN, OUTPUT_8MA);
+		pinMode(PIN_LED, OUTPUT_8MA);
 		if (rp2040.cpuid == 0)
 			alarm_pool_add_repeating_timer_ms(EVNISRTimer0::sharedAlarmPool(), UPDATE_INTERVAL_MS, update, NULL, &EVNISRTimer0::sharedISRTimer(2));
 		else

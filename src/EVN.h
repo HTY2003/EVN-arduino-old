@@ -1,6 +1,12 @@
 #ifndef EVN_h
 #define EVN_h
 
+#if ( defined(ARDUINO_EVN_ALPHA) )
+#elif ( defined(ARDUINO_GENERIC_RP2040) )
+#else
+#error This library is for EVN Alpha using the Arduino-Pico core only! Please check your Tools->Board settings.
+#endif
+
 #include "EVNAlpha.h"
 
 #include "actuators/EVNMotor.h"

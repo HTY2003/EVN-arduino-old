@@ -16,28 +16,28 @@ EVNMotor::EVNMotor(uint8_t port, uint8_t motortype, uint8_t motor_dir, uint8_t e
 	switch (portc)
 	{
 	case 1:
-		_pid_control.motora = OUTPUT1MOTORA;
-		_pid_control.motorb = OUTPUT1MOTORB;
-		_encoder.enca = OUTPUT1ENCA;
-		_encoder.encb = OUTPUT1ENCB;
+		_pid_control.motora = PIN_MOTOR1_OUTA;
+		_pid_control.motorb = PIN_MOTOR1_OUTB;
+		_encoder.enca = PIN_MOTOR1_ENCA;
+		_encoder.encb = PIN_MOTOR1_ENCB;
 		break;
 	case 2:
-		_pid_control.motora = OUTPUT2MOTORA;
-		_pid_control.motorb = OUTPUT2MOTORB;
-		_encoder.enca = OUTPUT2ENCA;
-		_encoder.encb = OUTPUT2ENCB;
+		_pid_control.motora = PIN_MOTOR2_OUTA;
+		_pid_control.motorb = PIN_MOTOR2_OUTB;
+		_encoder.enca = PIN_MOTOR2_ENCA;
+		_encoder.encb = PIN_MOTOR2_ENCB;
 		break;
 	case 3:
-		_pid_control.motora = OUTPUT3MOTORA;
-		_pid_control.motorb = OUTPUT3MOTORB;
-		_encoder.enca = OUTPUT3ENCA;
-		_encoder.encb = OUTPUT3ENCB;
+		_pid_control.motora = PIN_MOTOR3_OUTA;
+		_pid_control.motorb = PIN_MOTOR3_OUTB;
+		_encoder.enca = PIN_MOTOR3_ENCA;
+		_encoder.encb = PIN_MOTOR3_ENCB;
 		break;
 	case 4:
-		_pid_control.motora = OUTPUT4MOTORA;
-		_pid_control.motorb = OUTPUT4MOTORB;
-		_encoder.enca = OUTPUT4ENCA;
-		_encoder.encb = OUTPUT4ENCB;
+		_pid_control.motora = PIN_MOTOR4_OUTA;
+		_pid_control.motorb = PIN_MOTOR4_OUTB;
+		_encoder.enca = PIN_MOTOR4_ENCA;
+		_encoder.encb = PIN_MOTOR4_ENCB;
 		break;
 	}
 
