@@ -17,7 +17,7 @@ public:
 
     enum range : uint8_t
     {
-        // MV_6144 = 0,     //hitting >4V would fry the chip, and this mode provides worse resolution
+        MV_6144 = 0,
         MV_4096 = 1,
         MV_2048 = 2,
         MV_1024 = 3,
@@ -84,7 +84,7 @@ public:
 
         _sensor_started = true;
         setRange(range::MV_4096);
-        setDataRate(data_rate::SPS_250);
+        setDataRate(data_rate::SPS_860);
         setMode(mode::SINGLE_SHOT);
         setPin(0);
 
