@@ -20,11 +20,11 @@ void setup()
 void loop()
 {
     float accel_x = imu.readAccelX();
-    float accel_y = imu.readAccelY();
-    float accel_z = imu.readAccelZ();
-    float gyro_x = imu.readGyroX();
-    float gyro_y = imu.readGyroY();
-    float gyro_z = imu.readGyroZ();
+    float accel_y = imu.readAccelY(false);
+    float accel_z = imu.readAccelZ(false);
+    float gyro_x = imu.readGyroX(false);
+    float gyro_y = imu.readGyroY(false);
+    float gyro_z = imu.readGyroZ(false);
 
     Serial.print("Accel X ");
     Serial.print(accel_x);
@@ -38,5 +38,5 @@ void loop()
     Serial.print(" Y ");
     Serial.print(gyro_y);
     Serial.print(" Z ");
-    Serial.print(gyro_z);
+    Serial.println(gyro_z);
 }
