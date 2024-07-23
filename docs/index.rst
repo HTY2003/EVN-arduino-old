@@ -37,7 +37,14 @@ To find out more about purchasing, visit our `product website`_.
    :maxdepth: 1
    :caption: Guides
 
-   guides/index
+   guides/compass-cal
+   guides/third-party-i2c
+   guides/platformio
+   guides/soldering
+..
+   guides/third-party-motors
+   guides/motor-pid-cal
+   guides/drivebase-pid-cal
 
 Licenses
 --------
