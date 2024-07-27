@@ -260,7 +260,6 @@ protected:
 
 		//keep start_time and x at most recent states
 		pidArg->start_time_us = now;
-
 		pidArg->target_dps_constrained = dps;
 
 		//coast and brake stop functions are based on DRV8833 datasheet
@@ -587,12 +586,13 @@ typedef struct
 	//USER-SET
 	volatile float target_speed;
 	volatile float target_turn_rate;
-
 	volatile float target_speed_constrained;
 	volatile float target_turn_rate_constrained;
 
 	volatile bool drive;
 	volatile bool drive_position;
+	volatile bool core0_writing;
+	volatile bool stopAction_static_running;
 
 	//DRIVE
 	volatile float target_angle;
@@ -728,6 +728,9 @@ private:
 
 	static void stopAction_static(drivebase_state_t* arg)
 	{
+		if (arg->core0_writing) return;
+		arg->stopAction_static_running = true;
+
 		switch (arg->stop_action)
 		{
 		case STOP_BRAKE:
@@ -744,11 +747,13 @@ private:
 			break;
 		}
 
+		// we shouldn't assume drivebase speed and turn rate become 0...
+		// but as of right now I have no way to get a good estimate
 		arg->target_speed_constrained = 0;
 		arg->target_turn_rate_constrained = 0;
 
-		arg->target_angle = getAngle_static(arg);
-		arg->target_distance = getDistance_static(arg);
+		arg->target_angle = arg->current_angle;
+		arg->target_distance = arg->current_distance;
 		// arg->target_position_x = arg->position_x;
 		// arg->target_position_y = arg->position_y;
 
@@ -757,6 +762,8 @@ private:
 
 		arg->drive = false;
 		arg->drive_position = false;
+
+		arg->stopAction_static_running = false;
 	}
 
 	static float getDistance_static(drivebase_state_t* arg)
@@ -919,10 +926,11 @@ private:
 
 			bool old_sign_from_target_dist;
 			bool old_sign_from_target_angle;
+
 			if (arg->drive_position)
 			{
 				old_sign_from_target_dist = (arg->target_distance - arg->end_distance >= 0) ? true : false;
-				old_sign_from_target_angle = (arg->target_distance - arg->end_distance >= 0) ? true : false;
+				old_sign_from_target_angle = (arg->target_angle - arg->end_angle >= 0) ? true : false;
 			}
 
 			//increment target angle and XY position
@@ -1064,7 +1072,7 @@ private:
 			if (arg->drive_position)
 			{
 				bool new_sign_from_target_dist = (arg->target_distance - arg->end_distance >= 0) ? true : false;
-				bool new_sign_from_target_angle = (arg->target_distance - arg->end_distance >= 0) ? true : false;
+				bool new_sign_from_target_angle = (arg->target_angle - arg->end_angle >= 0) ? true : false;
 
 				if (old_sign_from_target_dist != new_sign_from_target_dist)
 					arg->target_distance = arg->end_distance;
