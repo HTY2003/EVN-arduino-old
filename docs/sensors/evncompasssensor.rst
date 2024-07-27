@@ -131,6 +131,31 @@ Reading Magnetometer Values
 
     :returns: calibrated Z-axis magnetometer measurement (in uT)
 
+Sensor Settings
+""""""""""""""""
+
+The compass measures along 3 different axes (X, Y and Z). This image depicts the 3 axes of the sensor.
+As a quick reference, the sensor PCB has markings for the X and Y axis.
+By default, the X axis is set as the axis passing through the front of the robot, and the Z axis as the axis passing through the top of the robot.
+
+However, the Compass Sensor Standard Peripheral can be mounted in many orientations, hence the functions below can be used to set the correct axes.
+
+.. function:: void setTopAxis(uint8_t axis)
+
+    :param axis: Sensor axis that passes through the top of the robot (options shown below)
+
+    * ``AXIS_X``
+    * ``AXIS_Y``
+    * ``AXIS_Z``
+
+.. function:: void setFrontAxis(uint8_t axis)
+
+    :param axis: Sensor axis that passes through the front of the robot (options shown below)
+
+    * ``AXIS_X``
+    * ``AXIS_Y``
+    * ``AXIS_Z``
+
 Advanced Sensor Settings (HMC)
 """""""""""""""""""""""""""""""
 
