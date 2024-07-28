@@ -32,7 +32,8 @@ Functions
     Initializes drivebase object. Call this function after calling begin() on the EVNMotor objects, but before calling any other EVNDrivebase functions.
 
 .. note::
-    For best performance, run this on the 2nd core using ``void setup1()``
+    This command should be run on the 2nd core using ``void setup1()``. 
+    However, you can still call the movement functions in ``void loop()`` like a normal program.
 
 Example Program:
 

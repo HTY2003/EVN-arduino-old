@@ -54,7 +54,8 @@ Functions
     Initializes motor object. Call this function before calling the other EVNMotor functions.
 
 .. note::
-    For best performance, run this on the 2nd core using ``void setup1()``
+    This command should be run on the 2nd core using ``void setup1()``. 
+    However, you can still call the movement functions in ``void loop()`` like a normal program.
 
 Example Program:
 
@@ -62,7 +63,7 @@ Example Program:
 
     EVNMotor motor(1, EV3_MED);
 
-    void setup1()   //call on setup1() for best performance!
+    void setup1()   //call on setup1(), not setup()!
     {
         motor.begin();
     }
