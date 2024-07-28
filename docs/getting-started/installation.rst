@@ -43,11 +43,11 @@ Currently, the best solution is to do a clean removal of the core before reinsta
 Library Installation
 ----------------------
 
-Download the `GitHub repository`_ as a .zip file and install in Arduino IDE (
+Open Library Manager in Arduino IDE using the sidebar (IDE 2) or topbar (Sketch > Include Library > Manage Libraries...).
+
+Search for EVN, select the library named ``EVN``, and you can install any stable release of the EVN-arduino library.
+
+Alternatively, you can download the `GitHub repository`_ as a .zip file and install in Arduino IDE (
 Sketch > Include Library > Add .ZIP Library > Select downloaded .zip file).
 
-.. _GitHub repository: https://www.github.com/HTY2003/EVN-arduino
-
-.. note::
-
-    We plan to publish the EVN library to the Arduino IDE Library Manager by official release. Once that happens, the installation process will be simpler!
+.. _GitHub repository: https://www.github.com/EVNdevs/EVN-arduino
