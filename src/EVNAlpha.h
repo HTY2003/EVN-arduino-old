@@ -3,7 +3,6 @@
 
 #include "helper/EVNButtonLED.h"
 #include "helper/EVNPortSelector.h"
-#include "evn_alpha_pins.h"
 #include <Arduino.h>
 
 class EVNAlpha {
@@ -32,7 +31,7 @@ public:
     bool read() { return this->buttonRead(); };
     bool buttonRead() { return button_led.read(); };
     void write(bool state) { this->write(state); };
-    void ledWrite(bool state) { if (!button_led.getFlash()) digitalWrite(LEDPIN, state); };
+    void ledWrite(bool state) { if (!button_led.getFlash()) digitalWrite(PIN_LED, state); };
 
     void setMode(uint8_t mode) { button_led.setMode(mode); };
     void setLinkLED(bool enable) { button_led.setLinkLED(enable); };

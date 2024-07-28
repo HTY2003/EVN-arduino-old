@@ -34,18 +34,18 @@ Constructor
 .. class:: EVNCompassSensor(uint8_t port, float hard_x = 0, float hard_y = 0, float hard_z = 0, float soft_x_0 = 1, float soft_x_1 = 0, float soft_x_2 = 0, float soft_y_0 = 0, float soft_y_1 = 1, float soft_y_2 = 0, float soft_z_0 = 0, float soft_z_1 = 0, float soft_z_2 = 1)
   
     :param port: I2C port the sensor is connected to (1-16)
-    :param hard_x: X-axis hard iron calibration value
-    :param hard_y: Y-axis hard iron calibration value
-    :param hard_z: Z-axis hard iron calibration value
-    :param soft_x_0: X-axis soft iron calibration value 0
-    :param soft_x_1: X-axis soft iron calibration value 1
-    :param soft_x_2: X-axis soft iron calibration value 2
-    :param soft_y_0: Y-axis soft iron calibration value 0
-    :param soft_y_1: Y-axis soft iron calibration value 1
-    :param soft_y_2: Y-axis soft iron calibration value 2
-    :param soft_z_0: Z-axis soft iron calibration value 0
-    :param soft_z_1: Z-axis soft iron calibration value 1
-    :param soft_z_2: Z-axis soft iron calibration value 2
+    :param hard_x: X-axis hard iron calibration value. Defaults to 0
+    :param hard_y: Y-axis hard iron calibration value. Defaults to 0
+    :param hard_z: Z-axis hard iron calibration value. Defaults to 0
+    :param soft_x_0: X-axis soft iron calibration value 0. Defaults to 1
+    :param soft_x_1: X-axis soft iron calibration value 1. Defaults to 0
+    :param soft_x_2: X-axis soft iron calibration value 2. Defaults to 0
+    :param soft_y_0: Y-axis soft iron calibration value 0. Defaults to 0
+    :param soft_y_1: Y-axis soft iron calibration value 1. Defaults to 1
+    :param soft_y_2: Y-axis soft iron calibration value 2. Defaults to 0
+    :param soft_z_0: Z-axis soft iron calibration value 0. Defaults to 0
+    :param soft_z_1: Z-axis soft iron calibration value 1. Defaults to 0
+    :param soft_z_2: Z-axis soft iron calibration value 2. Defaults to 1
 
 Functions
 ---------
@@ -70,18 +70,18 @@ Functions
 
 .. function:: void setCalibration(float hard_x = 0, float hard_y = 0, float hard_z = 0, float soft_x_0 = 1, float soft_x_1 = 0, float soft_x_2 = 0, float soft_y_0 = 0, float soft_y_1 = 1, float soft_y_2 = 0, float soft_z_0 = 0, float soft_z_1 = 0, float soft_z_2 = 1)
 
-    :param hard_x: X-axis hard iron calibration value
-    :param hard_y: Y-axis hard iron calibration value
-    :param hard_z: Z-axis hard iron calibration value
-    :param soft_x_0: X-axis soft iron calibration value 0
-    :param soft_x_1: X-axis soft iron calibration value 1
-    :param soft_x_2: X-axis soft iron calibration value 2
-    :param soft_y_0: Y-axis soft iron calibration value 0
-    :param soft_y_1: Y-axis soft iron calibration value 1
-    :param soft_y_2: Y-axis soft iron calibration value 2
-    :param soft_z_0: Z-axis soft iron calibration value 0
-    :param soft_z_1: Z-axis soft iron calibration value 1
-    :param soft_z_2: Z-axis soft iron calibration value 2
+    :param hard_x: X-axis hard iron calibration value. Defaults to 0
+    :param hard_y: Y-axis hard iron calibration value. Defaults to 0
+    :param hard_z: Z-axis hard iron calibration value. Defaults to 0
+    :param soft_x_0: X-axis soft iron calibration value 0. Defaults to 1
+    :param soft_x_1: X-axis soft iron calibration value 1. Defaults to 0
+    :param soft_x_2: X-axis soft iron calibration value 2. Defaults to 0
+    :param soft_y_0: Y-axis soft iron calibration value 0. Defaults to 0
+    :param soft_y_1: Y-axis soft iron calibration value 1. Defaults to 1
+    :param soft_y_2: Y-axis soft iron calibration value 2. Defaults to 0
+    :param soft_z_0: Z-axis soft iron calibration value 0. Defaults to 0
+    :param soft_z_1: Z-axis soft iron calibration value 1. Defaults to 0
+    :param soft_z_2: Z-axis soft iron calibration value 2. Defaults to 1
     
 Reading Yaw / Heading
 """"""""""""""""""""""
@@ -130,6 +130,31 @@ Reading Magnetometer Values
     Ensure that the sensor has received calibration values for this function to work properly.
 
     :returns: calibrated Z-axis magnetometer measurement (in uT)
+
+Sensor Settings
+""""""""""""""""
+
+The compass measures along 3 different axes (X, Y and Z). This image depicts the 3 axes of the sensor.
+As a quick reference, the sensor PCB has markings for the X and Y axis.
+By default, the X axis is set as the axis passing through the front of the robot, and the Z axis as the axis passing through the top of the robot.
+
+However, the Compass Sensor Standard Peripheral can be mounted in many orientations, hence the functions below can be used to set the correct axes.
+
+.. function:: void setTopAxis(uint8_t axis)
+
+    :param axis: Sensor axis that passes through the top of the robot (options shown below)
+
+    * ``AXIS_X``
+    * ``AXIS_Y``
+    * ``AXIS_Z``
+
+.. function:: void setFrontAxis(uint8_t axis)
+
+    :param axis: Sensor axis that passes through the front of the robot (options shown below)
+
+    * ``AXIS_X``
+    * ``AXIS_Y``
+    * ``AXIS_Z``
 
 Advanced Sensor Settings (HMC)
 """""""""""""""""""""""""""""""

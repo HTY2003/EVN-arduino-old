@@ -6,9 +6,7 @@ Start by opening EVN's ButtonLED example sketch in Arduino (File > Examples > EV
 Board Selection
 """""""""""""""
 
-To upload to EVN Alpha, select Generic RP2040 as your board (Tools > Board > Raspberry Pi RP2040 Boards > Generic RP2040), then the Generic SPI /2 Boot Stage 2 option (Tools > Boot Stage 2 > Generic SPI /2). These settings ensure that the USB Serial connection and upload process are stable.
-
-.. note:: We plan to add EVN Alpha to the Arduino-Pico core as its own Board option by official release. Once that happens, the board selection process will be simpler!
+To upload to EVN Alpha, select EVN Alpha as your board (Tools > Board > Raspberry Pi RP2040 Boards > EVNAlpha). Setting the right board ensures that the USB Serial connection and upload process are stable.
 
 USB Drive (BOOTSEL) Mode
 """""""""""""""""""""""""
@@ -18,6 +16,7 @@ Next, we will set the board to appear as a USB Mass Storage Drive to the compute
 In this mode, any previously uploaded programs are also stopped from running.
 
 There are 2 ways to set the board into USB Drive mode:
+
 1. Reset and BOOTSEL (Faster)
 
     * Press and Hold the Reset Button

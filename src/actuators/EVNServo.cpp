@@ -24,16 +24,16 @@ EVNServo::EVNServo(uint8_t port, bool servo_dir, uint16_t range, float start_pos
     switch (portc)
     {
     case 1:
-        _servo.pin = SERVO_PORT_1;
+        _servo.pin = PIN_SERVO1;
         break;
     case 2:
-        _servo.pin = SERVO_PORT_2;
+        _servo.pin = PIN_SERVO2;
         break;
     case 3:
-        _servo.pin = SERVO_PORT_3;
+        _servo.pin = PIN_SERVO3;
         break;
     case 4:
-        _servo.pin = SERVO_PORT_4;
+        _servo.pin = PIN_SERVO4;
         break;
     }
 }
@@ -111,16 +111,16 @@ EVNContinuousServo::EVNContinuousServo(uint8_t port, bool servo_dir, uint16_t mi
     switch (portc)
     {
     case 1:
-        _servo.pin = SERVO_PORT_1;
+        _servo.pin = PIN_SERVO1;
         break;
     case 2:
-        _servo.pin = SERVO_PORT_2;
+        _servo.pin = PIN_SERVO2;
         break;
     case 3:
-        _servo.pin = SERVO_PORT_3;
+        _servo.pin = PIN_SERVO3;
         break;
     case 4:
-        _servo.pin = SERVO_PORT_4;
+        _servo.pin = PIN_SERVO4;
         break;
     }
 }

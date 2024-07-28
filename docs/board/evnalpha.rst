@@ -49,8 +49,8 @@ Example Usage:
     //constructor with default options
     EVNAlpha board;
 
-    //constructor with non-default options
-    EVNAlpha board(BUTTON_PUSHBUTTON, false, false, 400000);
+    //constructor if you wish to set non-default options
+    EVNAlpha board(BUTTON_PUSHBUTTON, false, false, false, 400000);
 
 Functions
 ---------

@@ -5,7 +5,6 @@
 #include "../EVNAlpha.h"
 #include "../helper/EVNISRTimer.h"
 #include "../helper/PIDController.h"
-#include "../evn_alpha_pins.h"
 #include "../evn_motor_defs.h"
 
 //INPUT PARAMETER MACROS
@@ -261,7 +260,6 @@ protected:
 
 		//keep start_time and x at most recent states
 		pidArg->start_time_us = now;
-
 		pidArg->target_dps_constrained = dps;
 
 		//coast and brake stop functions are based on DRV8833 datasheet
@@ -497,8 +495,8 @@ protected:
 		}
 		switch (encoderArg->enca)
 		{
-		case OUTPUT1ENCA:
-		case OUTPUT1ENCB:
+		case PIN_MOTOR1_ENCA:
+		case PIN_MOTOR1_ENCB:
 			encoderArgs[0] = encoderArg;
 			pidArgs[0] = pidArg;
 			ports_started[0] = true;
@@ -506,8 +504,8 @@ protected:
 			attachInterrupt(encoderArg->encb, isr1, CHANGE);
 			break;
 
-		case OUTPUT2ENCA:
-		case OUTPUT2ENCB:
+		case PIN_MOTOR2_ENCA:
+		case PIN_MOTOR2_ENCB:
 			encoderArgs[1] = encoderArg;
 			pidArgs[1] = pidArg;
 			ports_started[1] = true;
@@ -515,8 +513,8 @@ protected:
 			attachInterrupt(encoderArg->encb, isr3, CHANGE);
 			break;
 
-		case OUTPUT3ENCA:
-		case OUTPUT3ENCB:
+		case PIN_MOTOR3_ENCA:
+		case PIN_MOTOR3_ENCB:
 			encoderArgs[2] = encoderArg;
 			pidArgs[2] = pidArg;
 			ports_started[2] = true;
@@ -524,8 +522,8 @@ protected:
 			attachInterrupt(encoderArg->encb, isr5, CHANGE);
 			break;
 
-		case OUTPUT4ENCA:
-		case OUTPUT4ENCB:
+		case PIN_MOTOR4_ENCA:
+		case PIN_MOTOR4_ENCB:
 			encoderArgs[3] = encoderArg;
 			pidArgs[3] = pidArg;
 			ports_started[3] = true;
@@ -588,12 +586,13 @@ typedef struct
 	//USER-SET
 	volatile float target_speed;
 	volatile float target_turn_rate;
-
 	volatile float target_speed_constrained;
 	volatile float target_turn_rate_constrained;
 
 	volatile bool drive;
 	volatile bool drive_position;
+	volatile bool core0_writing;
+	volatile bool stopAction_static_running;
 
 	//DRIVE
 	volatile float target_angle;
@@ -729,6 +728,9 @@ private:
 
 	static void stopAction_static(drivebase_state_t* arg)
 	{
+		if (arg->core0_writing) return;
+		arg->stopAction_static_running = true;
+
 		switch (arg->stop_action)
 		{
 		case STOP_BRAKE:
@@ -745,11 +747,13 @@ private:
 			break;
 		}
 
+		// we shouldn't assume drivebase speed and turn rate become 0...
+		// but as of right now I have no way to get a good estimate
 		arg->target_speed_constrained = 0;
 		arg->target_turn_rate_constrained = 0;
 
-		arg->target_angle = getAngle_static(arg);
-		arg->target_distance = getDistance_static(arg);
+		arg->target_angle = arg->current_angle;
+		arg->target_distance = arg->current_distance;
 		// arg->target_position_x = arg->position_x;
 		// arg->target_position_y = arg->position_y;
 
@@ -758,6 +762,8 @@ private:
 
 		arg->drive = false;
 		arg->drive_position = false;
+
+		arg->stopAction_static_running = false;
 	}
 
 	static float getDistance_static(drivebase_state_t* arg)
@@ -920,10 +926,11 @@ private:
 
 			bool old_sign_from_target_dist;
 			bool old_sign_from_target_angle;
+
 			if (arg->drive_position)
 			{
 				old_sign_from_target_dist = (arg->target_distance - arg->end_distance >= 0) ? true : false;
-				old_sign_from_target_angle = (arg->target_distance - arg->end_distance >= 0) ? true : false;
+				old_sign_from_target_angle = (arg->target_angle - arg->end_angle >= 0) ? true : false;
 			}
 
 			//increment target angle and XY position
@@ -1065,7 +1072,7 @@ private:
 			if (arg->drive_position)
 			{
 				bool new_sign_from_target_dist = (arg->target_distance - arg->end_distance >= 0) ? true : false;
-				bool new_sign_from_target_angle = (arg->target_distance - arg->end_distance >= 0) ? true : false;
+				bool new_sign_from_target_angle = (arg->target_angle - arg->end_angle >= 0) ? true : false;
 
 				if (old_sign_from_target_dist != new_sign_from_target_dist)
 					arg->target_distance = arg->end_distance;

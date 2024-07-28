@@ -6,8 +6,14 @@
 #include "../EVNAlpha.h"
 #include "../helper/EVNI2CDevice.h"
 
+#define AXIS_X 0
+#define AXIS_Y 1
+#define AXIS_Z 2
+
 class EVNCompassSensor : private EVNI2CDevice {
 public:
+
+    friend class EVNIMUSensor;
 
     static const uint8_t HMC_I2C_ADDR = 0x1E;
     static const uint8_t HMC_CHIP_ID = 0x48 ^ 0x34 ^ 0x33;
@@ -434,17 +440,7 @@ public:
         if (_sensor_started)
         {
             this->update(blocking);
-
-            if (_calibrated)
-            {
-                this->calibrateReadings();
-            }
-            else
-            {
-                _xcal = (float)_x / _gain;
-                _ycal = (float)_y / _gain;
-                _zcal = (float)_z / _gain;
-            }
+            this->calibrateReadings();
 
             _yaw = (atan2(_ycal, _xcal) / M_PI * 180) + 180;
             return fmod(_yaw - _yaw_offset + 360, 360);
@@ -454,11 +450,63 @@ public:
 
     void setNorth()
     {
+        this->read();
         _yaw_offset = _yaw;
     };
 
-private:
+    void setHeading(uint8_t heading)
+    {
+        this->read();
+        _yaw_offset = _yaw - heading;
+    };
 
+    void setTopAxis(uint8_t axis)
+    {
+        axis = constrain(axis, 0, 2);
+        _top_axis = axis;
+
+        if (_top_axis == _front_axis)
+        {
+            if ((_right_axis == AXIS_X && _top_axis == AXIS_Y) || (_top_axis == AXIS_X && _right_axis == AXIS_Y))
+                _front_axis = AXIS_Z;
+            else if ((_right_axis == AXIS_Y && _top_axis == AXIS_Z) || (_top_axis == AXIS_Y && _right_axis == AXIS_Z))
+                _front_axis = AXIS_X;
+            else
+                _front_axis = AXIS_Y;
+        }
+
+        if ((_top_axis == AXIS_X && _front_axis == AXIS_Y) || (_front_axis == AXIS_X && _top_axis == AXIS_Y))
+            _right_axis = AXIS_Z;
+        else if ((_top_axis == AXIS_Y && _front_axis == AXIS_Z) || (_front_axis == AXIS_Y && _top_axis == AXIS_Z))
+            _right_axis = AXIS_X;
+        else
+            _right_axis = AXIS_Y;
+    };
+
+    void setFrontAxis(uint8_t axis)
+    {
+        axis = constrain(axis, 0, 2);
+        _front_axis = axis;
+
+        if (_top_axis == _front_axis)
+        {
+            if ((_right_axis == AXIS_X && _front_axis == AXIS_Y) || (_front_axis == AXIS_X && _right_axis == AXIS_Y))
+                _top_axis = AXIS_Z;
+            else if ((_right_axis == AXIS_Y && _front_axis == AXIS_Z) || (_front_axis == AXIS_Y && _right_axis == AXIS_Z))
+                _top_axis = AXIS_X;
+            else
+                _top_axis = AXIS_Y;
+        }
+
+        if ((_top_axis == AXIS_X && _front_axis == AXIS_Y) || (_front_axis == AXIS_X && _top_axis == AXIS_Y))
+            _right_axis = AXIS_Z;
+        else if ((_top_axis == AXIS_Y && _front_axis == AXIS_Z) || (_front_axis == AXIS_Y && _top_axis == AXIS_Z))
+            _right_axis = AXIS_X;
+        else
+            _right_axis = AXIS_Y;
+    };
+
+protected:
     void update(bool blocking = true)
     {
         if (_sensor_started)
@@ -471,16 +519,95 @@ private:
                 if (_is_qmc)
                 {
                     readBuffer((uint8_t)qmc_reg::X_L, 6, _buffer);
-                    _x = _buffer[1] << 8 | _buffer[0];
-                    _y = _buffer[3] << 8 | _buffer[2];
-                    _z = _buffer[5] << 8 | _buffer[4];
+
+                    switch (_top_axis)
+                    {
+                    case AXIS_X:
+                        _z = _buffer[1] << 8 | _buffer[0];
+                        break;
+                    case AXIS_Y:
+                        _z = _buffer[3] << 8 | _buffer[2];
+                        break;
+                    case AXIS_Z:
+                        _z = _buffer[5] << 8 | _buffer[4];
+                        break;
+                    }
+
+                    switch (_front_axis)
+                    {
+                    case AXIS_X:
+                        _x = _buffer[1] << 8 | _buffer[0];
+                        break;
+                    case AXIS_Y:
+                        _x = _buffer[3] << 8 | _buffer[2];
+                        break;
+                    case AXIS_Z:
+                        _x = _buffer[5] << 8 | _buffer[4];
+                        break;
+                    }
+
+                    switch (_right_axis)
+                    {
+                    case AXIS_X:
+                        _y = _buffer[1] << 8 | _buffer[0];
+                        break;
+                    case AXIS_Y:
+                        _y = _buffer[3] << 8 | _buffer[2];
+                        break;
+                    case AXIS_Z:
+                        _y = _buffer[5] << 8 | _buffer[4];
+                        break;
+                    }
+
+                    // _x = _buffer[1] << 8 | _buffer[0];
+                    // _y = _buffer[3] << 8 | _buffer[2];
+                    // _z = _buffer[5] << 8 | _buffer[4];
                 }
                 else
                 {
                     readBuffer((uint8_t)hmc_reg::OUT_X_M, 6, _buffer);
-                    _x = _buffer[0] << 8 | _buffer[1];
-                    _z = _buffer[2] << 8 | _buffer[3];
-                    _y = _buffer[4] << 8 | _buffer[5];
+                    // _x = _buffer[0] << 8 | _buffer[1];
+                    // _z = _buffer[2] << 8 | _buffer[3];
+                    // _y = _buffer[4] << 8 | _buffer[5];
+
+                    switch (_top_axis)
+                    {
+                    case AXIS_X:
+                        _z = _buffer[0] << 8 | _buffer[1];
+                        break;
+                    case AXIS_Z:
+                        _z = _buffer[2] << 8 | _buffer[3];
+                        break;
+                    case AXIS_Y:
+                        _z = _buffer[4] << 8 | _buffer[5];
+                        break;
+                    }
+
+                    switch (_front_axis)
+                    {
+                    case AXIS_X:
+                        _x = _buffer[0] << 8 | _buffer[1];
+                        break;
+                    case AXIS_Z:
+                        _x = _buffer[2] << 8 | _buffer[3];
+                        break;
+                    case AXIS_Y:
+                        _x = _buffer[4] << 8 | _buffer[5];
+                        break;
+                    }
+
+                    switch (_right_axis)
+                    {
+                    case AXIS_X:
+                        _y = _buffer[0] << 8 | _buffer[1];
+                        break;
+                    case AXIS_Z:
+                        _y = _buffer[2] << 8 | _buffer[3];
+                        break;
+                    case AXIS_Y:
+                        _y = _buffer[4] << 8 | _buffer[5];
+                        break;
+                    }
                 }
                 _last_reading_us = micros();
             }
@@ -491,13 +618,22 @@ private:
     {
         if (_sensor_started)
         {
-            float x0, y0, z0;
-            x0 = (float)_x / _gain - _x_hard_cal;
-            y0 = (float)_y / _gain - _y_hard_cal;
-            z0 = (float)_z / _gain - _z_hard_cal;
-            _xcal = x0 * _x_soft_cal[0] + y0 * _x_soft_cal[1] + z0 * _x_soft_cal[2];
-            _ycal = x0 * _y_soft_cal[0] + y0 * _y_soft_cal[1] + z0 * _y_soft_cal[2];
-            _zcal = x0 * _z_soft_cal[0] + y0 * _z_soft_cal[1] + z0 * _z_soft_cal[2];
+            if (_calibrated)
+            {
+                float x0, y0, z0;
+                x0 = (float)_x / _gain - _x_hard_cal;
+                y0 = (float)_y / _gain - _y_hard_cal;
+                z0 = (float)_z / _gain - _z_hard_cal;
+                _xcal = x0 * _x_soft_cal[0] + y0 * _x_soft_cal[1] + z0 * _x_soft_cal[2];
+                _ycal = x0 * _y_soft_cal[0] + y0 * _y_soft_cal[1] + z0 * _y_soft_cal[2];
+                _zcal = x0 * _z_soft_cal[0] + y0 * _z_soft_cal[1] + z0 * _z_soft_cal[2];
+            }
+            else
+            {
+                _xcal = (float)_x / _gain;
+                _ycal = (float)_y / _gain;
+                _zcal = (float)_z / _gain;
+            }
         }
     };
 
@@ -509,6 +645,8 @@ private:
     float _x_hard_cal, _x_soft_cal[3];
     float _y_hard_cal, _y_soft_cal[3];
     float _z_hard_cal, _z_soft_cal[3];
+
+    uint8_t _top_axis = AXIS_Z, _front_axis = AXIS_X, _right_axis = AXIS_Y;
 
     float _freq, _gain;
     uint32_t _last_reading_us = 0;

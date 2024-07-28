@@ -5,9 +5,7 @@
 #include <hardware/clocks.h>
 #include <hardware/pio.h>
 #include <Servo.h>
-
 #include "ws2812/ws2812.pio.h"
-#include "../evn_alpha_pins.h"
 
 static PIOProgram _rgbLedPgm(&ws2812_program);
 
@@ -23,16 +21,16 @@ public:
         switch (portc)
         {
         case 1:
-            _pin = SERVO_PORT_1;
+            _pin = PIN_SERVO1;
             break;
         case 2:
-            _pin = SERVO_PORT_2;
+            _pin = PIN_SERVO2;
             break;
         case 3:
-            _pin = SERVO_PORT_3;
+            _pin = PIN_SERVO3;
             break;
         case 4:
-            _pin = SERVO_PORT_4;
+            _pin = PIN_SERVO4;
             break;
         }
 

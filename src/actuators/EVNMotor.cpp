@@ -16,28 +16,28 @@ EVNMotor::EVNMotor(uint8_t port, uint8_t motortype, uint8_t motor_dir, uint8_t e
 	switch (portc)
 	{
 	case 1:
-		_pid_control.motora = OUTPUT1MOTORA;
-		_pid_control.motorb = OUTPUT1MOTORB;
-		_encoder.enca = OUTPUT1ENCA;
-		_encoder.encb = OUTPUT1ENCB;
+		_pid_control.motora = PIN_MOTOR1_OUTA;
+		_pid_control.motorb = PIN_MOTOR1_OUTB;
+		_encoder.enca = PIN_MOTOR1_ENCA;
+		_encoder.encb = PIN_MOTOR1_ENCB;
 		break;
 	case 2:
-		_pid_control.motora = OUTPUT2MOTORA;
-		_pid_control.motorb = OUTPUT2MOTORB;
-		_encoder.enca = OUTPUT2ENCA;
-		_encoder.encb = OUTPUT2ENCB;
+		_pid_control.motora = PIN_MOTOR2_OUTA;
+		_pid_control.motorb = PIN_MOTOR2_OUTB;
+		_encoder.enca = PIN_MOTOR2_ENCA;
+		_encoder.encb = PIN_MOTOR2_ENCB;
 		break;
 	case 3:
-		_pid_control.motora = OUTPUT3MOTORA;
-		_pid_control.motorb = OUTPUT3MOTORB;
-		_encoder.enca = OUTPUT3ENCA;
-		_encoder.encb = OUTPUT3ENCB;
+		_pid_control.motora = PIN_MOTOR3_OUTA;
+		_pid_control.motorb = PIN_MOTOR3_OUTB;
+		_encoder.enca = PIN_MOTOR3_ENCA;
+		_encoder.encb = PIN_MOTOR3_ENCB;
 		break;
 	case 4:
-		_pid_control.motora = OUTPUT4MOTORA;
-		_pid_control.motorb = OUTPUT4MOTORB;
-		_encoder.enca = OUTPUT4ENCA;
-		_encoder.encb = OUTPUT4ENCB;
+		_pid_control.motora = PIN_MOTOR4_OUTA;
+		_pid_control.motorb = PIN_MOTOR4_OUTB;
+		_encoder.enca = PIN_MOTOR4_ENCA;
+		_encoder.encb = PIN_MOTOR4_ENCB;
 		break;
 	}
 
@@ -345,6 +345,8 @@ EVNDrivebase::EVNDrivebase(float wheel_dia, float axle_track, EVNMotor* motor_le
 	db.wheel_dia = fabs(wheel_dia);
 	db.drive = false;
 	db.drive_position = false;
+	db.stopAction_static_running = false;
+	db.core0_writing = false;
 
 	db.max_speed = db.max_rpm / 60 * db.wheel_dia * M_PI;
 	db.max_turn_rate = db.max_rpm * 6 * db.wheel_dia / axle_track;
@@ -471,9 +473,15 @@ float EVNDrivebase::radius_to_turn_rate(float speed, float radius)
 
 void EVNDrivebase::enable_drive_position(uint8_t stop_action, bool wait)
 {
+	while (db.stopAction_static_running);
+	db.core0_writing = true;
+
 	db.stop_action = clean_input_stop_action(stop_action);
 	db.drive = true;
 	db.drive_position = true;
+
+	db.core0_writing = false;
+
 	if (wait) while (!this->completed());
 }
 
@@ -507,9 +515,14 @@ void EVNDrivebase::driveTurnRate(float speed, float turn_rate)
 	float turn_ratec = clean_input_turn_rate(turn_rate);
 	float speedc = clean_input_speed(speed, turn_ratec);
 
+	while (db.stopAction_static_running);
+	db.core0_writing = true;
+
 	db.target_speed = speedc;
 	db.target_turn_rate = turn_ratec;
 	db.drive = true;
+
+	db.core0_writing = false;
 }
 
 void EVNDrivebase::driveRadius(float speed, float radius)

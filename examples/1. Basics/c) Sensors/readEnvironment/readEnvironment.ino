@@ -28,7 +28,7 @@ void loop()
     Serial.print(humidity);
     Serial.print("% | Temperature ");
     Serial.print(temp);
-    Serial.print("deg | Pressure");
+    Serial.print("deg | Pressure ");
     Serial.print(pressure);
     Serial.print("Pa | Altitude ");
     Serial.print(altitude);

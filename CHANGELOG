@@ -1,3 +1,31 @@
+0.10.3 (28/07/24)
+
+-- Features --
+
+- Madgwick IMU Sensor Fusion and Axis Configuration added to EVNIMUSensor and EVNCompassSensor
+- Docs added for EVNADC
+- Examples added for EVNBluetooth and EVNADC
+- We've now been added to the official board list for the arduino-pico core!
+
+-- Bugfixes --
+
+- Improved stability for EVNDrivebase
+- EVNDrivebase and EVNMotor must be run on 2nd core, docs now reflect this
+
+0.10.2 (07/07/24)
+
+-- Features --
+
+- User Guides have been added to the docs site! With more coming soon
+- This small update is mainly to fix bugs with EVNMotor and EVNDrivebase
+- There will be at least one more before this repository is displayed on the main EVNdevs GitHub repo.
+
+-- Bugfixes --
+
+- runPosition and similar position-based run functions now work properly when called back-to-back
+- Accel/decel has correct logic now
+- Motor jitter on boot is now gone
+
 0.10.2 (07/07/24)
 
 -- Features --

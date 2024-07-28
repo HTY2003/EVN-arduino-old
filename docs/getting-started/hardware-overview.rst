@@ -158,6 +158,15 @@ Nevertheless, it's strongly recommended to charge the board when the voltage cut
 
 Battery voltage measurements and low battery alerts can be configured in the ``EVNAlpha`` class.
 
+Flash
+------
+
+EVN Alpha uses a W25Q128JVSIQ 16MB SPI flash chip for program storage and read-only memory, which is the maximum size supported by the RP2040.
+
+Since this is much larger than most compiled programs will use, you can use part of the flash memory as an `onboard filesystem`_.
+
+.. _onboard filesystem: https://arduino-pico.readthedocs.io/en/latest/fs.html 
+
 Disassembly
 -----------
 
